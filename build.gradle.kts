@@ -16,8 +16,7 @@ dependencies {
     implementation("com.github.DRSchlaubi.Lavalink:protocol:7c03b48eec")
 //    implementation("dev.arbjerg.lavalink")
 
-    // TODO: kotlin websocket?
-    implementation("org.java-websocket:Java-WebSocket:1.5.3")
+    // TODO https://github.com/TakahikoKawasaki/nv-websocket-client
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
