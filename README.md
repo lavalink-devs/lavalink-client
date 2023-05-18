@@ -1,2 +1,2 @@
 # Lavalink client
-A new proposal
+Proposal for a v4 lavalink client
