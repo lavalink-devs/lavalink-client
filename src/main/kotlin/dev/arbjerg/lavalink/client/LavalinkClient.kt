@@ -8,7 +8,7 @@ class LavalinkClient {
     // Non mutable public list
     val nodes: List<LavalinkNode> = internalNodes
 
-    fun addNode(name: String, address: URI, password: String) {
+    fun addNode(name: String, address: URI, password: String): LavalinkNode {
         TODO("Not yet implemented")
     }
 }

@@ -29,9 +29,12 @@ class LavalinkNode(serverUri: URI) : Disposable {
         reference.dispose()
     }
 
+    // For the java people
     fun <T : Message.EmittedEvent> on(type: Class<T>): Flux<T> {
         return flux.ofType(type)
     }
+
+    inline fun <reified T : Message.EmittedEvent> on() = on(T::class.java)
 
     // Rest methods
     fun getPlayers() = rest.getPlayers()
