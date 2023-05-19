@@ -8,6 +8,7 @@ class LavalinkClient {
     // Non mutable public list
     val nodes: List<LavalinkNode> = internalNodes
 
+    // TODO: allow to set session id?
     fun addNode(name: String, address: URI, password: String): LavalinkNode {
         TODO("Not yet implemented")
     }

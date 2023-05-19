@@ -1,7 +1,9 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
+import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
+import reactor.core.publisher.Mono
 import kotlin.math.max
 import kotlin.math.min
 
@@ -15,6 +17,7 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient) {
     private var paused: Omissible<Boolean> = Omissible.omitted()
     private var filters: Omissible<Filters> = Omissible.omitted()
     private var voice: Omissible<VoiceState> = Omissible.omitted()
+    private var noReplace = true
 
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
         this.encodedTrack = encodedTrack.toOmissible()
@@ -36,9 +39,8 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient) {
         return this
     }
 
-    fun setVolume(volume: Double): PlayerUpdateBuilder {
-        val mappedVolume = (min(10.0, max(0.0, volume)) * 100).toInt()
-        this.volume = mappedVolume.toOmissible()
+    fun setVolume(volume: Int): PlayerUpdateBuilder {
+        this.volume = min(1000, max(0, volume)).toOmissible()
         return this
     }
 
@@ -57,10 +59,17 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient) {
         return this
     }
 
+    fun setNoReplace(noReplace: Boolean): PlayerUpdateBuilder {
+        this.noReplace = noReplace
+        return this
+    }
+
     fun build() = PlayerUpdate(
         encodedTrack, identifier, position, endTime, volume, paused, filters, voice
     )
 
-    // REST returns player object
-    fun asMono() = rest.updatePlayer(build())
+    fun asMono(): Mono<LavalinkPlayer> {
+        return rest.updatePlayer(build(), noReplace)
+            .map { it.toLavalinkPlayer(rest) }
+    }
 }

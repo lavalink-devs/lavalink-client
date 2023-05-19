@@ -14,6 +14,8 @@ class LavalinkNode(serverUri: URI) : Disposable {
     // "safe" uri with all paths aremoved
     val baseUri = URI.create("${serverUri.scheme}://${serverUri.host}:${serverUri.port}")
 
+    val sessionId: String = TODO("Not yet implemented")
+
     private val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<Message.EmittedEvent> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()

@@ -20,6 +20,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
         TODO("Not yet implemented")
     }
 
+    @JvmOverloads
     fun updatePlayer(player: PlayerUpdate, noReplace: Boolean = true): Mono<Player> {
         // PATCH /v4/sessions/{sessionId}/players/{guildId}?noReplace=true
         TODO("Not yet implemented")

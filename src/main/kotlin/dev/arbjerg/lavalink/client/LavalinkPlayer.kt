@@ -2,16 +2,19 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.protocol.v4.Filters
-import dev.arbjerg.lavalink.protocol.v4.PlayerState
+import dev.arbjerg.lavalink.protocol.v4.Player
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
-import reactor.core.publisher.Mono
 
 // Represents a "link"
-class LavalinkPlayer(private val rest: LavalinkRestClient) {
+class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Player) {
 
-    fun getState(): Mono<PlayerState> {
-        TODO("Not yet implemented")
-    }
+    val guildId = protocolPlayer.guildId.toULong()
+    val track = protocolPlayer.track
+    val volume = protocolPlayer.volume
+    val paused = protocolPlayer.paused
+    val state = protocolPlayer.state
+    val voiceState = protocolPlayer.voice
+    val filters = protocolPlayer.filters
 
     fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(rest)
         .setEncodedTrack(encodedTrack)
@@ -25,7 +28,13 @@ class LavalinkPlayer(private val rest: LavalinkRestClient) {
     fun steEndTime(endTime: Long?) = PlayerUpdateBuilder(rest)
         .setEndTime(endTime)
 
-    fun setVolume(volume: Double) = PlayerUpdateBuilder(rest)
+    /**
+     * While you could use the filters to set volume as well, do note that that is float based (1.0f is 100% volume)
+     * and takes the time of your buffer size to apply. This method updates the volume instantly after the update is sent out.
+     *
+     * @param volume The new player volume, value is between 0 and 1000 where 100 is 100% (default) volume.
+     */
+    fun setVolume(volume: Int) = PlayerUpdateBuilder(rest)
         .setVolume(volume)
 
     fun setPaused(paused: Boolean) = PlayerUpdateBuilder(rest)
