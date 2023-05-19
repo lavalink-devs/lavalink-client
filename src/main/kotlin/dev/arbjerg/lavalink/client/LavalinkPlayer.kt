@@ -16,16 +16,16 @@ class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Playe
     val voiceState = protocolPlayer.voice
     val filters = protocolPlayer.filters
 
-    fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(rest)
+    fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(rest, guildId)
         .setEncodedTrack(encodedTrack)
 
-    fun setIdentifier(identifier: String) = PlayerUpdateBuilder(rest)
+    fun setIdentifier(identifier: String) = PlayerUpdateBuilder(rest, guildId)
         .setIdentifier(identifier)
 
-    fun setPosition(position: Long) = PlayerUpdateBuilder(rest)
+    fun setPosition(position: Long) = PlayerUpdateBuilder(rest, guildId)
         .setPosition(position)
 
-    fun steEndTime(endTime: Long?) = PlayerUpdateBuilder(rest)
+    fun steEndTime(endTime: Long?) = PlayerUpdateBuilder(rest, guildId)
         .setEndTime(endTime)
 
     /**
@@ -34,16 +34,16 @@ class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Playe
      *
      * @param volume The new player volume, value is between 0 and 1000 where 100 is 100% (default) volume.
      */
-    fun setVolume(volume: Int) = PlayerUpdateBuilder(rest)
+    fun setVolume(volume: Int) = PlayerUpdateBuilder(rest, guildId)
         .setVolume(volume)
 
-    fun setPaused(paused: Boolean) = PlayerUpdateBuilder(rest)
+    fun setPaused(paused: Boolean) = PlayerUpdateBuilder(rest, guildId)
         .setPaused(paused)
 
-    fun setFilters(filters: Filters) = PlayerUpdateBuilder(rest)
+    fun setFilters(filters: Filters) = PlayerUpdateBuilder(rest, guildId)
         .setFilters(filters)
 
-    fun setVoice(voice: VoiceState) = PlayerUpdateBuilder(rest)
+    fun setVoice(voice: VoiceState) = PlayerUpdateBuilder(rest, guildId)
         .setVoice(voice)
 
 }

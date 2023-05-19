@@ -2,6 +2,7 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
+import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.Message
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
@@ -40,8 +41,10 @@ class LavalinkNode(serverUri: URI) : Disposable {
 
     // Rest methods
     fun getPlayers() = rest.getPlayers()
+        .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
 
     fun getPlayer(guildId: Long) = rest.getPlayer(guildId)
+        .map { it?.toLavalinkPlayer(rest) }
 
     fun loadItem(identifier: String) = rest.loadItem(identifier)
 }
