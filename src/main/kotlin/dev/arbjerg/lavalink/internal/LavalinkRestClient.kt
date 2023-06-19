@@ -7,6 +7,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.serializer
 import okhttp3.Call
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -40,7 +41,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
     fun updatePlayer(player: PlayerUpdate, guildId: Long, noReplace: Boolean = false): Mono<Player> {
         return newRequest {
             url("$baseUrl/sessions/${node.sessionId}/players/$guildId?noReplace=$noReplace")
-            patch(json.encodeToString(player).toRequestBody())
+            patch(json.encodeToString(player).toRequestBody("application/json".toMediaType()))
         }.toMono<Player>()
     }
 

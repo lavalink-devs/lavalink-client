@@ -53,9 +53,9 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     }
 
     fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
-        /*if (guildId !in players) {
+        if (guildId !in players) {
             return Mono.empty()
-        }*/
+        }
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(rest) }

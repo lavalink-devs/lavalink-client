@@ -22,47 +22,39 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
     }
 
     override fun onTextMessage(websocket: WebSocket, text: String) {
-        println(text)
+        val message = json.decodeFromString<Message>(text)
 
-        try {
-            val message = json.decodeFromString<Message>(text)
+        when (message.op) {
+            Message.Op.Ready -> {
+                node.sessionId = (message as Message.ReadyEvent).sessionId
+                println("Lavalink is ready!")
+            }
 
-            println(message)
+            Message.Op.Stats -> {
+                TODO("Not yet implemented")
+            }
 
-            when (message.op) {
-                Message.Op.Ready -> {
-                    node.sessionId = (message as Message.ReadyEvent).sessionId
-                    println("Lavalink is ready!")
-                }
+            Message.Op.PlayerUpdate -> {
+                val update = message as Message.PlayerUpdateEvent
+                val idLong = update.guildId.toLong()
 
-                Message.Op.Stats -> {
-                    TODO("Not yet implemented")
-                }
-
-                Message.Op.PlayerUpdate -> {
-                    val update = message as Message.PlayerUpdateEvent
-                    val idLong = update.guildId.toLong()
-
-                    // TODO: I don't like this
-                    if (idLong in node.players) {
-                        node.players[idLong]!!.state = update.state
-                    }
-                }
-
-                Message.Op.Event -> {
-                    try {
-                        sink.tryEmitNext(message as Message.EmittedEvent)
-                    } catch (e: Exception) {
-                        sink.tryEmitError(e)
-                    }
-                }
-
-                else -> {
-                    TODO("Unknown OP")
+                // TODO: I don't like this
+                if (idLong in node.players) {
+                    node.players[idLong]!!.state = update.state
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+
+            Message.Op.Event -> {
+                try {
+                    sink.tryEmitNext(message as Message.EmittedEvent)
+                } catch (e: Exception) {
+                    sink.tryEmitError(e)
+                }
+            }
+
+            else -> {
+                TODO("Unknown OP")
+            }
         }
     }
 

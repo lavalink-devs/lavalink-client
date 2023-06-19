@@ -73,16 +73,20 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
         "join" -> {
             val member = event.member!!
 
-            val memberVoice = member.voiceState!!
 
-            if (memberVoice.inAudioChannel()) {
-                event.jda.directAudioController.connect(memberVoice.channel!!)
+            lavalink.getLink(event.guild!!.idLong
+            ).node.createPlayer(event.guild!!.idLong).subscribe {
+                val memberVoice = member.voiceState!!
+
+                if (memberVoice.inAudioChannel()) {
+                    event.jda.directAudioController.connect(memberVoice.channel!!)
+                }
+
+                event.reply("Joining your channel!").queue()
             }
-
-            event.reply("Joining your channel!").queue()
         }
         "play" -> {
-            val identifier = event.getOption("input")!!.asString
+            val identifier = event.getOption("identifier")!!.asString
             val guildId = event.guild!!.idLong
             val link = lavalink.getLink(guildId)
             val node = link.node
@@ -95,6 +99,7 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
                                 .asMono()
                                 .subscribe {
                                     println("Player has been updated")
+                                    event.reply("Joining your channel!").queue()
                                 }
                         }
 

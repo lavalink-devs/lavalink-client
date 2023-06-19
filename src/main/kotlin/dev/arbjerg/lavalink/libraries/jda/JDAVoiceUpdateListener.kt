@@ -16,9 +16,7 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
 
         node.getPlayer(update.guildIdLong)
             .subscribe {
-                it.setVoiceState(state).asMono().subscribe {
-                    println(it)
-                }
+                it.setVoiceState(state).asMono().block()
             }
     }
 

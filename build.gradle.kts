@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "1.8.21"
-//    kotlin("plugin.serialization") version "1.8.21"
+    kotlin("plugin.serialization") version "1.8.21"
 }
 
 group = "dev.arbjerg"
@@ -17,7 +17,6 @@ dependencies {
     api("com.github.lavalink-devs.Lavalink:protocol:v4-SNAPSHOT")
     api("com.neovisionaries:nv-websocket-client:2.14")
     api("com.squareup.okhttp3:okhttp:4.10.0")
-    // api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     api("io.projectreactor:reactor-core:3.5.6")
     api("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
 
