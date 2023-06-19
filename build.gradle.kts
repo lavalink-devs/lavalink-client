@@ -12,11 +12,10 @@ repositories {
 }
 
 dependencies {
-    // TODO: replace with official package when protocol gets released
-    implementation("com.github.DRSchlaubi.Lavalink:protocol:7c03b48eec")
+    implementation("com.github.lavalink-devs.Lavalink:protocol:v4-SNAPSHOT")
 //    implementation("dev.arbjerg.lavalink")
 
-    // TODO https://github.com/TakahikoKawasaki/nv-websocket-client
+    implementation("com.neovisionaries:nv-websocket-client:2.14")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 

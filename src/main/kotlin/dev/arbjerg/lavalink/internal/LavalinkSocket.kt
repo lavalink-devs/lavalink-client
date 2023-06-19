@@ -1,19 +1,23 @@
 package dev.arbjerg.lavalink.internal
 
+import com.neovisionaries.ws.client.WebSocket
+import com.neovisionaries.ws.client.WebSocketAdapter
+import com.neovisionaries.ws.client.WebSocketException
+import com.neovisionaries.ws.client.WebSocketFrame
 import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.protocol.v4.Message
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import reactor.core.publisher.Sinks
 
-class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Many<Message.EmittedEvent>) {
+class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Many<Message.EmittedEvent>): WebSocketAdapter() {
 
-    fun onOpen() {
-        TODO("Not yet implemented")
+    override fun onConnected(websocket: WebSocket, headers: MutableMap<String, MutableList<String>>) {
+        //
     }
 
-    fun onMessage(raw: String) {
-        val message = Json.decodeFromString<Message>(raw)
+    override fun onTextMessage(websocket: WebSocket, text: String) {
+        val message = Json.decodeFromString<Message>(text)
 
         when (message.op) {
             Message.Op.Ready -> {
@@ -32,15 +36,18 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
                     sink.tryEmitError(e)
                 }
             }
+            else -> {
+                TODO("Unknown OP")
+            }
         }
     }
 
-    fun onClose(code: Int, reason: String, remote: Boolean) {
-        TODO("Not yet implemented")
+    override fun onCloseFrame(websocket: WebSocket, frame: WebSocketFrame) {
+        //
     }
 
-    fun onError(ex: Exception) {
-        TODO("Not yet implemented")
+    override fun onError(websocket: WebSocket, cause: WebSocketException) {
+        //
     }
 
 }
