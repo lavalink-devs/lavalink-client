@@ -16,6 +16,7 @@ dependencies {
 //    implementation("dev.arbjerg.lavalink")
 
     implementation("com.neovisionaries:nv-websocket-client:2.14")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
@@ -27,6 +28,11 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.wrapper {
+    gradleVersion = "8.1.1"
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 kotlin {

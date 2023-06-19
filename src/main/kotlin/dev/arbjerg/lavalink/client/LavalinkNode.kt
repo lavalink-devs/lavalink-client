@@ -9,13 +9,13 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
 import java.net.URI
+import java.util.UUID
 
-
-class LavalinkNode(serverUri: URI) : Disposable {
+class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Disposable {
     // "safe" uri with all paths aremoved
-    val baseUri = URI.create("${serverUri.scheme}://${serverUri.host}:${serverUri.port}")
+    val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
 
-    val sessionId: String = TODO("Not yet implemented")
+    val sessionId: String = UUID.randomUUID().toString()
 
     private val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<Message.EmittedEvent> = sink.asFlux()
@@ -44,7 +44,7 @@ class LavalinkNode(serverUri: URI) : Disposable {
         .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
 
     fun getPlayer(guildId: Long) = rest.getPlayer(guildId)
-        .map { it?.toLavalinkPlayer(rest) }
+        .mapNotNull { it?.toLavalinkPlayer(rest) }
 
     fun loadItem(identifier: String) = rest.loadItem(identifier)
 }

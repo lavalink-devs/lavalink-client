@@ -2,7 +2,9 @@ package dev.arbjerg.lavalink.client
 
 import java.net.URI
 
-class LavalinkClient {
+class LavalinkClient(
+    val userId: Long
+) {
     private val internalNodes = mutableListOf<LavalinkNode>()
 
     // Non mutable public list
@@ -10,6 +12,9 @@ class LavalinkClient {
 
     // TODO: allow to set session id?
     fun addNode(name: String, address: URI, password: String): LavalinkNode {
-        TODO("Not yet implemented")
+        val node = LavalinkNode(address, userId, password)
+        internalNodes.add(node)
+
+        return node
     }
 }
