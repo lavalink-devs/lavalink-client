@@ -16,7 +16,7 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guil
     private var volume: Omissible<Int> = Omissible.omitted()
     private var paused: Omissible<Boolean> = Omissible.omitted()
     private var filters: Omissible<Filters> = Omissible.omitted()
-    private var voice: Omissible<VoiceState> = Omissible.omitted()
+    private var state: Omissible<VoiceState> = Omissible.omitted()
     private var noReplace = false
 
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
@@ -54,8 +54,8 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guil
         return this
     }
 
-    fun setVoice(voice: VoiceState): PlayerUpdateBuilder {
-        this.voice = voice.toOmissible()
+    fun setVoiceState(state: VoiceState): PlayerUpdateBuilder {
+        this.state = state.toOmissible()
         return this
     }
 
@@ -65,7 +65,7 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guil
     }
 
     fun build() = PlayerUpdate(
-        encodedTrack, identifier, position, endTime, volume, paused, filters, voice
+        encodedTrack, identifier, position, endTime, volume, paused, filters, state
     )
 
     fun asMono(): Mono<LavalinkPlayer> {

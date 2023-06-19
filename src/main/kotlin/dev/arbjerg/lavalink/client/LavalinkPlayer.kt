@@ -43,7 +43,7 @@ class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Playe
     fun setFilters(filters: Filters) = PlayerUpdateBuilder(rest, guildId)
         .setFilters(filters)
 
-    fun setVoice(voice: VoiceState) = PlayerUpdateBuilder(rest, guildId)
-        .setVoice(voice)
+    fun setVoiceState(state: VoiceState) = PlayerUpdateBuilder(rest, guildId)
+        .setVoiceState(state)
 
 }
