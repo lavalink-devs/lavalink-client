@@ -17,7 +17,7 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guil
     private var paused: Omissible<Boolean> = Omissible.omitted()
     private var filters: Omissible<Filters> = Omissible.omitted()
     private var voice: Omissible<VoiceState> = Omissible.omitted()
-    private var noReplace = true
+    private var noReplace = false
 
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
         this.encodedTrack = encodedTrack.toOmissible()
