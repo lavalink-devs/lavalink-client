@@ -5,7 +5,6 @@ import dev.arbjerg.lavalink.internal.error.RestException
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -16,7 +15,6 @@ import reactor.core.publisher.Mono
 import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.CompletableFuture
 
 class LavalinkRestClient(val node: LavalinkNode) {
     private val client = OkHttpClient()
@@ -69,33 +67,31 @@ class LavalinkRestClient(val node: LavalinkNode) {
     }
 
     private inline fun <reified T> Call.toMono(): Mono<T> {
-        val future = CompletableFuture<T>()
-
-        this.enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                future.completeExceptionally(e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use { res ->
-
-                    res.body?.use { body ->
-                        if (res.code != 200) {
-                            val error = json.decodeFromString<Error>(body.string())
-
-                            future.completeExceptionally(RestException(error))
-                            return@use
-                        }
-
-                        val parsed = json.decodeFromString<T>(body.string())
-
-                        future.complete(parsed)
-                    }
+        return Mono.create { sink ->
+            this.enqueue(object : okhttp3.Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    sink.error(e)
                 }
 
-            }
-        })
+                override fun onResponse(call: Call, response: Response) {
+                    response.use { res ->
 
-        return Mono.fromFuture(future)
+                        res.body?.use { body ->
+                            if (res.code != 200) {
+                                val error = json.decodeFromString<Error>(body.string())
+
+                                sink.error(RestException(error))
+                                return
+                            }
+
+                            val parsed = json.decodeFromString<T>(body.string())
+
+                            sink.success(parsed)
+                        }
+                    }
+
+                }
+            })
+        }
     }
 }
