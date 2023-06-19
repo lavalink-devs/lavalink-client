@@ -3,8 +3,8 @@ package dev.arbjerg.lavalink.internal
 import com.neovisionaries.ws.client.*
 import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.protocol.v4.Message
+import dev.arbjerg.lavalink.protocol.v4.json
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import reactor.core.publisher.Sinks
 
 class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Many<Message.EmittedEvent>) :
@@ -22,32 +22,47 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
     }
 
     override fun onTextMessage(websocket: WebSocket, text: String) {
-        val message = Json.decodeFromString<Message>(text)
+        println(text)
 
-        when (message.op) {
-            Message.Op.Ready -> {
-                TODO("Not yet implemented")
-            }
+        try {
+            val message = json.decodeFromString<Message>(text)
 
-            Message.Op.Stats -> {
-                TODO("Not yet implemented")
-            }
+            println(message)
 
-            Message.Op.PlayerUpdate -> {
-                TODO("Not yet implemented")
-            }
+            when (message.op) {
+                Message.Op.Ready -> {
+                    node.sessionId = (message as Message.ReadyEvent).sessionId
+                    println("Lavalink is ready!")
+                }
 
-            Message.Op.Event -> {
-                try {
-                    sink.tryEmitNext(message as Message.EmittedEvent)
-                } catch (e: Exception) {
-                    sink.tryEmitError(e)
+                Message.Op.Stats -> {
+                    TODO("Not yet implemented")
+                }
+
+                Message.Op.PlayerUpdate -> {
+                    val update = message as Message.PlayerUpdateEvent
+                    val idLong = update.guildId.toLong()
+
+                    // TODO: I don't like this
+                    if (idLong in node.players) {
+                        node.players[idLong]!!.state = update.state
+                    }
+                }
+
+                Message.Op.Event -> {
+                    try {
+                        sink.tryEmitNext(message as Message.EmittedEvent)
+                    } catch (e: Exception) {
+                        sink.tryEmitError(e)
+                    }
+                }
+
+                else -> {
+                    TODO("Unknown OP")
                 }
             }
-
-            else -> {
-                TODO("Unknown OP")
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -63,7 +78,7 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
         socket = factory.createSocket("${node.baseUri}/websocket")
 
         socket!!.addListener(this)
-            .setDirectTextMessage(true)
+            .setDirectTextMessage(false)
             .addHeader("Authorization", node.password)
             // TODO: fix version
             .addHeader("Client-Name", "Lavalink-Client/DEV")

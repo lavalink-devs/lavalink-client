@@ -8,7 +8,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 // TODO: where to put "noReplace"
-class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guildId: ULong) {
+class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guildId: Long) {
     private var encodedTrack: Omissible<String?> = Omissible.omitted()
     private var identifier: Omissible<String> = Omissible.omitted()
     private var position: Omissible<Long> = Omissible.omitted()

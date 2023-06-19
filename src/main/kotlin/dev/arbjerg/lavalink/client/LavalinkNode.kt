@@ -6,6 +6,7 @@ import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.Message
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
 import java.net.URI
@@ -15,7 +16,7 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     // "safe" uri with all paths aremoved
     val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
 
-    val sessionId: String = UUID.randomUUID().toString()
+    lateinit var sessionId: String
 
     private val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<Message.EmittedEvent> = sink.asFlux()
@@ -24,9 +25,8 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     private val rest = LavalinkRestClient(this)
     private val ws = LavalinkSocket(this, sink)
 
-    init {
-        // TODO: do we want to connect on initialisation?
-    }
+    // TODO: do we need this?
+    val players = mutableMapOf<Long, LavalinkPlayer>()
 
     override fun dispose() {
         reference.dispose()
@@ -43,8 +43,33 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     fun getPlayers() = rest.getPlayers()
         .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
 
-    fun getPlayer(guildId: Long) = rest.getPlayer(guildId)
-        .mapNotNull { it?.toLavalinkPlayer(rest) }
+    fun createPlayer(guildId: Long): Mono<LavalinkPlayer> {
+        return PlayerUpdateBuilder(rest, guildId)
+            .setNoReplace(true)
+            .asMono()
+            .doOnNext {
+                players[it.guildId] = it
+            }
+    }
+
+    fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
+        /*if (guildId !in players) {
+            return Mono.empty()
+        }*/
+
+        return rest.getPlayer(guildId)
+            .map { it.toLavalinkPlayer(rest) }
+            // Update the player internally upon retrieving it.
+            .doOnNext {
+                players[it.guildId] = it
+            }
+    }
+
+    fun destroyPlayer(guildId: Long): Mono<Unit> {
+        return rest.destroyPlayer(guildId).doOnNext {
+            players.remove(guildId)
+        }
+    }
 
     fun loadItem(identifier: String) = rest.loadItem(identifier)
 }

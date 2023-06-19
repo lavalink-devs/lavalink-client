@@ -1,18 +1,19 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
-import dev.arbjerg.lavalink.protocol.v4.Filters
-import dev.arbjerg.lavalink.protocol.v4.Player
-import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import dev.arbjerg.lavalink.protocol.v4.*
 
 // Represents a "link"
 class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Player) {
-
-    val guildId = protocolPlayer.guildId.toULong()
+    val guildId = protocolPlayer.guildId.toLong()
     val track = protocolPlayer.track
     val volume = protocolPlayer.volume
     val paused = protocolPlayer.paused
-    val state = protocolPlayer.state
+
+    /**
+     * Contains the current player state. You should never update this yourself.
+     */
+    var state = protocolPlayer.state
     val voiceState = protocolPlayer.voice
     val filters = protocolPlayer.filters
 
@@ -25,7 +26,7 @@ class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Playe
     fun setPosition(position: Long) = PlayerUpdateBuilder(rest, guildId)
         .setPosition(position)
 
-    fun steEndTime(endTime: Long?) = PlayerUpdateBuilder(rest, guildId)
+    fun setEndTime(endTime: Long?) = PlayerUpdateBuilder(rest, guildId)
         .setEndTime(endTime)
 
     /**

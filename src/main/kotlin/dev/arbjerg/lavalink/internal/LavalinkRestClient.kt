@@ -1,15 +1,15 @@
 package dev.arbjerg.lavalink.internal
 
 import dev.arbjerg.lavalink.client.LavalinkNode
-import dev.arbjerg.lavalink.protocol.v4.LoadResult
-import dev.arbjerg.lavalink.protocol.v4.Player
-import dev.arbjerg.lavalink.protocol.v4.PlayerUpdate
-import dev.arbjerg.lavalink.protocol.v4.Players
+import dev.arbjerg.lavalink.internal.error.RestException
+import dev.arbjerg.lavalink.protocol.v4.*
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import reactor.core.publisher.Mono
 import java.io.IOException
@@ -28,15 +28,24 @@ class LavalinkRestClient(val node: LavalinkNode) {
         TODO("Not yet implemented")
     }
 
-    // TODO: where to store session id?
-    fun getPlayer(guildId: Long): Mono<Player?> {
+    fun getPlayer(guildId: Long): Mono<Player> {
         // GET /v4/sessions/{sessionId}/players/{guildId}
         // Keep track of players locally and create one if needed?
-        TODO("Not yet implemented")
+
+        return newRequest {
+            url("$baseUrl/sessions/${node.sessionId}/players/$guildId")
+        }.toMono()
     }
 
-    fun updatePlayer(player: PlayerUpdate, guildId: ULong, noReplace: Boolean = true): Mono<Player> {
-        // PATCH /v4/sessions/{sessionId}/players/{guildId}?noReplace=true
+    fun updatePlayer(player: PlayerUpdate, guildId: Long, noReplace: Boolean = false): Mono<Player> {
+        return newRequest {
+            url("$baseUrl/sessions/${node.sessionId}/players/$guildId?noReplace=$noReplace")
+            patch(json.encodeToString(player).toRequestBody())
+        }.toMono<Player>()
+    }
+
+    fun destroyPlayer(guildId: Long): Mono<Unit> {
+        // DELETE /v4/sessions/{sessionId}/players/{guildId}
         TODO("Not yet implemented")
     }
 
@@ -68,8 +77,16 @@ class LavalinkRestClient(val node: LavalinkNode) {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
+
                     res.body?.use { body ->
-                        val parsed = Json.decodeFromString<T>(body.string())
+                        if (res.code != 200) {
+                            val error = json.decodeFromString<Error>(body.string())
+
+                            future.completeExceptionally(RestException(error))
+                            return@use
+                        }
+
+                        val parsed = json.decodeFromString<T>(body.string())
 
                         future.complete(parsed)
                     }
