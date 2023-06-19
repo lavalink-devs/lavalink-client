@@ -68,6 +68,10 @@ class LavalinkRestClient(val node: LavalinkNode) {
 
     private inline fun <reified T> Call.toMono(): Mono<T> {
         return Mono.create { sink ->
+            sink.onCancel {
+                // try to cancel the request
+                this.cancel()
+            }
             this.enqueue(object : okhttp3.Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     sink.error(e)
