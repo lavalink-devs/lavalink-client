@@ -2,7 +2,6 @@ import dev.arbjerg.lavalink.client.LavalinkClient
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import dev.arbjerg.lavalink.protocol.v4.Message
-import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -10,17 +9,18 @@ import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import java.net.URI
+
+private const val COMMAND_GUILD_ID = 191245668617158656L
 
 fun main() {
     val client = LavalinkClient(
         405777831730085889L,
     )
 
-    val jda = JDABuilder.createDefault(System.getenv("BOT_TOKEN"))
+    JDABuilder.createDefault(System.getenv("BOT_TOKEN"))
         .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
         .enableIntents(
             GatewayIntent.GUILD_VOICE_STATES,
@@ -34,7 +34,7 @@ fun main() {
                     handleSlash(client, event)
                 } else if (event is ReadyEvent) {
                     println("${event.jda.selfUser.asTag} is ready!")
-                    event.jda.getGuildById(191245668617158656L)!!
+                    event.jda.getGuildById(COMMAND_GUILD_ID)!!
                         .updateCommands()
                         .addCommands(
                             Commands.slash("join", "Join the voice channel you are in."),
@@ -88,7 +88,9 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
         }
 
         "leave" -> {
-            lavalink.getLink(event.guild!!.idLong).destroyPlayer().subscribe()
+            // Disconnecting automatically destroys the player
+            event.jda.directAudioController.disconnect(event.guild!!)
+            event.reply("Leaving your channel!").queue()
         }
 
         "play" -> {
@@ -98,21 +100,33 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
             val node = link.node
 
             node.loadItem(identifier).subscribe { item ->
-                link.getPlayer().subscribe { player ->
+                link.getPlayer().subscribe getPlayer@{ player ->
                     when (item) {
                         is LoadResult.TrackLoaded -> {
                             player.setEncodedTrack(item.data.encoded)
                                 .asMono()
                                 .subscribe {
-                                    println("Player has been updated")
-                                    event.reply("Joining your channel!").queue()
+                                    event.reply("Now playing ${item.data.info.title}!").queue()
                                 }
                         }
 
                         is LoadResult.LoadFailed -> TODO()
                         is LoadResult.NoMatches -> TODO()
                         is LoadResult.PlaylistLoaded -> TODO()
-                        is LoadResult.SearchResult -> TODO()
+                        is LoadResult.SearchResult -> {
+                            if (item.data.tracks.isEmpty()) {
+                                event.reply("Nothing found").queue()
+                                return@getPlayer
+                            }
+
+                            val track = item.data.tracks.first()
+
+                            player.setEncodedTrack(track.encoded)
+                                .asMono()
+                                .subscribe {
+                                    event.reply("Now playing ${track.info.title}!").queue()
+                                }
+                        }
                     }
                 }
             }

@@ -1,6 +1,5 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.internal.Link
 import java.net.URI
 
 class LavalinkClient(

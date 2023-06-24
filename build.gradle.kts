@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     // package libraries
-    api("dev.arbjerg.lavalink:protocol:e3e3ef171359423eebcf37b50752d04c42a667d1-SNAPSHOT")
+    api("dev.arbjerg.lavalink:protocol:004a8f873517e1bf7771585ec915b4360257acd2-SNAPSHOT")
     api("com.neovisionaries:nv-websocket-client:2.14")
     api("com.squareup.okhttp3:okhttp:4.10.0")
     api("io.projectreactor:reactor-core:3.5.6")

@@ -10,7 +10,6 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
 import java.net.URI
-import java.util.UUID
 
 class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Disposable {
     // "safe" uri with all paths aremoved

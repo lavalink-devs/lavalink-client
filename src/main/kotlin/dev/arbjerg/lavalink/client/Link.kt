@@ -1,6 +1,4 @@
-package dev.arbjerg.lavalink.internal
-
-import dev.arbjerg.lavalink.client.LavalinkNode
+package dev.arbjerg.lavalink.client
 
 /**
  * A "Link" for linking a guild id to a node.

@@ -44,8 +44,10 @@ class LavalinkRestClient(val node: LavalinkNode) {
     }
 
     fun destroyPlayer(guildId: Long): Mono<Unit> {
-        // DELETE /v4/sessions/{sessionId}/players/{guildId}
-        TODO("Not yet implemented")
+        return newRequest {
+            url("$baseUrl/sessions/${node.sessionId}/players/$guildId")
+            delete()
+        }.toMono()
     }
 
     fun loadItem(identifier: String): Mono<LoadResult> {
@@ -81,10 +83,15 @@ class LavalinkRestClient(val node: LavalinkNode) {
                     response.use { res ->
 
                         res.body?.use { body ->
-                            if (res.code != 200) {
+                            if (res.code > 299) {
                                 val error = json.decodeFromString<Error>(body.string())
 
                                 sink.error(RestException(error))
+                                return
+                            }
+
+                            if (res.code == 204) {
+                                sink.success()
                                 return
                             }
 

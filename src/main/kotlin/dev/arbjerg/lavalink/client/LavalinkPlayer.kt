@@ -12,6 +12,7 @@ class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Playe
 
     /**
      * Contains the current player state. You should never update this yourself.
+     * TODO: keep track of players and update them manually?
      */
     var state = protocolPlayer.state
     val voiceState = protocolPlayer.voice
