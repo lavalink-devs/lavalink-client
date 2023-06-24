@@ -21,6 +21,7 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
         println("Connected to Lavalink Node")
     }
 
+    // TODO: emit these events from the client
     override fun onTextMessage(websocket: WebSocket, text: String) {
         val message = json.decodeFromString<Message>(text)
 
@@ -35,13 +36,7 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
             }
 
             Message.Op.PlayerUpdate -> {
-                val update = message as Message.PlayerUpdateEvent
-                val idLong = update.guildId.toLong()
-
-                // TODO: I don't like this
-                if (idLong in node.players) {
-                    node.players[idLong]!!.state = update.state
-                }
+                TODO("Not yet implemented")
             }
 
             Message.Op.Event -> {
@@ -59,7 +54,7 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
     }
 
     override fun onCloseFrame(websocket: WebSocket, frame: WebSocketFrame) {
-        //
+        println("Lavalink disconnected")
     }
 
     override fun onError(websocket: WebSocket, cause: WebSocketException) {

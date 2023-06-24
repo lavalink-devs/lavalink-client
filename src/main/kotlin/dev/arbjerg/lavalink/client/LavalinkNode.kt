@@ -25,9 +25,6 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     private val rest = LavalinkRestClient(this)
     private val ws = LavalinkSocket(this, sink)
 
-    // TODO: do we need this?
-    val players = mutableMapOf<Long, LavalinkPlayer>()
-
     override fun dispose() {
         reference.dispose()
     }
@@ -40,35 +37,22 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     inline fun <reified T : Message.EmittedEvent> on() = on(T::class.java)
 
     // Rest methods
-    fun getPlayers() = rest.getPlayers()
+    fun getPlayers(): Mono<List<LavalinkPlayer>> = rest.getPlayers()
         .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
 
     fun createPlayer(guildId: Long): Mono<LavalinkPlayer> {
         return PlayerUpdateBuilder(rest, guildId)
             .setNoReplace(true)
             .asMono()
-            .doOnNext {
-                players[it.guildId] = it
-            }
     }
 
     fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
-        if (guildId !in players) {
-            return Mono.empty()
-        }
-
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(rest) }
-            // Update the player internally upon retrieving it.
-            .doOnNext {
-                players[it.guildId] = it
-            }
     }
 
     fun destroyPlayer(guildId: Long): Mono<Unit> {
-        return rest.destroyPlayer(guildId).doOnNext {
-            players.remove(guildId)
-        }
+        return rest.destroyPlayer(guildId)
     }
 
     fun loadItem(identifier: String) = rest.loadItem(identifier)

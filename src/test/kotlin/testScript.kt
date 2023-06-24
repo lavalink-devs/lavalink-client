@@ -38,6 +38,7 @@ fun main() {
                         .updateCommands()
                         .addCommands(
                             Commands.slash("join", "Join the voice channel you are in."),
+                            Commands.slash("leave", "Leaves the vc"),
                             Commands.slash("play", "Play a song")
                                 .addOption(
                                     OptionType.STRING,
@@ -73,18 +74,23 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
         "join" -> {
             val member = event.member!!
 
+            lavalink.getLink(event.guild!!.idLong)
+                .createPlayer()
+                .subscribe {
+                    val memberVoice = member.voiceState!!
 
-            lavalink.getLink(event.guild!!.idLong
-            ).node.createPlayer(event.guild!!.idLong).subscribe {
-                val memberVoice = member.voiceState!!
+                    if (memberVoice.inAudioChannel()) {
+                        event.jda.directAudioController.connect(memberVoice.channel!!)
+                    }
 
-                if (memberVoice.inAudioChannel()) {
-                    event.jda.directAudioController.connect(memberVoice.channel!!)
+                    event.reply("Joining your channel!").queue()
                 }
-
-                event.reply("Joining your channel!").queue()
-            }
         }
+
+        "leave" -> {
+            lavalink.getLink(event.guild!!.idLong).destroyPlayer().subscribe()
+        }
+
         "play" -> {
             val identifier = event.getOption("identifier")!!.asString
             val guildId = event.guild!!.idLong
