@@ -10,7 +10,6 @@ class Link(
 ) {
     fun getPlayers() = node.getPlayers()
     fun getPlayer() = node.getPlayer(guildId)
-    fun createPlayer() = node.createPlayer(guildId)
     fun destroyPlayer() = node.destroyPlayer(guildId)
     fun loadItem(identifier: String) = node.loadItem(identifier)
 }

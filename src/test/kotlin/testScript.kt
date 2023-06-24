@@ -2,6 +2,7 @@ import dev.arbjerg.lavalink.client.LavalinkClient
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import dev.arbjerg.lavalink.protocol.v4.Message
+import dev.arbjerg.lavalink.protocol.v4.PlayerState
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent

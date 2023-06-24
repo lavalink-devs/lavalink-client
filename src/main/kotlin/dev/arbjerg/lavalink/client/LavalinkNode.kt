@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
+import reactor.kotlin.core.publisher.toMono
 import java.net.URI
 
 class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Disposable {
@@ -24,6 +25,11 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     val rest = LavalinkRestClient(this)
     private val ws = LavalinkSocket(this, sink)
 
+    /**
+     * A local player cache, allows us to not call the rest client every time we need a player.
+     */
+    private val playerCache = mutableMapOf<Long, LavalinkPlayer>()
+
     override fun dispose() {
         reference.dispose()
     }
@@ -36,22 +42,38 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     inline fun <reified T : Message.EmittedEvent> on() = on(T::class.java)
 
     // Rest methods
-    fun getPlayers(): Mono<List<LavalinkPlayer>> = rest.getPlayers()
-        .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
+    fun getPlayers(): Mono<List<LavalinkPlayer>> {
+        if (playerCache.isEmpty()) {
+            return rest.getPlayers()
+                .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
+                .doOnNext {
+                    it.forEach { player ->
+                        playerCache[player.guildId] = player
+                    }
+                }
+        }
 
-    fun createPlayer(guildId: Long): Mono<LavalinkPlayer> {
-        return PlayerUpdateBuilder(rest, guildId)
-            .setNoReplace(true)
-            .asMono()
+        return playerCache.values.toList().toMono()
     }
 
     fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
+        if (guildId in playerCache) {
+            return playerCache[guildId].toMono()
+        }
+
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(rest) }
+            // Update the player internally upon retrieving it.
+            .doOnNext {
+                playerCache[it.guildId] = it
+            }
     }
 
     fun destroyPlayer(guildId: Long): Mono<Unit> {
         return rest.destroyPlayer(guildId)
+            .doOnNext {
+                playerCache.remove(guildId)
+            }
     }
 
     fun loadItem(identifier: String) = rest.loadItem(identifier)

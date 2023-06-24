@@ -39,7 +39,12 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
             }
 
             Message.Op.PlayerUpdate -> {
-                logger.debug("player update is not implemented yet")
+                val update = message as Message.PlayerUpdateEvent
+                val idLong = update.guildId.toLong()
+
+                if (idLong in node.playerCache) {
+                    node.playerCache[idLong]!!.state = update.state
+                }
             }
 
             Message.Op.Event -> {
