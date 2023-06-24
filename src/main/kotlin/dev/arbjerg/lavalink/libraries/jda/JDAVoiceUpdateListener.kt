@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.libraries.jda
 
 import dev.arbjerg.lavalink.client.LavalinkClient
+import dev.arbjerg.lavalink.client.PlayerUpdateBuilder
 import dev.arbjerg.lavalink.internal.error.RestException
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import net.dv8tion.jda.api.hooks.VoiceDispatchInterceptor
@@ -15,10 +16,10 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
 
         val node = lavalink.getLink(update.guildIdLong).node
 
-        node.getPlayer(update.guildIdLong)
-            .subscribe {
-                it.setVoiceState(state).asMono().block()
-            }
+        PlayerUpdateBuilder(node.rest, update.guildIdLong)
+            .setVoiceState(state)
+            .asMono()
+            .block()
     }
 
     override fun onVoiceStateUpdate(update: VoiceDispatchInterceptor.VoiceStateUpdate): Boolean {

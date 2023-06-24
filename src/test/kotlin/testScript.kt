@@ -73,18 +73,13 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
     when (event.fullCommandName) {
         "join" -> {
             val member = event.member!!
+            val memberVoice = member.voiceState!!
 
-            lavalink.getLink(event.guild!!.idLong)
-                .createPlayer()
-                .subscribe {
-                    val memberVoice = member.voiceState!!
+            if (memberVoice.inAudioChannel()) {
+                event.jda.directAudioController.connect(memberVoice.channel!!)
+            }
 
-                    if (memberVoice.inAudioChannel()) {
-                        event.jda.directAudioController.connect(memberVoice.channel!!)
-                    }
-
-                    event.reply("Joining your channel!").queue()
-                }
+            event.reply("Joining your channel!").queue()
         }
 
         "leave" -> {

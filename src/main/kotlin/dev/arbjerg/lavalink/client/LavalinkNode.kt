@@ -21,7 +21,7 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
     val flux: Flux<Message.EmittedEvent> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()
 
-    private val rest = LavalinkRestClient(this)
+    val rest = LavalinkRestClient(this)
     private val ws = LavalinkSocket(this, sink)
 
     override fun dispose() {
