@@ -5,10 +5,12 @@ import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
 import kotlinx.serialization.decodeFromString
+import org.slf4j.LoggerFactory
 import reactor.core.publisher.Sinks
 
-class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Many<Message.EmittedEvent>) :
-    WebSocketAdapter() {
+// TODO: auto reconnect
+class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Many<Message.EmittedEvent>) : WebSocketAdapter() {
+    private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
 
     private val factory = WebSocketFactory()
     private var socket: WebSocket? = null
@@ -18,7 +20,7 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
     }
 
     override fun onConnected(websocket: WebSocket, headers: MutableMap<String, MutableList<String>>) {
-        println("Connected to Lavalink Node")
+        logger.info("Connected to Lavalink")
     }
 
     // TODO: emit these events from the client
@@ -27,16 +29,17 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
 
         when (message.op) {
             Message.Op.Ready -> {
-                node.sessionId = (message as Message.ReadyEvent).sessionId
-                println("Lavalink is ready!")
+                val sessionId = (message as Message.ReadyEvent).sessionId
+                node.sessionId = sessionId
+                logger.info("Lavalink is ready with session id $sessionId")
             }
 
             Message.Op.Stats -> {
-                TODO("Not yet implemented")
+                logger.debug("Stats are not implemented yet")
             }
 
             Message.Op.PlayerUpdate -> {
-                TODO("Not yet implemented")
+                logger.debug("player update is not implemented yet")
             }
 
             Message.Op.Event -> {
@@ -48,13 +51,13 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
             }
 
             else -> {
-                TODO("Unknown OP")
+                logger.error("Unknown WS message, please report the following information to the devs: $text")
             }
         }
     }
 
     override fun onCloseFrame(websocket: WebSocket, frame: WebSocketFrame) {
-        println("Lavalink disconnected")
+        logger.info("Lavalink disconnected! (yell at devs to implement auto re-connect)")
     }
 
     override fun onError(websocket: WebSocket, cause: WebSocketException) {
