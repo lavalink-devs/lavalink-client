@@ -95,6 +95,8 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
             val link = lavalink.getLink(guildId)
             val node = link.node
 
+            event.deferReply(false).queue()
+
             node.loadItem(identifier).subscribe { item ->
                 link.getPlayer().subscribe getPlayer@{ player ->
                     when (item) {
@@ -102,16 +104,18 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
                             player.setEncodedTrack(item.data.encoded)
                                 .asMono()
                                 .subscribe {
-                                    event.reply("Now playing ${item.data.info.title}!").queue()
+                                    event.hook.sendMessage("Now playing ${item.data.info.title}!").queue()
                                 }
                         }
 
                         is LoadResult.LoadFailed -> TODO()
-                        is LoadResult.NoMatches -> TODO()
+                        is LoadResult.NoMatches -> {
+                            event.hook.sendMessage("No matches found for your input!").queue()
+                        }
                         is LoadResult.PlaylistLoaded -> TODO()
                         is LoadResult.SearchResult -> {
                             if (item.data.tracks.isEmpty()) {
-                                event.reply("Nothing found").queue()
+                                event.hook.sendMessage("Nothing found").queue()
                                 return@getPlayer
                             }
 
@@ -120,7 +124,7 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
                             player.setEncodedTrack(track.encoded)
                                 .asMono()
                                 .subscribe {
-                                    event.reply("Now playing ${track.info.title}!").queue()
+                                    event.hook.sendMessage("Now playing ${track.info.title}!").queue()
                                 }
                         }
                     }

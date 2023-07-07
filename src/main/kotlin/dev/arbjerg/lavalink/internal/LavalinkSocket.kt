@@ -4,12 +4,10 @@ import com.neovisionaries.ws.client.*
 import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
-import kotlinx.serialization.decodeFromString
 import org.slf4j.LoggerFactory
-import reactor.core.publisher.Sinks
 
 // TODO: auto reconnect
-class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Many<Message.EmittedEvent>) : WebSocketAdapter() {
+class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
 
     private val factory = WebSocketFactory()
@@ -49,9 +47,9 @@ class LavalinkSocket(private val node: LavalinkNode, private val sink: Sinks.Man
 
             Message.Op.Event -> {
                 try {
-                    sink.tryEmitNext(message as Message.EmittedEvent)
+                    node.sink.tryEmitNext(message as Message.EmittedEvent)
                 } catch (e: Exception) {
-                    sink.tryEmitError(e)
+                    node.sink.tryEmitError(e)
                 }
             }
 

@@ -18,17 +18,17 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
 
     lateinit var sessionId: String
 
-    private val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
+    internal val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<Message.EmittedEvent> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()
 
     val rest = LavalinkRestClient(this)
-    private val ws = LavalinkSocket(this, sink)
+    val ws = LavalinkSocket(this)
 
     /**
      * A local player cache, allows us to not call the rest client every time we need a player.
      */
-    private val playerCache = mutableMapOf<Long, LavalinkPlayer>()
+    internal val playerCache = mutableMapOf<Long, LavalinkPlayer>()
 
     override fun dispose() {
         reference.dispose()
