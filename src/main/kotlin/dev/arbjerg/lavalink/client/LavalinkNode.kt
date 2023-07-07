@@ -1,9 +1,12 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
+import dev.arbjerg.lavalink.internal.loadbalancing.NodeStats
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.Message
+import dev.arbjerg.lavalink.protocol.v4.Stats
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -12,7 +15,7 @@ import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
 import java.net.URI
 
-class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Disposable {
+class LavalinkNode(serverUri: URI, val userId: Long, val password: String, val region: VoiceRegion) : Disposable {
     // "safe" uri with all paths aremoved
     val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
 
@@ -24,6 +27,9 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String) : Dis
 
     val rest = LavalinkRestClient(this)
     val ws = LavalinkSocket(this)
+
+    var stats: Stats? = null
+        internal set
 
     /**
      * A local player cache, allows us to not call the rest client every time we need a player.

@@ -3,8 +3,9 @@ package dev.arbjerg.lavalink.client
 /**
  * A "Link" for linking a guild id to a node.
  * Mainly just a data class that contains some shortcuts to the node.
+ * You should never store a link as it might be replaced internally without you knowing.
  */
-class Link(
+data class Link(
     val guildId: Long,
     val node: LavalinkNode
 ) {

@@ -23,21 +23,21 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
 
     // TODO: emit these events from the client
     override fun onTextMessage(websocket: WebSocket, text: String) {
-        val message = json.decodeFromString<Message>(text)
+        val event = json.decodeFromString<Message>(text)
 
-        when (message.op) {
+        when (event.op) {
             Message.Op.Ready -> {
-                val sessionId = (message as Message.ReadyEvent).sessionId
+                val sessionId = (event as Message.ReadyEvent).sessionId
                 node.sessionId = sessionId
                 logger.info("Lavalink is ready with session id $sessionId")
             }
 
             Message.Op.Stats -> {
-                logger.debug("Stats are not implemented yet")
+                node.stats = (event as Message.StatsEvent)
             }
 
             Message.Op.PlayerUpdate -> {
-                val update = message as Message.PlayerUpdateEvent
+                val update = event as Message.PlayerUpdateEvent
                 val idLong = update.guildId.toLong()
 
                 if (idLong in node.playerCache) {
@@ -47,7 +47,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
 
             Message.Op.Event -> {
                 try {
-                    node.sink.tryEmitNext(message as Message.EmittedEvent)
+                    node.sink.tryEmitNext(event as Message.EmittedEvent)
                 } catch (e: Exception) {
                     node.sink.tryEmitError(e)
                 }
@@ -64,7 +64,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
     }
 
     override fun onError(websocket: WebSocket, cause: WebSocketException) {
-        //
+        logger.error("Unknown error", cause)
     }
 
     private fun connect() {
