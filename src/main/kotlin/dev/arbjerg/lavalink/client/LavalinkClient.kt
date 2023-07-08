@@ -47,13 +47,14 @@ class LavalinkClient(
         return node
     }
 
-    fun getLink(guildId: Long): Link {
+    @JvmOverloads
+    fun getLink(guildId: Long, region: VoiceRegion = VoiceRegion.NONE): Link {
         if (nodes.isEmpty()) {
             throw IllegalStateException("No available nodes!")
         }
 
         if (guildId !in links) {
-            val bestNode = loadBalancer.determineBestNode()
+            val bestNode = loadBalancer.determineBestSocketForRegion(region)
 
             links[guildId] = Link(guildId, bestNode)
         }

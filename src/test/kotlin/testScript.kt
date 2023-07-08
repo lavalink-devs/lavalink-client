@@ -2,7 +2,6 @@ import dev.arbjerg.lavalink.client.LavalinkClient
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import dev.arbjerg.lavalink.protocol.v4.Message
-import dev.arbjerg.lavalink.protocol.v4.PlayerState
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -56,10 +55,6 @@ fun main() {
         .awaitReady()
 
     val node = client.addNode("Testnode", URI.create("ws://localhost:2333"), "youshallnotpass")
-
-    /*node.loadItem("https://www.youtube.com/watch?v=G87p148EOjo&pp=ygUJdG9tIGNhcmR5").subscribe {
-        println(it)
-    }*/
 
     node.on<Message.EmittedEvent.TrackStartEvent>()
         .next()
