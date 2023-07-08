@@ -1,10 +1,13 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
-    kotlin("jvm") version "1.8.21"
-    kotlin("plugin.serialization") version "1.8.21"
+    java
+    kotlin("jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 group = "dev.arbjerg"
-version = "1.0-SNAPSHOT"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -23,7 +26,6 @@ dependencies {
     api("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
     api("org.slf4j:slf4j-api:2.0.7")
 
-
     // Discord library support
     compileOnly("net.dv8tion:JDA:5.0.0-beta.11")
     // I have no clue how this lib works and the docs are confusing
@@ -32,6 +34,33 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("net.dv8tion:JDA:5.0.0-beta.11")
     testImplementation("org.slf4j:slf4j-simple:2.0.7")
+}
+
+val sourcesForRelease = task<Copy>("sourcesForRelease") {
+    from("src/main/kotlin") {
+        include("**/Version.java")
+
+        filter<ReplaceTokens>(mapOf("tokens" to mapOf(
+            "PLUGIN_VERSION" to project.version
+        )))
+    }
+    into("build/filteredSrc")
+
+    includeEmptyDirs = false
+}
+
+val generateKotlinSources = task<SourceTask>("generateKotlinSources") {
+    val javaSources = sourceSets["main"].allSource.filter {
+        it.name != "Version.java"
+    }.asFileTree
+
+    source = javaSources + fileTree(sourcesForRelease.destinationDir)
+    dependsOn(sourcesForRelease)
+}
+
+tasks.compileJava {
+    source = generateKotlinSources.source
+    dependsOn(generateKotlinSources)
 }
 
 tasks.test {

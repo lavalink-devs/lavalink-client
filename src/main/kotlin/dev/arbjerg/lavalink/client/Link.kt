@@ -7,8 +7,12 @@ package dev.arbjerg.lavalink.client
  */
 data class Link(
     val guildId: Long,
-    val node: LavalinkNode
+    val initialNode: LavalinkNode
 ) {
+    // TODO: actual change node function to also handle server updates.
+    var node = initialNode
+        internal set
+
     fun getPlayers() = node.getPlayers()
     fun getPlayer() = node.getPlayer(guildId)
     fun destroyPlayer() = node.destroyPlayer(guildId)

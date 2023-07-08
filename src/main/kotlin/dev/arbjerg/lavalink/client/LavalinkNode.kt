@@ -3,7 +3,7 @@ package dev.arbjerg.lavalink.client
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
-import dev.arbjerg.lavalink.internal.loadbalancing.NodeStats
+import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.Stats
@@ -15,7 +15,7 @@ import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
 import java.net.URI
 
-class LavalinkNode(serverUri: URI, val userId: Long, val password: String, val region: VoiceRegion) : Disposable {
+class LavalinkNode(val name: String, serverUri: URI, val password: String, val region: VoiceRegion, val lavalink: LavalinkClient) : Disposable {
     // "safe" uri with all paths aremoved
     val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
 
@@ -28,7 +28,11 @@ class LavalinkNode(serverUri: URI, val userId: Long, val password: String, val r
     val rest = LavalinkRestClient(this)
     val ws = LavalinkSocket(this)
 
+    // Stuff for load balancing
+    val penalties = Penalties(this)
     var stats: Stats? = null
+        internal set
+    var available: Boolean = false
         internal set
 
     /**

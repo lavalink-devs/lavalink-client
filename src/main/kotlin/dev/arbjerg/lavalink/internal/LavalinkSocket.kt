@@ -2,6 +2,7 @@ package dev.arbjerg.lavalink.internal
 
 import com.neovisionaries.ws.client.*
 import dev.arbjerg.lavalink.client.LavalinkNode
+import dev.arbjerg.lavalink.Version
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
 import org.slf4j.LoggerFactory
@@ -19,6 +20,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
 
     override fun onConnected(websocket: WebSocket, headers: MutableMap<String, MutableList<String>>) {
         logger.info("Connected to Lavalink")
+        node.available = true
     }
 
     // TODO: emit these events from the client
@@ -47,7 +49,10 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
 
             Message.Op.Event -> {
                 try {
-                    node.sink.tryEmitNext(event as Message.EmittedEvent)
+                    val eventTyped = event as Message.EmittedEvent
+
+                    node.penalties.handleTrackEvent(eventTyped)
+                    node.sink.tryEmitNext(eventTyped)
                 } catch (e: Exception) {
                     node.sink.tryEmitError(e)
                 }
@@ -61,6 +66,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
 
     override fun onCloseFrame(websocket: WebSocket, frame: WebSocketFrame) {
         logger.info("Lavalink disconnected! (yell at devs to implement auto re-connect)")
+        node.available = false
     }
 
     override fun onError(websocket: WebSocket, cause: WebSocketException) {
@@ -73,9 +79,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
         socket!!.addListener(this)
             .setDirectTextMessage(false)
             .addHeader("Authorization", node.password)
-            // TODO: fix version
-            .addHeader("Client-Name", "Lavalink-Client/DEV")
-            .addHeader("User-Id", node.userId.toString())
+            .addHeader("Client-Name", "Lavalink-Client/${Version.VERSION}")
+            .addHeader("User-Id", node.lavalink.userId.toString())
             .connect()
     }
 }
