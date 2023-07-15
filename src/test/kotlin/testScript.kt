@@ -56,32 +56,27 @@ fun main() {
         .awaitReady()
 }
 
-private fun registerNode(client: LavalinkClient) {
-    val node = client.addNode(
-        "Testnode",
-        URI.create("ws://localhost:2333"),
-        "youshallnotpass"
+fun registerNode(client: LavalinkClient) {
+    listOf(
+        client.addNode(
+            "Testnode",
+            URI.create("ws://localhost:2333"),
+            "youshallnotpass"
+        ),
+
+        client.addNode(
+            "Mac-mini",
+            URI.create("ws://192.168.1.139:2333/bepis"),
+            "youshallnotpass"
+        )
     )
-
-    val node2 = client.addNode(
-        "Mac-mini",
-        URI.create("ws://192.168.1.139:2333/bepis"),
-        "youshallnotpass"
-    )
-
-    node.on<Message.EmittedEvent.TrackStartEvent>()
-        .next()
-        .subscribe {
-            // A new track is started!
-            println("A new track is started!")
-            println(it.track.info)
-        }
-
-    node2.on<Message.EmittedEvent.TrackStartEvent>()
-        .next()
-        .subscribe {
-            // A new track is started!
-            println("MAC_MINI: track started: ${it.track.info}")
+        .forEach { node ->
+            node.on<Message.EmittedEvent.TrackStartEvent>()
+                .next()
+                .subscribe {
+                    // A new track is started!
+                    println("${node.name}: track started: ${it.track.info}")
+                }
         }
 }
 
