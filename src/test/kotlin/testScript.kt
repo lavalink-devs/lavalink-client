@@ -56,7 +56,7 @@ fun main() {
         .awaitReady()
 }
 
-fun registerNode(client: LavalinkClient) {
+private fun registerNode(client: LavalinkClient) {
     val node = client.addNode(
         "Testnode",
         URI.create("ws://localhost:2333"),
