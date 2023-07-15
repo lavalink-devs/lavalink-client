@@ -29,8 +29,6 @@ dependencies {
     // Discord library support
     compileOnly("net.dv8tion:JDA:5.0.0-beta.11")
     compileOnly("com.discord4j:discord4j-core:3.2.3")
-    // I have no clue how this lib works and the docs are confusing
-    // compileOnly("com.discord4j:discord4j-core:3.2.5")
 
     testImplementation(kotlin("test"))
     testImplementation("net.dv8tion:JDA:5.0.0-beta.11")
