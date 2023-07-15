@@ -22,7 +22,7 @@ JDABuilder.createDefault(System.getenv("BOT_TOKEN"))
 Good luck
 
 ```java
-LavalinkClient client = LavalinkClient();
+LavalinkClient client = new LavalinkClient();
 DiscordClient discord = DiscordClientBuilder.create(System.getenv("BOT_TOKEN"))
     .build()
     .gateway()
