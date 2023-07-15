@@ -41,7 +41,7 @@ val sourcesForRelease = task<Copy>("sourcesForRelease") {
         include("**/Version.java")
 
         filter<ReplaceTokens>(mapOf("tokens" to mapOf(
-            "PLUGIN_VERSION" to project.version
+            "gradle_plugin_ver_to_annoy_schlaudbibus" to project.version
         )))
     }
     into("build/filteredSrc")
