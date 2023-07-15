@@ -3,15 +3,26 @@ package dev.arbjerg.lavalink.client
 import dev.arbjerg.lavalink.client.loadbalancing.DefaultLoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
+import dev.arbjerg.lavalink.internal.ReconnectTask
+import java.io.Closeable
 import java.net.URI
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class LavalinkClient(
-    val userId: Long
-) {
+class LavalinkClient: Closeable {
     private val internalNodes = mutableListOf<LavalinkNode>()
     private val links = mutableMapOf<Long, Link>()
+
+    private var internalUserId = -1L
+    var userId: Long
+        get() = internalUserId
+        set(value) {
+            if (internalUserId != -1L) {
+                throw IllegalStateException("User ID already set")
+            }
+
+            internalUserId = value
+        }
 
     /**
      * To determine the best node, we use a load balancer.
@@ -19,15 +30,17 @@ class LavalinkClient(
      */
     var loadBalancer: ILoadBalancer = DefaultLoadBalancer(this)
 
-    init {
-        // TODO: replace this with a better system, this is just to have something that works for now
-        val executor = Executors.newSingleThreadScheduledExecutor {
-            val thread = Thread(it)
-            thread.isDaemon = true
-            thread
-        }
+    private val reconnectService = Executors.newSingleThreadScheduledExecutor {
+        val thread = Thread(it, "lavalink-reconnect-thread")
+        thread.isDaemon = true
+        thread
+    }
 
-        executor.scheduleAtFixedRate(
+    init {
+        reconnectService.scheduleWithFixedDelay(ReconnectTask(this), 0, 500, TimeUnit.MILLISECONDS);
+
+        // TODO: replace this with a better system, this is just to have something that works for now
+        reconnectService.scheduleAtFixedRate(
             {
                 internalNodes.forEach { node ->
                     node.penalties.clearStats()
@@ -41,6 +54,14 @@ class LavalinkClient(
 
     @JvmOverloads
     fun addNode(name: String, address: URI, password: String, region: VoiceRegion = VoiceRegion.NONE): LavalinkNode {
+        if (userId == -1L) {
+            throw IllegalStateException("User ID not set, please use LavalinkClient#setUserId(Long) to set it before adding nodes.")
+        }
+
+        if (nodes.any { it.name == name }) {
+            throw IllegalStateException("Node with name '$name' already exists")
+        }
+
         val node = LavalinkNode(name, address, password, region, this)
         internalNodes.add(node)
 
@@ -62,7 +83,8 @@ class LavalinkClient(
         return links[guildId]!!
     }
 
-    internal fun replaceLink(guildId: Long, newLink: Link) {
-        TODO("Not implemented yet (do we even need this?)")
+    override fun close() {
+//        reconnectService.close()
+        nodes.forEach { it.ws.close() }
     }
 }

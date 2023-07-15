@@ -6,6 +6,7 @@ import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.Message
+import dev.arbjerg.lavalink.protocol.v4.PlayerUpdate
 import dev.arbjerg.lavalink.protocol.v4.Stats
 import reactor.core.Disposable
 import reactor.core.publisher.Flux

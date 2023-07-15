@@ -86,7 +86,7 @@ data class Penalties(
         // This is where we differ from the original client, penalties for failures.
         val trackStuckPenalty = tracksStuck * 100 - 100
         val trackExceptionPenalty = trackExceptions * 10 - 10
-        val loadFailedPenalty = loadsFailed / loadsAttempted
+        val loadFailedPenalty = if (loadsFailed > 0) loadsFailed / loadsAttempted else 0
 
         return playerPenalty + cpuPenalty + deficitFramePenalty + nullFramePenalty + trackStuckPenalty + trackExceptionPenalty + loadFailedPenalty
     }

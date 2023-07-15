@@ -6,13 +6,20 @@ import dev.arbjerg.lavalink.Version
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
 import org.slf4j.LoggerFactory
+import java.io.Closeable
 
 // TODO: auto reconnect
-class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
+class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter(), Closeable {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
 
     private val factory = WebSocketFactory()
-    private var socket: WebSocket? = null
+    internal var socket: WebSocket? = null
+
+    var mayReconnect = true
+    var lastReconnectAttempt = 0L
+    var reconnectsAttempted = 0
+    val reconnectInterval: Int
+        get() = reconnectsAttempted * 2000 - 2000
 
     init {
         connect()
@@ -23,7 +30,6 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
         node.available = true
     }
 
-    // TODO: emit these events from the client
     override fun onTextMessage(websocket: WebSocket, text: String) {
         val event = json.decodeFromString<Message>(text)
 
@@ -73,14 +79,63 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter() {
         logger.error("Unknown error", cause)
     }
 
+    override fun onDisconnected(
+        websocket: WebSocket,
+        serverCloseFrame: WebSocketFrame?,
+        clientCloseFrame: WebSocketFrame?,
+        closedByServer: Boolean
+    ) {
+        node.available = false
+
+        if (closedByServer && serverCloseFrame != null) {
+            val reason = serverCloseFrame.closeReason ?: "<no reason given>"
+            val code = serverCloseFrame.closeCode
+
+            if (code == WebSocketCloseCode.NORMAL) {
+                mayReconnect = false
+                logger.info("Connection to {} closed normally with reason {} (closed by server = true)", websocket.uri, reason)
+            } else {
+                logger.info("Connection to {} closed abnormally with reason {}:{} (closed by server = true)", websocket.uri, code, reason)
+            }
+
+            return
+        }
+
+        if (clientCloseFrame != null) {
+            val code = clientCloseFrame.closeCode
+            val reason = clientCloseFrame.closeReason ?: "<no reason given>"
+
+            if (code == WebSocketCloseCode.NORMAL) {
+                mayReconnect = false
+            }
+
+            logger.info("Connection to {} closed by client with code {} and reason {} (closed by server = false)", websocket.uri, code, reason)
+        }
+    }
+
+    fun attemptReconnect() {
+        lastReconnectAttempt = System.currentTimeMillis()
+        reconnectsAttempted++
+        connect()
+    }
+
     private fun connect() {
         socket = factory.createSocket("${node.baseUri}/websocket")
-
-        socket!!.addListener(this)
+            .addListener(this)
             .setDirectTextMessage(false)
             .addHeader("Authorization", node.password)
             .addHeader("Client-Name", "Lavalink-Client/${Version.VERSION}")
             .addHeader("User-Id", node.lavalink.userId.toString())
-            .connect()
+
+        try {
+            socket!!.connect()
+            reconnectsAttempted = 0
+        } catch (e: Exception) {
+            logger.error("Failed to connect to WS of node '${node.name}', retrying in ${reconnectInterval / 1000} seconds", e)
+        }
+    }
+
+    override fun close() {
+        socket?.disconnect()
     }
 }

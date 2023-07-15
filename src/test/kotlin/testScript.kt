@@ -13,12 +13,10 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import java.net.URI
 
-private const val COMMAND_GUILD_ID = 191245668617158656L
+private const val COMMAND_GUILD_ID = 1082302532421943407L
 
 fun main() {
-    val client = LavalinkClient(
-        405777831730085889L,
-    )
+    val client = LavalinkClient()
 
     JDABuilder.createDefault(System.getenv("BOT_TOKEN"))
         .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
@@ -33,6 +31,9 @@ fun main() {
                 if (event is SlashCommandInteractionEvent) {
                     handleSlash(client, event)
                 } else if (event is ReadyEvent) {
+                    client.userId = event.jda.selfUser.idLong
+                    registerNode(client)
+
                     println("${event.jda.selfUser.asTag} is ready!")
                     event.jda.getGuildById(COMMAND_GUILD_ID)!!
                         .updateCommands()
@@ -53,8 +54,20 @@ fun main() {
         })
         .build()
         .awaitReady()
+}
 
-    val node = client.addNode("Testnode", URI.create("ws://localhost:2333"), "youshallnotpass")
+fun registerNode(client: LavalinkClient) {
+    val node = client.addNode(
+        "Testnode",
+        URI.create("ws://localhost:2333"),
+        "youshallnotpass"
+    )
+
+    val node2 = client.addNode(
+        "Mac-mini",
+        URI.create("ws://192.168.1.139:2333"),
+        "youshallnotpass"
+    )
 
     node.on<Message.EmittedEvent.TrackStartEvent>()
         .next()
@@ -62,6 +75,13 @@ fun main() {
             // A new track is started!
             println("A new track is started!")
             println(it.track.info)
+        }
+
+    node2.on<Message.EmittedEvent.TrackStartEvent>()
+        .next()
+        .subscribe {
+            // A new track is started!
+            println("MAC_MINI: track started: ${it.track.info}")
         }
 }
 
@@ -103,7 +123,9 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
                                 }
                         }
 
-                        is LoadResult.LoadFailed -> TODO()
+                        is LoadResult.LoadFailed -> {
+                            event.hook.sendMessage("Failed to load track! ${item.data.message}").queue()
+                        }
                         is LoadResult.NoMatches -> {
                             event.hook.sendMessage("No matches found for your input!").queue()
                         }

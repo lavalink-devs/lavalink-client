@@ -11,7 +11,10 @@ data class Link(
 ) {
     // TODO: actual change node function to also handle server updates.
     var node = initialNode
-        internal set
+        internal set(newNode) {
+            field = newNode
+            // TODO: Node change logic here
+        }
 
     fun getPlayers() = node.getPlayers()
     fun getPlayer() = node.getPlayer(guildId)
