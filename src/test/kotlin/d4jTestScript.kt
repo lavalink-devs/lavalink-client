@@ -75,7 +75,7 @@ fun registerNodeD4j(client: LavalinkClient) {
         }
 }
 
-fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEvent) {
+private fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEvent) {
     when (event.commandName) {
         "join" -> {
             val guild = event.interaction.guild.block()!!

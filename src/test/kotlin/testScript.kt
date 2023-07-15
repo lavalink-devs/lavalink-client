@@ -80,7 +80,7 @@ fun registerNode(client: LavalinkClient) {
         }
 }
 
-fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
+private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
     when (event.fullCommandName) {
         "join" -> {
             val member = event.member!!
