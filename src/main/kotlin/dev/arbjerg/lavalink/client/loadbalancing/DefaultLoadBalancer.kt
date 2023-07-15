@@ -5,9 +5,9 @@ import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.loadbalancing.penaltyproviders.IPenaltyProvider
 
 class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
+    val penaltyProviders = mutableListOf<IPenaltyProvider>()
 
-    private val penaltyProviders = mutableListOf<IPenaltyProvider>()
-
+    // TODO: Why even do this LOL
     fun addPenaltyProvider(penaltyProvider: IPenaltyProvider) {
         penaltyProviders.add(penaltyProvider)
     }

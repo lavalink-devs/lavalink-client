@@ -13,15 +13,15 @@ class LavalinkClient: Closeable {
     private val internalNodes = mutableListOf<LavalinkNode>()
     private val links = mutableMapOf<Long, Link>()
 
-    private var internalUserId = -1L
-    var userId: Long
-        get() = internalUserId
+    // Non mutable public list
+    val nodes: List<LavalinkNode> = internalNodes
+    var userId: Long = -1
         set(value) {
-            if (internalUserId != -1L) {
-                throw IllegalStateException("User ID already set")
+            if (nodes.isNotEmpty()) {
+                throw IllegalStateException("Can't set userId if we already have nodes registered!")
             }
 
-            internalUserId = value
+            field = value
         }
 
     /**
@@ -48,9 +48,6 @@ class LavalinkClient: Closeable {
             }, 1, 1, TimeUnit.MINUTES
         )
     }
-
-    // Non mutable public list
-    val nodes: List<LavalinkNode> = internalNodes
 
     @JvmOverloads
     fun addNode(name: String, address: URI, password: String, region: VoiceRegion = VoiceRegion.NONE): LavalinkNode {
@@ -83,8 +80,20 @@ class LavalinkClient: Closeable {
         return links[guildId]!!
     }
 
+    fun onNodeDisconnected(node: LavalinkNode) {
+        links.forEach { (_, link) ->
+            if (link.node == node)  {
+                link.node = loadBalancer.determineBestSocketForRegion(node.region)
+            }
+        }
+    }
+
+    fun onNodeConnected(node: LavalinkNode) {
+        // TODO: do I need this?
+    }
+
     override fun close() {
 //        reconnectService.close()
-        nodes.forEach { it.ws.close() }
+        nodes.forEach { it.close() }
     }
 }

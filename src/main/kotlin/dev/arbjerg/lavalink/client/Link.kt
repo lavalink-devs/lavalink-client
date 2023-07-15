@@ -9,14 +9,29 @@ data class Link(
     val guildId: Long,
     val initialNode: LavalinkNode
 ) {
-    // TODO: actual change node function to also handle server updates.
     var node = initialNode
+        /*get () {
+            if (!field.available) {
+                throw IllegalStateException("Node is not available")
+            }
+
+            return field
+        }*/
         internal set(newNode) {
+            val player = getCachedPlayer()
+
+            if (player != null) {
+                PlayerUpdateBuilder(newNode.rest, guildId)
+                    .setVoiceState(player.voiceState)
+                    .asMono()
+                    .block()
+            }
+
             field = newNode
-            // TODO: Node change logic here
         }
 
     fun getPlayers() = node.getPlayers()
+    fun getCachedPlayer() = node.getCachedPlayer(guildId)
     fun getPlayer() = node.getPlayer(guildId)
     fun destroyPlayer() = node.destroyPlayer(guildId)
     fun loadItem(identifier: String) = node.loadItem(identifier)

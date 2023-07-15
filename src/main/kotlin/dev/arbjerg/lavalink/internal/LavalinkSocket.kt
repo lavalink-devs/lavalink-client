@@ -8,7 +8,6 @@ import dev.arbjerg.lavalink.protocol.v4.json
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 
-// TODO: auto reconnect
 class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter(), Closeable {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
 
@@ -28,6 +27,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter(), Close
     override fun onConnected(websocket: WebSocket, headers: MutableMap<String, MutableList<String>>) {
         logger.info("Connected to Lavalink")
         node.available = true
+        node.lavalink.onNodeConnected(node)
     }
 
     override fun onTextMessage(websocket: WebSocket, text: String) {
@@ -86,6 +86,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter(), Close
         closedByServer: Boolean
     ) {
         node.available = false
+        node.lavalink.onNodeDisconnected(node)
 
         if (closedByServer && serverCloseFrame != null) {
             val reason = serverCloseFrame.closeReason ?: "<no reason given>"

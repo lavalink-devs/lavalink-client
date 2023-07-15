@@ -65,7 +65,7 @@ fun registerNode(client: LavalinkClient) {
 
     val node2 = client.addNode(
         "Mac-mini",
-        URI.create("ws://192.168.1.139:2333"),
+        URI.create("ws://192.168.1.139:2333/bepis"),
         "youshallnotpass"
     )
 
@@ -105,14 +105,18 @@ fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
         }
 
         "play" -> {
+            if (!event.guild!!.selfMember.voiceState!!.inAudioChannel()) {
+                event.reply("Please make me join a voice channel first").queue()
+                return
+            }
+
             val identifier = event.getOption("identifier")!!.asString
             val guildId = event.guild!!.idLong
             val link = lavalink.getLink(guildId)
-            val node = link.node
 
             event.deferReply(false).queue()
 
-            node.loadItem(identifier).subscribe { item ->
+            link.loadItem(identifier).subscribe { item ->
                 link.getPlayer().subscribe getPlayer@{ player ->
                     when (item) {
                         is LoadResult.TrackLoaded -> {

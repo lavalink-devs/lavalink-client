@@ -6,7 +6,6 @@ import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.Message
-import dev.arbjerg.lavalink.protocol.v4.PlayerUpdate
 import dev.arbjerg.lavalink.protocol.v4.Stats
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
@@ -14,10 +13,11 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
+import java.io.Closeable
 import java.net.URI
 
-class LavalinkNode(val name: String, serverUri: URI, val password: String, val region: VoiceRegion, val lavalink: LavalinkClient) : Disposable {
-    // "safe" uri with all paths aremoved
+class LavalinkNode(val name: String, serverUri: URI, val password: String, val region: VoiceRegion, val lavalink: LavalinkClient) : Disposable, Closeable {
+    // "safe" uri with all paths removed
     val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
 
     lateinit var sessionId: String
@@ -45,6 +45,11 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
         reference.dispose()
     }
 
+    override fun close() {
+        ws.close()
+        dispose()
+    }
+
     // For the java people
     fun <T : Message.EmittedEvent> on(type: Class<T>): Flux<T> {
         return flux.ofType(type)
@@ -65,6 +70,14 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
         }
 
         return playerCache.values.toList().toMono()
+    }
+
+    fun getCachedPlayer(guildId: Long): LavalinkPlayer? {
+        if (guildId in playerCache) {
+            return playerCache[guildId]
+        }
+
+        return null
     }
 
     fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
@@ -88,4 +101,28 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
     }
 
     fun loadItem(identifier: String) = rest.loadItem(identifier)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LavalinkNode
+
+        if (name != other.name) return false
+        if (password != other.password) return false
+        if (region != other.region) return false
+        if (baseUri != other.baseUri) return false
+        if (sessionId != other.sessionId) return false
+        return available == other.available
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + password.hashCode()
+        result = 31 * result + region.hashCode()
+        result = 31 * result + baseUri.hashCode()
+        result = 31 * result + sessionId.hashCode()
+        result = 31 * result + available.hashCode()
+        return result
+    }
 }
