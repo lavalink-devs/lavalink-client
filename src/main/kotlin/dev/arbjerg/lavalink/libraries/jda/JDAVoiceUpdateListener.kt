@@ -29,10 +29,8 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
         val player = link.node.playerCache[update.guildIdLong] ?: return false
         val playerState = player.state
 
-        println(channel)
-
         if (channel == null) {
-            if (playerState.connected) {
+            if (!playerState.connected) {
                 link.destroyPlayer().block()
             }
         }

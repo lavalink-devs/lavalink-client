@@ -46,15 +46,17 @@ discord.installVoiceHandler(client)
 Then connect like this
 ```java
 var voiceState = /* Get the voice state of the member that ran the command */;
-var memberVoice = voiceState.channel.block();
+var memberVoice = voiceState.getChannel().block();
 
 memberVoice.sendConnectVoiceState(false, false).subscribe();
 ```
 
 And disconnect like this
 ```java
-val voiceState = /* Get the voice state of the member that ran the command */;
-val memberVoice = voiceState.channel.block();
+var voiceState = /* Get the voice state of the member that ran the command */;
+var memberVoice = voiceState.getChannel().block();
 
 memberVoice.sendDisconnectVoiceState().subscribe();
 ```
+
+Alternatively, you can use `Discord4JUtils.leave(gatewayClient, guildId);` as that does not access any voice states.

@@ -128,6 +128,10 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketAdapter(), Close
             .addHeader("Client-Name", "Lavalink-Client/${Version.VERSION}")
             .addHeader("User-Id", node.lavalink.userId.toString())
 
+        if (node.sessionId != null) {
+            socket!!.addHeader("Session-Id", node.sessionId)
+        }
+
         try {
             socket!!.connect()
             reconnectsAttempted = 0

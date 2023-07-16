@@ -5,20 +5,13 @@ package dev.arbjerg.lavalink.client
  * Mainly just a data class that contains some shortcuts to the node.
  * You should never store a link as it might be replaced internally without you knowing.
  */
-data class Link(
+class Link(
     val guildId: Long,
-    val initialNode: LavalinkNode
+    initialNode: LavalinkNode
 ) {
     var node = initialNode
-        /*get () {
-            if (!field.available) {
-                throw IllegalStateException("Node is not available")
-            }
-
-            return field
-        }*/
         internal set(newNode) {
-            val player = getCachedPlayer()
+            val player = node.getCachedPlayer(guildId)
 
             if (player != null) {
                 PlayerUpdateBuilder(newNode.rest, guildId)
@@ -30,9 +23,29 @@ data class Link(
             field = newNode
         }
 
+    /**
+     * Retrieves a list of all players from the lavalink server.
+     */
     fun getPlayers() = node.getPlayers()
-    fun getCachedPlayer() = node.getCachedPlayer(guildId)
+    /**
+     * Gets the player from the guild id. If the player is not cached, it will be retrieved from the server.
+     */
     fun getPlayer() = node.getPlayer(guildId)
     fun destroyPlayer() = node.destroyPlayer(guildId)
     fun loadItem(identifier: String) = node.loadItem(identifier)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Link
+
+        return guildId == other.guildId
+    }
+
+    override fun hashCode(): Int {
+        return guildId.hashCode()
+    }
+
+
 }

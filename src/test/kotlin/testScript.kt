@@ -35,8 +35,7 @@ fun main() {
                     registerNode(client)
 
                     println("${event.jda.selfUser.asTag} is ready!")
-                    event.jda.getGuildById(COMMAND_GUILD_ID)!!
-                        .updateCommands()
+                    event.jda.updateCommands()
                         .addCommands(
                             Commands.slash("join", "Join the voice channel you are in."),
                             Commands.slash("leave", "Leaves the vc"),
@@ -64,11 +63,11 @@ fun registerNode(client: LavalinkClient) {
             "youshallnotpass"
         ),
 
-        client.addNode(
+        /*client.addNode(
             "Mac-mini",
             URI.create("ws://192.168.1.139:2333/bepis"),
             "youshallnotpass"
-        )
+        )*/
     )
         .forEach { node ->
             node.on<Message.EmittedEvent.TrackStartEvent>()

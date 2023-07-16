@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
+import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.Stats
 import reactor.core.Disposable
@@ -20,7 +21,8 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
     // "safe" uri with all paths removed
     val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
 
-    lateinit var sessionId: String
+    var sessionId: String? = null
+        internal set
 
     internal val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<Message.EmittedEvent> = sink.asFlux()
@@ -57,30 +59,29 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
 
     inline fun <reified T : Message.EmittedEvent> on() = on(T::class.java)
 
-    // Rest methods
+    /**
+     * Retrieves a list of all players from the lavalink server.
+     */
     fun getPlayers(): Mono<List<LavalinkPlayer>> {
-        if (playerCache.isEmpty()) {
-            return rest.getPlayers()
-                .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
-                .doOnNext {
-                    it.forEach { player ->
-                        playerCache[player.guildId] = player
-                    }
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
+        return rest.getPlayers()
+            .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
+            .doOnNext {
+                it.forEach { player ->
+                    playerCache[player.guildId] = player
                 }
-        }
-
-        return playerCache.values.toList().toMono()
+            }
     }
 
-    fun getCachedPlayer(guildId: Long): LavalinkPlayer? {
-        if (guildId in playerCache) {
-            return playerCache[guildId]
-        }
-
-        return null
-    }
-
+    /**
+     * Gets the player from the guild id. If the player is not cached, it will be retrieved from the server.
+     *
+     * @param guildId The guild id of the player.
+     */
     fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
         if (guildId in playerCache) {
             return playerCache[guildId].toMono()
         }
@@ -94,13 +95,27 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
     }
 
     fun destroyPlayer(guildId: Long): Mono<Unit> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
         return rest.destroyPlayer(guildId)
             .doOnNext {
                 playerCache.remove(guildId)
             }
     }
 
-    fun loadItem(identifier: String) = rest.loadItem(identifier)
+    fun loadItem(identifier: String): Mono<LoadResult> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
+        return rest.loadItem(identifier)
+    }
+
+    internal fun getCachedPlayer(guildId: Long): LavalinkPlayer? {
+        if (guildId in playerCache) {
+            return playerCache[guildId]
+        }
+
+        return null
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

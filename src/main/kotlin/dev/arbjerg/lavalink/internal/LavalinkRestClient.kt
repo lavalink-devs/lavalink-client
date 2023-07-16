@@ -23,14 +23,12 @@ class LavalinkRestClient(val node: LavalinkNode) {
         .replace("wss://", "https://")
 
     fun getPlayers(): Mono<Players> {
-        // GET /v4/sessions/{sessionId}/players
-        TODO("Not yet implemented")
+        return newRequest {
+            url("$baseUrl/sessions/${node.sessionId}/players")
+        }.toMono()
     }
 
     fun getPlayer(guildId: Long): Mono<Player> {
-        // GET /v4/sessions/{sessionId}/players/{guildId}
-        // Keep track of players locally and create one if needed?
-
         return newRequest {
             url("$baseUrl/sessions/${node.sessionId}/players/$guildId")
         }.toMono()
@@ -40,7 +38,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
         return newRequest {
             url("$baseUrl/sessions/${node.sessionId}/players/$guildId?noReplace=$noReplace")
             patch(json.encodeToString(player).toRequestBody("application/json".toMediaType()))
-        }.toMono<Player>()
+        }.toMono()
     }
 
     fun destroyPlayer(guildId: Long): Mono<Unit> {
@@ -55,7 +53,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
 
         return newRequest {
             url("$baseUrl/loadtracks?identifier=$encId")
-        }.toMono<LoadResult>()
+        }.toMono()
     }
 
     private fun newRequest(configure: Request.Builder.() -> Request.Builder): Call {
