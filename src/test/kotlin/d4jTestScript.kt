@@ -1,6 +1,5 @@
 import dev.arbjerg.lavalink.client.LavalinkClient
 import dev.arbjerg.lavalink.libraries.discord4j.installVoiceHandler
-import dev.arbjerg.lavalink.libraries.discord4j.joinChannel
 import dev.arbjerg.lavalink.libraries.discord4j.leave
 import dev.arbjerg.lavalink.protocol.v4.Message
 import discord4j.core.DiscordClientBuilder
@@ -83,10 +82,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEve
                 .blockFirst()!!
             val memberVoice = voiceState.channel.block()
 
-            if (memberVoice != null) {
-                event.client.joinChannel(memberVoice).subscribe()
-            }
-
+            memberVoice?.sendConnectVoiceState(false, false)?.subscribe()
 
             event.reply("Joining your channel!").subscribe()
         }
