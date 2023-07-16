@@ -18,7 +18,7 @@ fun main() {
     val discord = DiscordClientBuilder.create(System.getenv("BOT_TOKEN"))
         .build()
         .gateway()
-        .setEnabledIntents(IntentSet.all())
+        .setEnabledIntents(IntentSet.nonPrivileged())
         .login().block()!!
 
     client.userId = discord.selfId.asLong()
@@ -77,8 +77,8 @@ fun registerNodeD4j(client: LavalinkClient) {
 private fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEvent) {
     when (event.commandName) {
         "join" -> {
-            val guild = event.interaction.guild.block()!!
-            val voiceState = guild.voiceStates.blockFirst()!!
+            val member = event.interaction.member.get()
+            val voiceState = member.voiceState.block()!!
             val memberVoice = voiceState.channel.block()
 
             memberVoice?.sendConnectVoiceState(false, false)?.subscribe()
@@ -88,7 +88,12 @@ private fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEve
 
         "leave" -> {
             // Disconnecting automatically destroys the player
-            event.client.leave(event.interaction.guildId.get()).subscribe()
+            val member = event.interaction.member.get()
+            val voiceState = member.voiceState.block()!!
+            val memberVoice = voiceState.channel.block()
+
+            memberVoice?.sendDisconnectVoiceState()?.subscribe()
+
             event.reply("Leaving your channel!").subscribe()
         }
 

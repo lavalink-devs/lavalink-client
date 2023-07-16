@@ -53,11 +53,8 @@ memberVoice.sendConnectVoiceState(false, false).subscribe();
 
 And disconnect like this
 ```java
-Discord4JUtils.leave(gatewayClient, guildId);
-```
+val voiceState = /* Get the voice state of the member that ran the command */;
+val memberVoice = voiceState.channel.block();
 
-or if you're using kotlin
-```kotlin
-// event being ChatInputInteractionEvent
-event.client.leave(event.interaction.guildId.get()).subscribe()
+memberVoice.sendDisconnectVoiceState().subscribe();
 ```
