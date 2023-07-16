@@ -94,6 +94,11 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
             }
     }
 
+    /**
+     * Destroy a player.
+     *
+     * @param guildId The guild id of the player to destroy.
+     */
     fun destroyPlayer(guildId: Long): Mono<Unit> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
@@ -103,6 +108,11 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
             }
     }
 
+    /**
+     * Load an item for the player.
+     *
+     * @param identifier The identifier (E.G. youtube url) to load.
+     */
     fun loadItem(identifier: String): Mono<LoadResult> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 

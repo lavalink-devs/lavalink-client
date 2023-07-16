@@ -49,6 +49,16 @@ class LavalinkClient: Closeable {
         )
     }
 
+    // TODO: configure resuming
+
+    /**
+     * Add a node to the client.
+     *
+     * @param name The name of your node
+     * @param address The ip and port of your node
+     * @param password The password of your node
+     * @param region (not currently used) The voice region of your node
+     */
     @JvmOverloads
     fun addNode(name: String, address: URI, password: String, region: VoiceRegion = VoiceRegion.NONE): LavalinkNode {
         if (userId == -1L) {
@@ -65,6 +75,12 @@ class LavalinkClient: Closeable {
         return node
     }
 
+    /**
+     * Get or crate a link between a guild and a node.
+     *
+     * @param guildId The id of the guild
+     * @param region (not currently used) The target voice region of when to select a node
+     */
     @JvmOverloads
     fun getLink(guildId: Long, region: VoiceRegion = VoiceRegion.NONE): Link {
         if (nodes.isEmpty()) {
@@ -92,6 +108,9 @@ class LavalinkClient: Closeable {
         // TODO: do I need this?
     }
 
+    /**
+     * Close the client and disconnect all nodes.
+     */
     override fun close() {
 //        reconnectService.close()
         nodes.forEach { it.close() }

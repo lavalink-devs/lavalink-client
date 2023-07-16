@@ -26,12 +26,24 @@ class Link(
     /**
      * Retrieves a list of all players from the lavalink server.
      */
+    // Does it make sense to have getPlayers in the link?
     fun getPlayers() = node.getPlayers()
+
     /**
-     * Gets the player from the guild id. If the player is not cached, it will be retrieved from the server.
+     * Gets the player for this link. If the player is not cached, it will be retrieved from the server.
      */
     fun getPlayer() = node.getPlayer(guildId)
+
+    /**
+     * Destroys the player for this link.
+     */
     fun destroyPlayer() = node.destroyPlayer(guildId)
+
+    /**
+     * Load an item for the player.
+     *
+     * @param identifier The identifier (E.G. youtube url) to load.
+     */
     fun loadItem(identifier: String) = node.loadItem(identifier)
 
     override fun equals(other: Any?): Boolean {
