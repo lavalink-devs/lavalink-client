@@ -78,8 +78,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEve
     when (event.commandName) {
         "join" -> {
             val guild = event.interaction.guild.block()!!
-            val voiceState = guild.voiceStates
-                .blockFirst()!!
+            val voiceState = guild.voiceStates.blockFirst()!!
             val memberVoice = voiceState.channel.block()
 
             memberVoice?.sendConnectVoiceState(false, false)?.subscribe()
