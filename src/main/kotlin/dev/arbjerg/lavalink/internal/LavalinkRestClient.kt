@@ -17,8 +17,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 class LavalinkRestClient(val node: LavalinkNode) {
-    private val client = OkHttpClient()
-
     private val baseUrl = node.baseUri.replace("ws://", "http://")
         .replace("wss://", "https://")
 
@@ -63,7 +61,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
                 .get()
         )
 
-        return client.newCall(builder.build())
+        return node.httpClient.newCall(builder.build())
     }
 
     private inline fun <reified T> Call.toMono(): Mono<T> {
