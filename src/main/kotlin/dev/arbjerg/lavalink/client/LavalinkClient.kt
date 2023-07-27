@@ -1,6 +1,6 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.client.loadbalancing.DefaultLoadBalancer
+import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultLoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.internal.ReconnectTask
@@ -13,9 +13,9 @@ class LavalinkClient: Closeable {
     private val internalNodes = mutableListOf<LavalinkNode>()
     private val links = mutableMapOf<Long, Link>()
 
-    // Non mutable public list
+    // Immutable public list
     val nodes: List<LavalinkNode> = internalNodes
-    var userId: Long = -1
+    var userId: Long? = null
         set(value) {
             if (nodes.isNotEmpty()) {
                 throw IllegalStateException("Can't set userId if we already have nodes registered!")
@@ -28,12 +28,11 @@ class LavalinkClient: Closeable {
      * To determine the best node, we use a load balancer.
      * It is recommended to not change the load balancer after you've connected to a voice channel.
      */
+    @Suppress("MemberVisibilityCanBePrivate")
     var loadBalancer: ILoadBalancer = DefaultLoadBalancer(this)
 
     private val reconnectService = Executors.newSingleThreadScheduledExecutor {
-        val thread = Thread(it, "lavalink-reconnect-thread")
-        thread.isDaemon = true
-        thread
+        Thread(it, "lavalink-reconnect-thread").apply { isDaemon = true }
     }
 
     init {
@@ -61,7 +60,7 @@ class LavalinkClient: Closeable {
      */
     @JvmOverloads
     fun addNode(name: String, address: URI, password: String, region: VoiceRegion = VoiceRegion.NONE): LavalinkNode {
-        if (userId == -1L) {
+        if (userId == null) {
             throw IllegalStateException("User ID not set, please use LavalinkClient#setUserId(Long) to set it before adding nodes.")
         }
 
@@ -96,15 +95,15 @@ class LavalinkClient: Closeable {
         return links[guildId]!!
     }
 
-    fun onNodeDisconnected(node: LavalinkNode) {
+    internal fun onNodeDisconnected(node: LavalinkNode) {
         links.forEach { (_, link) ->
             if (link.node == node)  {
-                link.node = loadBalancer.determineBestSocketForRegion(node.region)
+                link.transferNode(loadBalancer.determineBestSocketForRegion(node.region))
             }
         }
     }
 
-    fun onNodeConnected(node: LavalinkNode) {
+    internal fun onNodeConnected(node: LavalinkNode) {
         // TODO: do I need this?
     }
 

@@ -88,8 +88,8 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(rest) }
-            // Update the player internally upon retrieving it.
             .doOnNext {
+                // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
             }
     }

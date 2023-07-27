@@ -1,11 +1,12 @@
-package dev.arbjerg.lavalink.client.loadbalancing
+package dev.arbjerg.lavalink.client.loadbalancing.builtin
 
 import dev.arbjerg.lavalink.client.LavalinkClient
 import dev.arbjerg.lavalink.client.LavalinkNode
-import dev.arbjerg.lavalink.client.loadbalancing.penaltyproviders.IPenaltyProvider
+import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
+import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 
 class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
-    val penaltyProviders = mutableListOf<IPenaltyProvider>()
+    private val penaltyProviders = mutableListOf<IPenaltyProvider>()
 
     // TODO: Why even do this LOL
     fun addPenaltyProvider(penaltyProvider: IPenaltyProvider) {
@@ -25,30 +26,16 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
 
         // Don't bother calculating penalties if we only have one node.
         if (nodes.size == 1) {
-            if (!nodes[0].available) {
+            val node = nodes.first()
+            if (!node.available) {
                 throw IllegalStateException("Node ${nodes[0].name} is unavailable!")
             }
 
-            return nodes[0]
+            return node
         }
 
-        var leastPenalty: LavalinkNode? = null
-        var record = Int.MAX_VALUE
-
-        nodes.forEach { node ->
-            val nodePenalties = node.penalties.calculateTotal() + penaltyProviders.sumOf { it.getPenalty(node, region) }
-
-            if (nodePenalties < record) {
-                leastPenalty = node
-                record = nodePenalties
-            }
-        }
-
-        if (leastPenalty == null || !leastPenalty!!.available) {
-            throw IllegalStateException("No available nodes!")
-        }
-
-        // Kotlin moment, I should probably properly learn kotlin and buy a book some day
-        return leastPenalty!!
+        return nodes.filter { it.available }.minByOrNull { node ->
+            node.penalties.calculateTotal() + penaltyProviders.sumOf { it.getPenalty(node, region) }
+        } ?: throw IllegalStateException("No available nodes!")
     }
 }

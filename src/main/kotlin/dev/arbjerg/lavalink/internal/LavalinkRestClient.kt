@@ -79,7 +79,6 @@ class LavalinkRestClient(val node: LavalinkNode) {
 
                 override fun onResponse(call: Call, response: Response) {
                     response.use { res ->
-
                         res.body?.use { body ->
                             if (res.code > 299) {
                                 val error = json.decodeFromString<Error>(body.string())
@@ -98,7 +97,6 @@ class LavalinkRestClient(val node: LavalinkNode) {
                             sink.success(parsed)
                         }
                     }
-
                 }
             })
         }
