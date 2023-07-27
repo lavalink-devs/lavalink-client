@@ -1,6 +1,6 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
+import dev.arbjerg.lavalink.client.loadbalancing.RegionFilter
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
@@ -17,7 +17,13 @@ import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
 import java.net.URI
 
-class LavalinkNode(val name: String, serverUri: URI, val password: String, val region: VoiceRegion, val lavalink: LavalinkClient) : Disposable, Closeable {
+class LavalinkNode(
+    val name: String,
+    serverUri: URI,
+    val password: String,
+    val regionFilter: RegionFilter?,
+    val lavalink: LavalinkClient
+) : Disposable, Closeable {
     // "safe" uri with all paths removed
     val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
 
@@ -135,7 +141,7 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
 
         if (name != other.name) return false
         if (password != other.password) return false
-        if (region != other.region) return false
+        if (regionFilter != other.regionFilter) return false
         if (baseUri != other.baseUri) return false
         if (sessionId != other.sessionId) return false
         return available == other.available
@@ -144,7 +150,7 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + password.hashCode()
-        result = 31 * result + region.hashCode()
+        result = 31 * result + regionFilter.hashCode()
         result = 31 * result + baseUri.hashCode()
         result = 31 * result + sessionId.hashCode()
         result = 31 * result + available.hashCode()

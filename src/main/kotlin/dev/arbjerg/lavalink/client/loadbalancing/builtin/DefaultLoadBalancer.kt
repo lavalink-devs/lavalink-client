@@ -21,7 +21,7 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
     //  Keep track of stuck tracks?
     //  Keep track of load failures? (LoadResult.NoMatches)
     //  Keep track of track exceptions?
-    override fun determineBestSocketForRegion(region: VoiceRegion): LavalinkNode {
+    override fun selectNode(region: VoiceRegion?): LavalinkNode {
         val nodes = client.nodes
 
         // Don't bother calculating penalties if we only have one node.
