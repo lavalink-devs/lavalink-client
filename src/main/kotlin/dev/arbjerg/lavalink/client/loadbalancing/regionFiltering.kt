@@ -16,4 +16,8 @@ enum class RegionFilterVerdict {
     BLOCK
 }
 
+// TODO
+//  - Class that has all discord voice servers
+//  - Voice servers are being grouped into regions
+//  - In case no exact server match it should look for the closest node in that same region
 data class VoiceRegion(val id: String, val name: String)

@@ -8,12 +8,11 @@ import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
     private val penaltyProviders = mutableListOf<IPenaltyProvider>()
 
-    // TODO: Why even do this LOL
-    fun addPenaltyProvider(penaltyProvider: IPenaltyProvider) {
+    override fun addPenaltyProvider(penaltyProvider: IPenaltyProvider) {
         penaltyProviders.add(penaltyProvider)
     }
 
-    fun removePenaltyProvider(penaltyProvider: IPenaltyProvider) {
+    override fun removePenaltyProvider(penaltyProvider: IPenaltyProvider) {
         penaltyProviders.remove(penaltyProvider)
     }
 

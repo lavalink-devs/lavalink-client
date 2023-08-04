@@ -21,6 +21,8 @@ fun main() {
         userIdFromToken(token)
     )
 
+    client.loadBalancer.
+
     JDABuilder.createDefault(token)
         .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
         .enableIntents(
