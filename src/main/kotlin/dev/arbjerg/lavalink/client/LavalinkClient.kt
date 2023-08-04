@@ -2,7 +2,7 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultLoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
-import dev.arbjerg.lavalink.client.loadbalancing.RegionFilter
+import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.internal.ReconnectTask
 import java.io.Closeable
@@ -52,10 +52,10 @@ class LavalinkClient(val userId: Long) : Closeable {
      * @param name The name of your node
      * @param address The ip and port of your node
      * @param password The password of your node
-     * @param region (not currently used) The voice region of your node
+     * @param regionFilter (not currently used) Allows you to limit your node to a specific discord voice region
      */
     @JvmOverloads
-    fun addNode(name: String, address: URI, password: String, regionFilter: RegionFilter? = null): LavalinkNode {
+    fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null): LavalinkNode {
         if (nodes.any { it.name == name }) {
             throw IllegalStateException("Node with name '$name' already exists")
         }
@@ -90,15 +90,11 @@ class LavalinkClient(val userId: Long) : Closeable {
         }
     }
 
-    internal fun onNodeConnected(node: LavalinkNode) {
-        // TODO: do I need this?
-    }
-
     /**
      * Close the client and disconnect all nodes.
      */
     override fun close() {
-//        reconnectService.close()
+        reconnectService.shutdown()
         nodes.forEach { it.close() }
     }
 }

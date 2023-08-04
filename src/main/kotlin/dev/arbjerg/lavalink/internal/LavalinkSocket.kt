@@ -31,7 +31,6 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     override fun onOpen(webSocket: WebSocket, response: Response) {
         logger.info("${node.name} has been connected!")
         node.available = true
-        node.lavalink.onNodeConnected(node)
         open = true
     }
 

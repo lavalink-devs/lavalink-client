@@ -1,4 +1,5 @@
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.ajoberstar.grgit.Grgit
 
 plugins {
     java
@@ -6,12 +7,14 @@ plugins {
     `maven-publish`
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.serialization") version "1.9.0"
+    id("org.ajoberstar.grgit") version "5.2.0"
 }
 
-val libVersion = "0.0.1"
+val (gitVersion, release) = versionFromGit()
+logger.lifecycle("Version: $gitVersion (release: $release)")
 
 group = "dev.arbjerg"
-version = "$libVersion${getSuffix()}"
+version = gitVersion
 val archivesBaseName = "lavalink-client"
 
 repositories {
@@ -89,11 +92,11 @@ val isSnapshot = System.getenv("SNAPSHOT") == "true"
 
 val mavenUrl: String
     get() {
-        if (isSnapshot) {
-            return "https://maven.arbjerg.dev/snapshots"
+        if (release) {
+            return "https://maven.arbjerg.dev/releases"
         }
 
-        return "https://maven.arbjerg.dev/releases"
+        return "https://maven.arbjerg.dev/snapshots"
     }
 
 publishing {
@@ -162,5 +165,20 @@ publish.apply {
 
     onlyIf {
         System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null
+    }
+}
+
+fun versionFromGit(): Pair<String, Boolean> {
+    Grgit.open(mapOf("currentDir" to project.rootDir)).use { git ->
+        val headTag = git.tag
+            .list()
+            .find { it.commit.id == git.head().id }
+
+        val clean = git.status().isClean || System.getenv("CI") != null
+        if (!clean) {
+            logger.lifecycle("Git state is dirty, version is a snapshot.")
+        }
+
+        return if (headTag != null && clean) headTag.name to true else "${git.head().id}-SNAPSHOT" to false
     }
 }

@@ -1,6 +1,6 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.client.loadbalancing.RegionFilter
+import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
@@ -22,7 +22,7 @@ class LavalinkNode(
     val name: String,
     serverUri: URI,
     val password: String,
-    val regionFilter: RegionFilter?,
+    val regionFilter: IRegionFilter?,
     val lavalink: LavalinkClient
 ) : Disposable, Closeable {
     // "safe" uri with all paths removed
