@@ -8,6 +8,7 @@ import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.Stats
+import okhttp3.OkHttpClient
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -23,6 +24,8 @@ class LavalinkNode(val name: String, serverUri: URI, val password: String, val r
 
     var sessionId: String? = null
         internal set
+
+    internal val httpClient = OkHttpClient()
 
     internal val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<Message.EmittedEvent> = sink.asFlux()

@@ -1,6 +1,5 @@
 package dev.arbjerg.lavalink.internal
 
-import com.neovisionaries.ws.client.WebSocketState
 import dev.arbjerg.lavalink.client.LavalinkClient
 import org.slf4j.LoggerFactory
 
@@ -14,8 +13,7 @@ class ReconnectTask(val lavalink: LavalinkClient) : Runnable {
         try {
             sockets.forEach { ws ->
                 if (
-                    !ws.socket!!.isOpen &&
-                    ws.socket!!.state != WebSocketState.CONNECTING &&
+                    !ws.open &&
                     System.currentTimeMillis() - ws.lastReconnectAttempt > ws.reconnectInterval &&
                     ws.mayReconnect
                 ) {
