@@ -1,3 +1,3 @@
 package dev.arbjerg.lavalink.internal
 
-const val TIMEOUT_MS = 5000
+internal const val TIMEOUT_MS = 5000

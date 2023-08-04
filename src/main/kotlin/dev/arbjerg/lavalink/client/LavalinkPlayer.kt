@@ -3,7 +3,6 @@ package dev.arbjerg.lavalink.client
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.protocol.v4.*
 
-// Represents a "link"
 class LavalinkPlayer(private val rest: LavalinkRestClient, protocolPlayer: Player) {
     val guildId = protocolPlayer.guildId.toLong()
     val track = protocolPlayer.track

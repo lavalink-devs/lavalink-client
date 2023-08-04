@@ -7,27 +7,10 @@ package dev.arbjerg.lavalink.client
  */
 class Link(
     val guildId: Long,
-    initialNode: LavalinkNode
+    node: LavalinkNode
 ) {
-    var node = initialNode
-        internal set(newNode) {
-            val player = node.getCachedPlayer(guildId)
-
-            if (player != null) {
-                PlayerUpdateBuilder(newNode.rest, guildId)
-                    .setVoiceState(player.voiceState)
-                    .asMono()
-                    .block()
-            }
-
-            field = newNode
-        }
-
-    /**
-     * Retrieves a list of all players from the lavalink server.
-     */
-    // Does it make sense to have getPlayers in the link?
-    fun getPlayers() = node.getPlayers()
+    var node = node
+        private set
 
     /**
      * Gets the player for this link. If the player is not cached, it will be retrieved from the server.
@@ -45,6 +28,19 @@ class Link(
      * @param identifier The identifier (E.G. youtube url) to load.
      */
     fun loadItem(identifier: String) = node.loadItem(identifier)
+
+    internal fun transferNode(newNode: LavalinkNode) {
+        val player = node.getCachedPlayer(guildId)
+
+        if (player != null) {
+            PlayerUpdateBuilder(newNode.rest, guildId)
+                .setVoiceState(player.voiceState)
+                .asMono()
+                .block()
+        }
+
+        node = newNode
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
