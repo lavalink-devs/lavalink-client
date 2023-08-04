@@ -2,12 +2,17 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     java
+    `java-library`
+    `maven-publish`
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.serialization") version "1.9.0"
 }
 
+val libVersion = "0.0.1"
+
 group = "dev.arbjerg"
-version = "0.0.1-SNAPSHOT"
+version = "$libVersion${getSuffix()}"
+val archivesBaseName = "lavalink-client"
 
 repositories {
     mavenCentral()
@@ -58,6 +63,11 @@ val generateKotlinSources = task<SourceTask>("generateKotlinSources") {
     dependsOn(sourcesForRelease)
 }
 
+val sourcesJar = task<Jar>("sourcesJar") {
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
+}
+
 tasks.compileJava {
     source = generateKotlinSources.source
     dependsOn(generateKotlinSources)
@@ -74,4 +84,84 @@ tasks.wrapper {
 
 kotlin {
     jvmToolchain(11)
+}
+
+val isSnapshot = System.getenv("SNAPSHOT") == "true"
+
+val mavenUrl: String
+    get() {
+        if (isSnapshot) {
+            return "https://maven.arbjerg.dev/snapshots"
+        }
+
+        return "https://maven.arbjerg.dev/releases"
+    }
+
+publishing {
+    repositories {
+        maven {
+            name = "arbjerg"
+            url = uri(mavenUrl)
+            credentials {
+                username = System.getenv("USERNAME")
+                password = System.getenv("PASSWORD")
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+    publications {
+        register<MavenPublication>("arbjerg") {
+            pom {
+                name.set(archivesBaseName)
+                description.set("Lavalink v4 client library")
+                url.set("https://github.com/duncte123/lavalink-client")
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://mit-license.org/")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("duncte123")
+                        name.set("Duncan Sterken")
+                        email.set("contact@duncte123.me")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/duncte123/lavalink-client.git")
+                    developerConnection.set("scm:git:ssh://git@github.com:duncte123/lavalink-client.git")
+                    url.set("https://github.com/duncte123/lavalink-client")
+                }
+            }
+
+            from(components["java"])
+
+            artifactId = archivesBaseName
+            groupId = project.group as String
+            version = project.version as String
+
+            artifact(sourcesJar)
+        }
+    }
+}
+
+fun getSuffix(): String {
+    if (isSnapshot) {
+        return "-SNAPSHOT_${System.getenv("GITHUB_RUN_NUMBER")}"
+    }
+
+    return ""
+}
+
+val publish: Task by tasks
+
+publish.apply {
+    dependsOn(tasks.build)
+
+    onlyIf {
+        System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null
+    }
 }
