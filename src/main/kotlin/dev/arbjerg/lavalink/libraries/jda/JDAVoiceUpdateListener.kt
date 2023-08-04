@@ -14,7 +14,7 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
             update.sessionId
         )
 
-        val region = VoiceRegion.fromEndpoint(update.endpoint)
+        val region = VoiceRegion(update.endpoint, update.endpoint)
         val node = lavalink.getLink(update.guildIdLong, region).node
 
         PlayerUpdateBuilder(node.rest, update.guildIdLong)

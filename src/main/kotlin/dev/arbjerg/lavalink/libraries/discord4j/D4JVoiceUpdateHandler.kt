@@ -45,7 +45,7 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
             getGatewayClient(update.shardInfo.index).get().sessionId
         )
 
-        val region = VoiceRegion.fromEndpoint(update.endpoint!!)
+        val region = VoiceRegion(update.endpoint!!, update.endpoint!!)
         val node = lavalink.getLink(update.guildId.asLong(), region).node
 
         PlayerUpdateBuilder(node.rest, update.guildId.asLong())

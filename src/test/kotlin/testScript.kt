@@ -16,9 +16,12 @@ import java.net.URI
 private const val COMMAND_GUILD_ID = 1082302532421943407L
 
 fun main() {
-    val client = LavalinkClient()
+    val token = System.getenv("BOT_TOKEN")
+    val client = LavalinkClient(
+        userIdFromToken(token)
+    )
 
-    JDABuilder.createDefault(System.getenv("BOT_TOKEN"))
+    JDABuilder.createDefault(token)
         .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
         .enableIntents(
             GatewayIntent.GUILD_VOICE_STATES,
@@ -31,7 +34,6 @@ fun main() {
                 if (event is SlashCommandInteractionEvent) {
                     handleSlash(client, event)
                 } else if (event is ReadyEvent) {
-                    client.userId = event.jda.selfUser.idLong
                     registerNode(client)
 
                     println("${event.jda.selfUser.asTag} is ready!")

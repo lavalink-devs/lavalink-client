@@ -14,14 +14,16 @@ import reactor.core.publisher.Mono
 import java.net.URI
 
 fun main() {
-    val client = LavalinkClient()
-    val discord = DiscordClientBuilder.create(System.getenv("BOT_TOKEN"))
+    val token = System.getenv("BOT_TOKEN")
+    val client = LavalinkClient(
+        userIdFromToken(token)
+    )
+    val discord = DiscordClientBuilder.create(token)
         .build()
         .gateway()
         .setEnabledIntents(IntentSet.nonPrivileged())
         .login().block()!!
 
-    client.userId = discord.selfId.asLong()
     registerNodeD4j(client)
 
     val appId = discord.restClient.applicationId.block()!!
