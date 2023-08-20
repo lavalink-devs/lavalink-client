@@ -33,7 +33,7 @@ class Link(
         val player = node.getCachedPlayer(guildId)
 
         if (player != null) {
-            PlayerUpdateBuilder(newNode.rest, guildId)
+            PlayerUpdateBuilder(newNode, guildId)
                 .setVoiceState(player.voiceState)
                 .asMono()
                 .block()

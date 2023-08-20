@@ -1,4 +1,5 @@
 @file:JvmName("D4JVoiceHandler")
+
 package dev.arbjerg.lavalink.libraries.discord4j
 
 import dev.arbjerg.lavalink.client.LavalinkClient
@@ -48,7 +49,7 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         val region = VoiceRegion(update.endpoint!!, update.endpoint!!)
         val node = lavalink.getLink(update.guildId.asLong(), region).node
 
-        PlayerUpdateBuilder(node.rest, update.guildId.asLong())
+        PlayerUpdateBuilder(node, update.guildId.asLong())
             .setVoiceState(state)
             .asMono()
     }.subscribe()

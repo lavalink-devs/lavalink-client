@@ -75,7 +75,7 @@ class LavalinkNode(
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.getPlayers()
-            .map { it.players.map { pl -> pl.toLavalinkPlayer(rest) } }
+            .map { it.players.map { pl -> pl.toLavalinkPlayer(this) } }
             .doOnNext {
                 it.forEach { player ->
                     playerCache[player.guildId] = player
@@ -96,7 +96,7 @@ class LavalinkNode(
         }
 
         return rest.getPlayer(guildId)
-            .map { it.toLavalinkPlayer(rest) }
+            .map { it.toLavalinkPlayer(this) }
             .doOnNext {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it

@@ -53,9 +53,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 val idLong = update.guildId.toLong()
 
                 if (idLong in node.playerCache) {
-                    val player = node.playerCache[idLong]!!
-
-                    player.state = update.state
+                    node.playerCache[idLong]!!.state = update.state
                 }
             }
 
