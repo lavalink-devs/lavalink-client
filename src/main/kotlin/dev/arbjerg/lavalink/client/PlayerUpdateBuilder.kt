@@ -8,7 +8,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 // TODO: where to put "noReplace"
-class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guildId: Long) {
+class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guildId: Long) : IUpdatablePlayer {
     private var encodedTrack: Omissible<String?> = Omissible.omitted()
     private var identifier: Omissible<String> = Omissible.omitted()
     private var position: Omissible<Long> = Omissible.omitted()
@@ -19,42 +19,52 @@ class PlayerUpdateBuilder(private val rest: LavalinkRestClient, private val guil
     private var state: Omissible<VoiceState> = Omissible.omitted()
     private var noReplace = false
 
-    fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
-        this.encodedTrack = encodedTrack.toOmissible()
+    override fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
+        this.encodedTrack = Omissible.Present(encodedTrack)
         return this
     }
 
-    fun setIdentifier(identifier: String?): PlayerUpdateBuilder {
+    override fun clearEncodedTrack(): PlayerUpdateBuilder {
+        this.encodedTrack = Omissible.omitted()
+        return this
+    }
+
+    override fun setIdentifier(identifier: String?): PlayerUpdateBuilder {
         this.identifier = identifier.toOmissible()
         return this
     }
 
-    fun setPosition(position: Long?): PlayerUpdateBuilder {
+    override fun setPosition(position: Long?): PlayerUpdateBuilder {
         this.position = position.toOmissible()
         return this
     }
 
-    fun setEndTime(endTime: Long?): PlayerUpdateBuilder {
-        this.endTime = endTime.toOmissible()
+    override fun setEndTime(endTime: Long?): PlayerUpdateBuilder {
+        this.endTime = Omissible.Present(endTime)
         return this
     }
 
-    fun setVolume(volume: Int): PlayerUpdateBuilder {
+    override fun clearEndTime(): PlayerUpdateBuilder {
+        this.endTime = Omissible.omitted()
+        return this
+    }
+
+    override fun setVolume(volume: Int): PlayerUpdateBuilder {
         this.volume = min(1000, max(0, volume)).toOmissible()
         return this
     }
 
-    fun setPaused(paused: Boolean): PlayerUpdateBuilder {
+    override fun setPaused(paused: Boolean): PlayerUpdateBuilder {
         this.paused = paused.toOmissible()
         return this
     }
 
-    fun setFilters(filters: Filters): PlayerUpdateBuilder {
+    override fun setFilters(filters: Filters): PlayerUpdateBuilder {
         this.filters = filters.toOmissible()
         return this
     }
 
-    fun setVoiceState(state: VoiceState): PlayerUpdateBuilder {
+    override fun setVoiceState(state: VoiceState): PlayerUpdateBuilder {
         this.state = state.toOmissible()
         return this
     }
