@@ -1,4 +1,5 @@
 import dev.arbjerg.lavalink.client.LavalinkClient
+import dev.arbjerg.lavalink.client.getUserIdFromToken
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import dev.arbjerg.lavalink.protocol.v4.Message
@@ -18,10 +19,8 @@ private const val COMMAND_GUILD_ID = 1082302532421943407L
 fun main() {
     val token = System.getenv("BOT_TOKEN")
     val client = LavalinkClient(
-        userIdFromToken(token)
+        getUserIdFromToken(token)
     )
-
-    client.loadBalancer.
 
     JDABuilder.createDefault(token)
         .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))

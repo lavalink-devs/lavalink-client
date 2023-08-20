@@ -1,4 +1,5 @@
 import dev.arbjerg.lavalink.client.LavalinkClient
+import dev.arbjerg.lavalink.client.getUserIdFromToken
 import dev.arbjerg.lavalink.libraries.discord4j.installVoiceHandler
 import dev.arbjerg.lavalink.libraries.discord4j.leave
 import dev.arbjerg.lavalink.protocol.v4.Message
@@ -16,7 +17,7 @@ import java.net.URI
 fun main() {
     val token = System.getenv("BOT_TOKEN")
     val client = LavalinkClient(
-        userIdFromToken(token)
+        getUserIdFromToken(token)
     )
     val discord = DiscordClientBuilder.create(token)
         .build()

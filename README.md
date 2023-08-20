@@ -6,12 +6,13 @@ Proposal for a v4 lavalink client
 Lavalink client ships with a voice interceptor for JDA
 
 ```java
+String botToken = System.getenv("BOT_TOKEN");
 LavalinkClient client = new LavalinkClient(
-    0000000:, // your bot's id, can also be set from the ready event.
+    Helpers.getUserIdFromToken(botToken)
 );
 
 
-JDABuilder.createDefault(System.getenv("BOT_TOKEN"))
+JDABuilder.createDefault(botToken)
     // .... your jda configuration
     .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
     // .... your jda configuration
@@ -24,15 +25,17 @@ then connect to vc as you would normally.
 Good luck
 
 ```java
-LavalinkClient client = new LavalinkClient();
-DiscordClient discord = DiscordClientBuilder.create(System.getenv("BOT_TOKEN"))
+String botToken = System.getenv("BOT_TOKEN");
+LavalinkClient client = new LavalinkClient(
+    Helpers.getUserIdFromToken(botToken)
+);
+        
+DiscordClient discord = DiscordClientBuilder.create(botToken)
     .build()
     .gateway()
     .setEnabledIntents(IntentSet.all())
     .login()
     .block();
-
-client.setUserId(discord.selfId.asLong());
 
 D4JVoiceHandler.install(discord, client);
 ```
