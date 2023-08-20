@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     // package libraries
-    api("dev.arbjerg.lavalink:protocol:004a8f873517e1bf7771585ec915b4360257acd2-SNAPSHOT")
+    api("dev.arbjerg.lavalink:protocol:0f59a5a981af0dfa13cb9f51145e077e8dd89e13-SNAPSHOT")
     api("com.squareup.okhttp3:okhttp:4.10.0")
     api("io.projectreactor:reactor-core:3.5.6")
     api("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")

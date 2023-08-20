@@ -14,8 +14,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import java.net.URI
 
-private const val COMMAND_GUILD_ID = 1082302532421943407L
-
 fun main() {
     val token = System.getenv("BOT_TOKEN")
     val client = LavalinkClient(
@@ -82,17 +80,21 @@ fun registerNode(client: LavalinkClient) {
         }
 }
 
+private fun joinHelper(event: SlashCommandInteractionEvent) {
+    val member = event.member!!
+    val memberVoice = member.voiceState!!
+
+    if (memberVoice.inAudioChannel()) {
+        event.jda.directAudioController.connect(memberVoice.channel!!)
+    }
+
+    event.reply("Joining your channel!").queue()
+}
+
 private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
     when (event.fullCommandName) {
         "join" -> {
-            val member = event.member!!
-            val memberVoice = member.voiceState!!
-
-            if (memberVoice.inAudioChannel()) {
-                event.jda.directAudioController.connect(memberVoice.channel!!)
-            }
-
-            event.reply("Joining your channel!").queue()
+            joinHelper(event)
         }
 
         "leave" -> {
@@ -103,50 +105,55 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
 
         "play" -> {
             if (!event.guild!!.selfMember.voiceState!!.inAudioChannel()) {
-                event.reply("Please make me join a voice channel first").queue()
-                return
+                joinHelper(event)
+            } else {
+                event.deferReply(false).queue()
             }
 
             val identifier = event.getOption("identifier")!!.asString
             val guildId = event.guild!!.idLong
             val link = lavalink.getLink(guildId)
 
-            event.deferReply(false).queue()
-
-            link.loadItem(identifier).subscribe { item ->
-                link.getPlayer().subscribe getPlayer@{ player ->
-                    when (item) {
-                        is LoadResult.TrackLoaded -> {
-                            player.setEncodedTrack(item.data.encoded)
-                                .asMono()
-                                .subscribe {
-                                    event.hook.sendMessage("Now playing ${item.data.info.title}!").queue()
-                                }
-                        }
-
-                        is LoadResult.LoadFailed -> {
-                            event.hook.sendMessage("Failed to load track! ${item.data.message}").queue()
-                        }
-                        is LoadResult.NoMatches -> {
-                            event.hook.sendMessage("No matches found for your input!").queue()
-                        }
-                        is LoadResult.PlaylistLoaded -> TODO()
-                        is LoadResult.SearchResult -> {
-                            if (item.data.tracks.isEmpty()) {
-                                event.hook.sendMessage("Nothing found").queue()
-                                return@getPlayer
+            link.loadItem(identifier).subscribe loadItem@ { item ->
+                when (item) {
+                    is LoadResult.TrackLoaded -> {
+                        link.createPlayer().setEncodedTrack(item.data.encoded)
+                            .asMono()
+                            .subscribe {
+                                event.hook.sendMessage("Now playing ${item.data.info.title}!").queue()
                             }
+                    }
 
-                            val track = item.data.tracks.first()
-
-                            player.setEncodedTrack(track.encoded)
-                                .asMono()
-                                .subscribe {
-                                    event.hook.sendMessage("Now playing ${track.info.title}!").queue()
-                                }
+                    is LoadResult.LoadFailed -> {
+                        event.hook.sendMessage("Failed to load track! ${item.data.message}").queue()
+                    }
+                    is LoadResult.NoMatches -> {
+                        event.hook.sendMessage("No matches found for your input!").queue()
+                    }
+                    is LoadResult.PlaylistLoaded -> {
+                        event.hook.sendMessage("IMPLEMENT PLAYLIST LOADED").queue()
+                    }
+                    is LoadResult.SearchResult -> {
+                        if (item.data.tracks.isEmpty()) {
+                            event.hook.sendMessage("Nothing found").queue()
+                            return@loadItem
                         }
+
+                        val track = item.data.tracks.first()
+
+                        link.createPlayer().setEncodedTrack(track.encoded)
+                            .asMono()
+                            .subscribe {
+                                event.hook.sendMessage("Now playing ${track.info.title}!").queue()
+                            }
                     }
                 }
+
+                /*link.getPlayer().subscribe( getPlayer@ { player ->
+
+                }) {
+                    event.hook.sendMessage("Failed to load track on player '${it.message}'").queue()
+                }*/
             }
         }
     }

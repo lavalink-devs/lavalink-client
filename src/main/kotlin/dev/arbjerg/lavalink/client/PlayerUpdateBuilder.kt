@@ -1,14 +1,12 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
 import reactor.core.publisher.Mono
 import kotlin.math.max
 import kotlin.math.min
 
-// TODO: where to put "noReplace"
-class PlayerUpdateBuilder(private val node: LavalinkNode, private val guildId: Long) : IUpdatablePlayer {
+class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : IUpdatablePlayer {
     private var encodedTrack: Omissible<String?> = Omissible.omitted()
     private var identifier: Omissible<String> = Omissible.omitted()
     private var position: Omissible<Long> = Omissible.omitted()
@@ -20,7 +18,7 @@ class PlayerUpdateBuilder(private val node: LavalinkNode, private val guildId: L
     private var noReplace = false
 
     override fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.Present(encodedTrack)
+        this.encodedTrack = Omissible.of(encodedTrack)
         return this
     }
 
@@ -40,7 +38,7 @@ class PlayerUpdateBuilder(private val node: LavalinkNode, private val guildId: L
     }
 
     override fun setEndTime(endTime: Long?): PlayerUpdateBuilder {
-        this.endTime = Omissible.Present(endTime)
+        this.endTime = Omissible.of(endTime)
         return this
     }
 
@@ -79,6 +77,12 @@ class PlayerUpdateBuilder(private val node: LavalinkNode, private val guildId: L
     )
 
     fun asMono(): Mono<LavalinkPlayer> {
+        /*val cachedPlayer = node.playerCache[guildId]
+
+        if ((cachedPlayer == null || !cachedPlayer.state.connected) && state is Omissible.Omitted) {
+            return Mono.error(IllegalStateException("Player is not connected to a voice channel."))
+        }*/
+
         return node.rest.updatePlayer(build(), guildId, noReplace)
             .map { it.toLavalinkPlayer(node) }
             .doOnNext {

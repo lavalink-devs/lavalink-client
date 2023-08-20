@@ -23,7 +23,7 @@ JDABuilder.createDefault(botToken)
     .build();
 ```
 
-then connect to vc as you would normally.
+then connect to vc by using the [direct audio controller](https://ci.dv8tion.net/job/JDA5/javadoc/net/dv8tion/jda/api/JDA.html#getDirectAudioController()). Using `Guild#getAudioManager()` will ***NOT*** work.
 
 ## Installation in discord4j
 Good luck

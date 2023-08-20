@@ -3,7 +3,6 @@
 package dev.arbjerg.lavalink.libraries.discord4j
 
 import dev.arbjerg.lavalink.client.LavalinkClient
-import dev.arbjerg.lavalink.client.PlayerUpdateBuilder
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import discord4j.core.GatewayDiscordClient
@@ -49,7 +48,7 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         val region = VoiceRegion(update.endpoint!!, update.endpoint!!)
         val node = lavalink.getLink(update.guildId.asLong(), region).node
 
-        PlayerUpdateBuilder(node, update.guildId.asLong())
+        node.createPlayer(update.guildId.asLong())
             .setVoiceState(state)
             .asMono()
     }.subscribe()
