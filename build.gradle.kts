@@ -17,6 +17,11 @@ group = "dev.arbjerg"
 version = gitVersion
 val archivesBaseName = "lavalink-client"
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 repositories {
     mavenCentral()
     maven("https://maven.arbjerg.dev/releases")
@@ -27,7 +32,7 @@ repositories {
 
 dependencies {
     // package libraries
-    api("dev.arbjerg.lavalink:protocol:0f59a5a981af0dfa13cb9f51145e077e8dd89e13-SNAPSHOT")
+    api("dev.arbjerg.lavalink:protocol:8a6c376407205e8208aa452c8b59443774c2e754-SNAPSHOT")
     api("com.squareup.okhttp3:okhttp:4.10.0")
     api("io.projectreactor:reactor-core:3.5.6")
     api("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
@@ -85,7 +90,7 @@ tasks.wrapper {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 val isSnapshot = System.getenv("SNAPSHOT") == "true"

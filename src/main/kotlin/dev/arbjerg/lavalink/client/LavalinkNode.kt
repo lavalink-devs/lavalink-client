@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
+import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
 import java.net.URI
@@ -88,19 +89,33 @@ class LavalinkNode(
      *
      * @param guildId The guild id of the player.
      */
-    fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
-        if (!available) return Mono.error(IllegalStateException("Node is not available"))
-
-        if (guildId in playerCache) {
-            return playerCache[guildId].toMono()
+    fun getPlayer(guildId: Long): Mono<LavalinkPlayer> = Mono.create { sink ->
+        if (!available) {
+            sink.error(IllegalStateException("Node is not available"))
+            return@create
         }
 
-        return rest.getPlayer(guildId)
+        if (guildId in playerCache) {
+            sink.success(playerCache[guildId])
+            return@create
+        }
+
+        rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
-            .doOnNext {
+            .doOnSuccess {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
             }
+            .doOnError {
+                createPlayer(guildId)
+                    .asMono()
+                    .doOnSuccess {
+                        // Update the player internally upon retrieving it.
+                        playerCache[it.guildId] = it
+                    }
+                    .subscribe(sink::success)
+            }
+            .subscribe(sink::success)
     }
 
     fun createPlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)

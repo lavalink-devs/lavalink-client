@@ -79,7 +79,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     fun asMono(): Mono<LavalinkPlayer> {
         /*val cachedPlayer = node.playerCache[guildId]
 
-        if ((cachedPlayer == null || !cachedPlayer.state.connected) && state is Omissible.Omitted) {
+        if ((cachedPlayer == null || !cachedPlayer.state.connected) && state.isOmitted()) {
             return Mono.error(IllegalStateException("Player is not connected to a voice channel."))
         }*/
 
