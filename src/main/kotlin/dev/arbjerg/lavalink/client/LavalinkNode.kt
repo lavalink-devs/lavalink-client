@@ -104,7 +104,7 @@ class LavalinkNode(
             }
     }
 
-    fun createPlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
+    fun updatePlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
 
     /**
      * Destroy a player.

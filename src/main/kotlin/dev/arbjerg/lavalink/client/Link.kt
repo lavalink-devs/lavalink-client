@@ -22,7 +22,10 @@ class Link(
      */
     fun destroyPlayer() = node.destroyPlayer(guildId)
 
-    fun createPlayer() = node.createPlayer(guildId)
+    /**
+     * Updates the player for this link and creates it if it doesn't exist.
+     */
+    fun updatePlayer() = node.updatePlayer(guildId)
 
     /**
      * Load an item for the player.
@@ -35,7 +38,7 @@ class Link(
         val player = node.getCachedPlayer(guildId)
 
         if (player != null) {
-            newNode.createPlayer(guildId)
+            newNode.updatePlayer(guildId)
                 .setVoiceState(player.voiceState)
                 .asMono()
                 .block()
