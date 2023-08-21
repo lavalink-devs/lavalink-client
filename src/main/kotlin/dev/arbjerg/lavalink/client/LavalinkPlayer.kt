@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.protocol.v4.Filters
 import dev.arbjerg.lavalink.protocol.v4.Player
 import dev.arbjerg.lavalink.protocol.v4.PlayerState
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import kotlin.math.min
 
 class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : IUpdatablePlayer {
     val guildId = protocolPlayer.guildId.toLong()
@@ -11,7 +12,7 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
     /**
      * Gets the current track that is playing on the player.
      *
-     * To get the current position of the track, use [state]
+     * To get the current position of the track, use [position].
      */
     val track = protocolPlayer.track
     val volume = protocolPlayer.volume
@@ -25,6 +26,15 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
         internal set
     val voiceState = protocolPlayer.voice
     val filters = protocolPlayer.filters
+
+    val position: Long
+        get() {
+            return when {
+                track == null -> 0
+                paused -> state.position
+                else -> min(state.position + (System.currentTimeMillis() - state.time), track.info.length)
+            }
+        }
 
     override fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(node, guildId)
         .setEncodedTrack(encodedTrack)
