@@ -89,33 +89,19 @@ class LavalinkNode(
      *
      * @param guildId The guild id of the player.
      */
-    fun getPlayer(guildId: Long): Mono<LavalinkPlayer> = Mono.create { sink ->
-        if (!available) {
-            sink.error(IllegalStateException("Node is not available"))
-            return@create
-        }
+    fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         if (guildId in playerCache) {
-            sink.success(playerCache[guildId])
-            return@create
+            return playerCache[guildId].toMono()
         }
 
-        rest.getPlayer(guildId)
+        return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
-            .doOnSuccess {
+            .doOnNext {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
             }
-            .doOnError {
-                createPlayer(guildId)
-                    .asMono()
-                    .doOnSuccess {
-                        // Update the player internally upon retrieving it.
-                        playerCache[it.guildId] = it
-                    }
-                    .subscribe(sink::success)
-            }
-            .subscribe(sink::success)
     }
 
     fun createPlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
