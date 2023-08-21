@@ -23,7 +23,7 @@ class Link(
     fun destroyPlayer() = node.destroyPlayer(guildId)
 
     /**
-     * Updates the player for this link and creates it if it doesn't exist.
+     * Updates the player for this link. If no player exists yet it will be created.
      */
     fun updatePlayer() = node.updatePlayer(guildId)
 
