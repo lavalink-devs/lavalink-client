@@ -1,12 +1,10 @@
-import dev.arbjerg.lavalink.client.LavalinkClient
-import dev.arbjerg.lavalink.client.getUserIdFromToken
+import dev.arbjerg.lavalink.client.*
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
-import dev.arbjerg.lavalink.protocol.v4.Message
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.events.session.ReadyEvent
+import net.dv8tion.jda.api.events.session.ReadyEvent as JDAReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
@@ -20,6 +18,16 @@ fun main() {
         getUserIdFromToken(token)
     )
 
+    client.on<ReadyEvent>()
+        .subscribe { (node, event) ->
+            println("Node '${node.name}' is ready, session id is '${event.sessionId}'!")
+        }
+
+    client.on<StatsEvent>()
+        .subscribe { (node, event) ->
+            println("Node '${node.name}' has stats, current players: ${event.playingPlayers}")
+        }
+
     JDABuilder.createDefault(token)
         .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
         .enableIntents(
@@ -32,7 +40,7 @@ fun main() {
             override fun onEvent(event: GenericEvent) {
                 if (event is SlashCommandInteractionEvent) {
                     handleSlash(client, event)
-                } else if (event is ReadyEvent) {
+                } else if (event is JDAReadyEvent) {
                     registerNode(client)
 
                     println("${event.jda.selfUser.asTag} is ready!")
@@ -71,11 +79,11 @@ fun registerNode(client: LavalinkClient) {
         )*/
     )
         .forEach { node ->
-            node.on<Message.EmittedEvent.TrackStartEvent>()
-                .next()
-                .subscribe {
+            node.on<TrackStartEvent>()
+                // .next() // Adding next turns this into a 'once' listener.
+                .subscribe { (node, event) ->
                     // A new track is started!
-                    println("${node.name}: track started: ${it.track.info}")
+                    println("${node.name}: track started: ${event.track.info}")
                 }
         }
 }
