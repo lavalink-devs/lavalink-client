@@ -1,8 +1,7 @@
 import dev.arbjerg.lavalink.client.LavalinkClient
+import dev.arbjerg.lavalink.client.TrackStartEvent
 import dev.arbjerg.lavalink.client.getUserIdFromToken
 import dev.arbjerg.lavalink.libraries.discord4j.installVoiceHandler
-import dev.arbjerg.lavalink.libraries.discord4j.leave
-import dev.arbjerg.lavalink.protocol.v4.Message
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
@@ -68,12 +67,12 @@ fun registerNodeD4j(client: LavalinkClient) {
         URI.create("ws://localhost:2333"),
         "youshallnotpass"
     )
-    node.on<Message.EmittedEvent.TrackStartEvent>()
+    node.on<TrackStartEvent>()
         .next()
-        .subscribe {
+        .subscribe {(_, event) ->
             // A new track is started!
             println("A new track is started!")
-            println(it.track.info)
+            println(event.track.info)
         }
 }
 

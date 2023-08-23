@@ -33,11 +33,11 @@ class LavalinkNode(
 
     internal val httpClient = OkHttpClient()
 
-    internal val sink: Many<Message.EmittedEvent> = Sinks.many().multicast().onBackpressureBuffer()
-    val flux: Flux<Message.EmittedEvent> = sink.asFlux()
+    internal val sink: Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
+    val flux: Flux<ClientEvent<*>> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()
 
-    val rest = LavalinkRestClient(this)
+    internal val rest = LavalinkRestClient(this)
     val ws = LavalinkSocket(this)
 
     // Stuff for load balancing
@@ -62,11 +62,11 @@ class LavalinkNode(
     }
 
     // For the java people
-    fun <T : Message.EmittedEvent> on(type: Class<T>): Flux<T> {
+    fun <T : ClientEvent<*>> on(type: Class<T>): Flux<T> {
         return flux.ofType(type)
     }
 
-    inline fun <reified T : Message.EmittedEvent> on() = on(T::class.java)
+    inline fun <reified T : ClientEvent<*>> on() = on(T::class.java)
 
     /**
      * Retrieves a list of all players from the lavalink server.
@@ -97,7 +97,8 @@ class LavalinkNode(
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
-            .doOnNext {
+            .onErrorResume { createPlayer(guildId).asMono() }
+            .doOnSuccess {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
             }

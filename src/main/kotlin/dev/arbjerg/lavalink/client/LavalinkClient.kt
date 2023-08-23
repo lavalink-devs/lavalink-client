@@ -5,6 +5,10 @@ import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.internal.ReconnectTask
+import dev.arbjerg.lavalink.protocol.v4.Message
+import reactor.core.Disposable
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Sinks
 import java.io.Closeable
 import java.net.URI
 import java.util.concurrent.Executors
@@ -13,12 +17,17 @@ import java.util.concurrent.TimeUnit
 /**
  * @param userId ID of the bot for authenticating with Discord
  */
-class LavalinkClient(val userId: Long) : Closeable {
+class LavalinkClient(val userId: Long) : Closeable, Disposable {
     private val internalNodes = mutableListOf<LavalinkNode>()
     private val links = mutableMapOf<Long, Link>()
 
     // Immutable public list
     val nodes: List<LavalinkNode> = internalNodes
+
+    // Events forwarded from all nodes.
+    internal val sink: Sinks.Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
+    val flux: Flux<ClientEvent<*>> = sink.asFlux()
+    private val reference: Disposable = flux.subscribe()
 
     /**
      * To determine the best node, we use a load balancer.
@@ -32,7 +41,7 @@ class LavalinkClient(val userId: Long) : Closeable {
     }
 
     init {
-        reconnectService.scheduleWithFixedDelay(ReconnectTask(this), 0, 500, TimeUnit.MILLISECONDS);
+        reconnectService.scheduleWithFixedDelay(ReconnectTask(this), 0, 500, TimeUnit.MILLISECONDS)
 
         // TODO: replace this with a better system, this is just to have something that works for now
         reconnectService.scheduleAtFixedRate(
@@ -63,6 +72,8 @@ class LavalinkClient(val userId: Long) : Closeable {
         val node = LavalinkNode(name, address, password, regionFilter, this)
         internalNodes.add(node)
 
+        listenForNodeEvent(node)
+
         return node
     }
 
@@ -90,11 +101,34 @@ class LavalinkClient(val userId: Long) : Closeable {
         }
     }
 
+    // For the java people
+    fun <T : ClientEvent<*>> on(type: Class<T>): Flux<T> {
+        return flux.ofType(type)
+    }
+
+    inline fun <reified T : ClientEvent<*>> on() = on(T::class.java)
+
     /**
      * Close the client and disconnect all nodes.
      */
     override fun close() {
         reconnectService.shutdown()
+        reference.dispose()
         nodes.forEach { it.close() }
+    }
+
+    override fun dispose() {
+        close()
+    }
+
+    private fun listenForNodeEvent(node: LavalinkNode) {
+        node.on<ClientEvent<Message>>()
+            .subscribe {
+                try {
+                    sink.tryEmitNext(it)
+                } catch (e: Exception) {
+                    sink.tryEmitError(e)
+                }
+            }
     }
 }

@@ -2,6 +2,7 @@ package dev.arbjerg.lavalink.internal
 
 import dev.arbjerg.lavalink.Version
 import dev.arbjerg.lavalink.client.LavalinkNode
+import dev.arbjerg.lavalink.client.toClientEvent
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
 import okhttp3.Request
@@ -58,19 +59,19 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             }
 
             Message.Op.Event -> {
-                try {
-                    val eventTyped = event as Message.EmittedEvent
-
-                    node.penalties.handleTrackEvent(eventTyped)
-                    node.sink.tryEmitNext(eventTyped)
-                } catch (e: Exception) {
-                    node.sink.tryEmitError(e)
-                }
+                node.penalties.handleTrackEvent(event as Message.EmittedEvent)
             }
 
             else -> {
                 logger.error("Unknown WS message on ${node.name}, please report the following information to the devs: $text")
             }
+        }
+
+        // Handle user listeners when the lib has handled its own events.
+        try {
+            node.sink.tryEmitNext(event.toClientEvent(node))
+        } catch (e: Exception) {
+            node.sink.tryEmitError(e)
         }
     }
 
