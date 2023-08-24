@@ -85,6 +85,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        node.lavalink.onNodeDisconnected(node)
+
         when(t) {
             is EOFException -> {
                 logger.error("Got disconnected from ${node.name}, trying to reconnect", t)
