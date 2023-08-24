@@ -13,8 +13,15 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
             update.sessionId
         )
 
-        val region = VoiceRegion(update.endpoint, update.endpoint)
+        println(update.toData())
+
+        val region = VoiceRegion.fromEndpoint(update.endpoint)
+
+        println(region)
+
         val node = lavalink.getLink(update.guildIdLong, region).node
+
+        println(node.name)
 
         node.createOrUpdatePlayer(update.guildIdLong)
             .setVoiceState(state)
@@ -24,7 +31,7 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
 
     override fun onVoiceStateUpdate(update: VoiceDispatchInterceptor.VoiceStateUpdate): Boolean {
         val channel = update.channel
-        val link = lavalink.getLink(update.guildIdLong)
+        val link = lavalink.getLinkIfCached(update.guildIdLong) ?: return false
         val player = link.node.playerCache[update.guildIdLong] ?: return false
         val playerState = player.state
 

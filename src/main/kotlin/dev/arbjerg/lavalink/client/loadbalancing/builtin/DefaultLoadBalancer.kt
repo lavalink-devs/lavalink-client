@@ -33,6 +33,7 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
             return node
         }
 
+        // TODO: This number system is shit, it's way too easy to get an overflow
         return nodes.filter { it.available }.minByOrNull { node ->
             node.penalties.calculateTotal() + penaltyProviders.sumOf { it.getPenalty(node, region) }
         } ?: throw IllegalStateException("No available nodes!")

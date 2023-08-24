@@ -27,7 +27,7 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         val update = event.current
         if (update.userId != update.client.selfId) return@on Mono.empty()
         val channel = update.channelId.getOrNull()
-        val link = lavalink.getLink(update.guildId.asLong())
+        val link = lavalink.getLinkIfCached(update.guildId.asLong()) ?: return@on Mono.empty()
         val player = link.node.playerCache[update.guildId.asLong()] ?: return@on Mono.empty()
         val playerState = player.state
 
@@ -45,7 +45,7 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
             getGatewayClient(update.shardInfo.index).get().sessionId
         )
 
-        val region = VoiceRegion(update.endpoint!!, update.endpoint!!)
+        val region = VoiceRegion.fromEndpoint(update.endpoint!!)
         val node = lavalink.getLink(update.guildId.asLong(), region).node
 
         node.createOrUpdatePlayer(update.guildId.asLong())

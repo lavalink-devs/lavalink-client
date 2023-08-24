@@ -93,6 +93,12 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         return links[guildId]!!
     }
 
+    /**
+     * Returns a [Link] if it exists in teh cache.
+     * If we select a region for voice updates we don't have a region to select.
+     */
+    internal fun getLinkIfCached(guildId: Long): Link? = links[guildId]
+
     internal fun onNodeDisconnected(node: LavalinkNode) {
         links.forEach { (_, link) ->
             if (link.node == node)  {

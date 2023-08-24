@@ -1,4 +1,6 @@
 import dev.arbjerg.lavalink.client.*
+import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup
+import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import net.dv8tion.jda.api.JDABuilder
@@ -18,6 +20,8 @@ fun main() {
         getUserIdFromToken(token)
     )
 
+    client.loadBalancer.addPenaltyProvider(VoiceRegionPenaltyProvider())
+
     client.on<ReadyEvent>()
         .subscribe { (node, event) ->
             println("Node '${node.name}' is ready, session id is '${event.sessionId}'!")
@@ -25,7 +29,7 @@ fun main() {
 
     client.on<StatsEvent>()
         .subscribe { (node, event) ->
-            println("Node '${node.name}' has stats, current players: ${event.playingPlayers}")
+            println("Node '${node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
         }
 
     JDABuilder.createDefault(token)
@@ -69,14 +73,16 @@ fun registerNode(client: LavalinkClient) {
         client.addNode(
             "Testnode",
             URI.create("ws://localhost:2333"),
-            "youshallnotpass"
+            "youshallnotpass",
+            RegionGroup.EUROPE
         ),
 
-        /*client.addNode(
+        client.addNode(
             "Mac-mini",
             URI.create("ws://192.168.1.139:2333/bepis"),
-            "youshallnotpass"
-        )*/
+            "youshallnotpass",
+            RegionGroup.US
+        )
     )
         .forEach { node ->
             node.on<TrackStartEvent>()
@@ -156,12 +162,6 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
                             }
                     }
                 }
-
-                /*link.getPlayer().subscribe( getPlayer@ { player ->
-
-                }) {
-                    event.hook.sendMessage("Failed to load track on player '${it.message}'").queue()
-                }*/
             }
         }
     }
