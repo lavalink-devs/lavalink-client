@@ -43,7 +43,7 @@ fun main() {
                 } else if (event is JDAReadyEvent) {
                     registerNode(client)
 
-                    println("${event.jda.selfUser.name} is ready!")
+                    println("${event.jda.selfUser.asTag} is ready!")
                     event.jda.updateCommands()
                         .addCommands(
                             Commands.slash("join", "Join the voice channel you are in."),

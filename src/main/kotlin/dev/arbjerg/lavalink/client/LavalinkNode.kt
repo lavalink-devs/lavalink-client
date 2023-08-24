@@ -97,7 +97,7 @@ class LavalinkNode(
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
-            .onErrorResume { createPlayer(guildId).asMono() }
+            .onErrorResume { createOrUpdatePlayer(guildId).asMono() }
             .doOnSuccess {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
