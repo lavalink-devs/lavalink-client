@@ -11,6 +11,8 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.slf4j.LoggerFactory
 import java.io.Closeable
+import java.io.EOFException
+import java.net.ConnectException
 
 class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Closeable {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
@@ -33,6 +35,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         logger.info("${node.name} has been connected!")
         node.available = true
         open = true
+        reconnectsAttempted = 0
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -82,7 +85,21 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        logger.error("Unknown error on ${node.name}", t)
+        when(t) {
+            is EOFException -> {
+                logger.error("Got disconnected from ${node.name}, trying to reconnect", t)
+                node.available = false
+                open = false
+            }
+
+            is ConnectException -> {
+                logger.error("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds", t)
+            }
+
+            else -> {
+                logger.error("Unknown error on ${node.name}", t)
+            }
+        }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -128,12 +145,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             }
             .build()
 
-        try {
-            socket = node.httpClient.newWebSocket(request, this)
-            reconnectsAttempted = 0
-        } catch (e: Exception) {
-            logger.error("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds", e)
-        }
+        socket = node.httpClient.newWebSocket(request, this)
     }
 
     override fun close() {
