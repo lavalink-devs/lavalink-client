@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
-import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
 import java.net.URI
@@ -98,14 +97,14 @@ class LavalinkNode(
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
-            .onErrorResume { createPlayer(guildId).asMono() }
+            .onErrorResume { createOrUpdatePlayer(guildId).asMono() }
             .doOnSuccess {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
             }
     }
 
-    fun createPlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
+    fun createOrUpdatePlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
 
     /**
      * Destroy a player.

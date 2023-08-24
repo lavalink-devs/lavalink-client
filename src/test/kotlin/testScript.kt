@@ -125,7 +125,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
             link.loadItem(identifier).subscribe loadItem@ { item ->
                 when (item) {
                     is LoadResult.TrackLoaded -> {
-                        link.createPlayer().setEncodedTrack(item.data.encoded)
+                        link.createOrUpdatePlayer().setEncodedTrack(item.data.encoded)
                             .asMono()
                             .subscribe {
                                 event.hook.sendMessage("Now playing ${item.data.info.title}!").queue()
@@ -149,7 +149,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
 
                         val track = item.data.tracks.first()
 
-                        link.createPlayer().setEncodedTrack(track.encoded)
+                        link.createOrUpdatePlayer().setEncodedTrack(track.encoded)
                             .asMono()
                             .subscribe {
                                 event.hook.sendMessage("Now playing ${track.info.title}!").queue()
