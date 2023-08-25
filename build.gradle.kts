@@ -50,7 +50,7 @@ dependencies {
 
 val sourcesForRelease = task<Copy>("sourcesForRelease") {
     from("src/main/kotlin") {
-        include("**/Version.java")
+        include("**/LLClientInfo.java")
 
         filter<ReplaceTokens>(mapOf("tokens" to mapOf(
             "gradle_plugin_ver_to_annoy_schlaudbibus" to project.version

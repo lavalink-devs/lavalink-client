@@ -1,6 +1,6 @@
 package dev.arbjerg.lavalink.internal
 
-import dev.arbjerg.lavalink.Version
+import dev.arbjerg.lavalink.LLClientInfo
 import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.toClientEvent
 import dev.arbjerg.lavalink.protocol.v4.Message
@@ -138,7 +138,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         val request = Request.Builder()
             .url("${node.baseUri}/websocket")
             .addHeader("Authorization", node.password)
-            .addHeader("Client-Name", "Lavalink-Client/${Version.VERSION}")
+            .addHeader("Client-Name", "Lavalink-Client/${LLClientInfo.VERSION}")
             .addHeader("User-Id", node.lavalink.userId.toString())
             .apply {
                 if (node.sessionId != null) {
