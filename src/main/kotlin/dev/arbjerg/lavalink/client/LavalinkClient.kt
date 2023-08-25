@@ -25,7 +25,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     val nodes: List<LavalinkNode> = internalNodes
 
     // Events forwarded from all nodes.
-    internal val sink: Sinks.Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
+    private val sink: Sinks.Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<ClientEvent<*>> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()
 
@@ -42,15 +42,6 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
 
     init {
         reconnectService.scheduleWithFixedDelay(ReconnectTask(this), 0, 500, TimeUnit.MILLISECONDS)
-
-        // TODO: replace this with a better system, this is just to have something that works for now
-        reconnectService.scheduleAtFixedRate(
-            {
-                internalNodes.forEach { node ->
-                    node.penalties.clearStats()
-                }
-            }, 1, 1, TimeUnit.MINUTES
-        )
     }
 
     // TODO: configure resuming

@@ -63,7 +63,7 @@ val sourcesForRelease = task<Copy>("sourcesForRelease") {
 
 val generateKotlinSources = task<SourceTask>("generateKotlinSources") {
     val javaSources = sourceSets["main"].allSource.filter {
-        it.name != "Version.java"
+        it.name != "LLClientInfo.java"
     }.asFileTree
 
     source = javaSources + fileTree(sourcesForRelease.destinationDir)

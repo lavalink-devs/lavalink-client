@@ -12,31 +12,27 @@ import kotlin.math.pow
 // Tracks stuck per minute
 // Track exceptions per minute
 // loads failed per minute
-data class Penalties(
-    val node: LavalinkNode,
-    var tracksStuck: Int = 0,
-    var trackExceptions: Int = 0,
-    var loadsFailed: Int = 0,
-    var loadsAttempted: Int = 0
-) {
+data class Penalties(val node: LavalinkNode) {
+    private val metricService = MetricService()
+
     fun handleTrackEvent(event: Message.EmittedEvent) {
         when (event) {
             is Message.EmittedEvent.TrackStartEvent -> {
-                loadsAttempted++
+                metricService.trackMetric(MetricType.LOAD_ATTEMPT)
             }
 
             is Message.EmittedEvent.TrackEndEvent -> {
                 if (event.reason == Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason.LOAD_FAILED) {
-                    loadsFailed++
+                    metricService.trackMetric(MetricType.LOAD_FAILED)
                 }
             }
 
             is Message.EmittedEvent.TrackExceptionEvent -> {
-                trackExceptions++
+                metricService.trackMetric(MetricType.TRACK_EXCEPTION)
             }
 
             is Message.EmittedEvent.TrackStuckEvent -> {
-                tracksStuck++
+                metricService.trackMetric(MetricType.TRACK_STUCK)
             }
 
             else -> {
@@ -45,19 +41,16 @@ data class Penalties(
         }
     }
 
-    internal fun clearStats() {
-        loadsAttempted = 0
-        loadsFailed = 0
-        trackExceptions = 0
-        tracksStuck = 0
-    }
-
     fun calculateTotal(): Int {
         val stats = node.stats
 
         if (!node.available || stats == null) {
             return Int.MAX_VALUE - 1
         }
+
+        val metrics = metricService.getCurrentMetrics()
+        val loadsAttempted = metrics[MetricType.LOAD_ATTEMPT] ?: 0
+        val loadsFailed = metrics[MetricType.LOAD_FAILED] ?: 0
 
         // When the node fails to load anything, we consider it to have the highest penalty
         if (loadsAttempted > 0 && loadsAttempted == loadsFailed) {
@@ -76,12 +69,15 @@ data class Penalties(
         var nullFramePenalty = 0
 
         // frame stats are per minute.
-        // -1 or null Means we don't have any frame stats. This is normal for very young nodes
+        // -1 or null means we don't have any frame stats. This is normal for very young nodes
         if (frames != null && frames.deficit != -1) {
             deficitFramePenalty = ( 1.03f.pow(500f * (frames.deficit / 3000f)) * 600 - 600 ).toInt()
             nullFramePenalty = ( 1.03f.pow(500f * (frames.nulled / 3000f)) * 600 - 600 ).toInt()
             nullFramePenalty *= 2
         }
+
+        val tracksStuck = metrics[MetricType.TRACK_STUCK] ?: 0
+        val trackExceptions = metrics[MetricType.TRACK_EXCEPTION] ?: 0
 
         // This is where we differ from the original client, penalties for failures.
         val trackStuckPenalty = tracksStuck * 100 - 100
