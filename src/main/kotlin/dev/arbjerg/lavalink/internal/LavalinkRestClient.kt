@@ -54,6 +54,25 @@ class LavalinkRestClient(val node: LavalinkNode) {
         }.toMono()
     }
 
+    fun decodeTrack(encoded: String): Mono<Track> {
+        return newRequest {
+            url("$baseUrl/decodetrack?encodedTrack=$encoded")
+        }.toMono()
+    }
+
+    fun decodeTracks(encoded: List<String>): Mono<Tracks> {
+        return newRequest {
+            url("$baseUrl/decodetracks")
+            post(json.encodeToString(encoded).toRequestBody("application/json".toMediaType()))
+        }.toMono()
+    }
+
+    fun getNodeInfo(): Mono<Info> {
+        return newRequest {
+            url("$baseUrl/info")
+        }.toMono()
+    }
+
     private fun newRequest(configure: Request.Builder.() -> Request.Builder): Call {
         val builder = configure(
             Request.Builder()

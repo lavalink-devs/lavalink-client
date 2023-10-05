@@ -5,9 +5,7 @@ import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
-import dev.arbjerg.lavalink.protocol.v4.LoadResult
-import dev.arbjerg.lavalink.protocol.v4.Message
-import dev.arbjerg.lavalink.protocol.v4.Stats
+import dev.arbjerg.lavalink.protocol.v4.*
 import okhttp3.OkHttpClient
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
@@ -129,6 +127,30 @@ class LavalinkNode(
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.loadItem(identifier)
+    }
+
+    /**
+     * Uses the node to decode a base64 encoded track.
+     */
+    fun decodeTrack(encoded: String): Mono<Track> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
+        return rest.decodeTrack(encoded)
+    }
+
+    /**
+     * Uses the node to decode a list of base64 encoded tracks.
+     */
+    fun decodeTracks(encoded: List<String>): Mono<Tracks> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
+        return rest.decodeTracks(encoded)
+    }
+
+    fun getNodeInfo(): Mono<Info> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
+        return rest.getNodeInfo()
     }
 
     internal fun getCachedPlayer(guildId: Long): LavalinkPlayer? {
