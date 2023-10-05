@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.internal.loadbalancing
 
 import dev.arbjerg.lavalink.client.LavalinkNode
+import dev.arbjerg.lavalink.client.loadbalancing.MAX_ERROR
 import dev.arbjerg.lavalink.protocol.v4.Message
 import kotlin.math.pow
 
@@ -45,7 +46,7 @@ data class Penalties(val node: LavalinkNode) {
         val stats = node.stats
 
         if (!node.available || stats == null) {
-            return Int.MAX_VALUE - 1
+            return MAX_ERROR
         }
 
         val metrics = metricService.getCurrentMetrics()
@@ -54,7 +55,7 @@ data class Penalties(val node: LavalinkNode) {
 
         // When the node fails to load anything, we consider it to have the highest penalty
         if (loadsAttempted > 0 && loadsAttempted == loadsFailed) {
-            return Int.MAX_VALUE - 1
+            return MAX_ERROR
         }
 
         // The way we calculate penalties is heavily based on the original Lavalink client.

@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 
+// TODO: https://medium.com/javarevisited/load-balancing-algorithms-that-can-be-used-in-java-applications-6f605d1bf19
 class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
     private val penaltyProviders = mutableListOf<IPenaltyProvider>()
 
@@ -26,6 +27,7 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
         // Don't bother calculating penalties if we only have one node.
         if (nodes.size == 1) {
             val node = nodes.first()
+
             if (!node.available) {
                 throw IllegalStateException("Node ${nodes[0].name} is unavailable!")
             }
@@ -33,7 +35,7 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
             return node
         }
 
-        // TODO: This number system is shit, it's way too easy to get an overflow
+        // TODO: Probably should enforce that no nodes go above the max
         return nodes.filter { it.available }.minByOrNull { node ->
             node.penalties.calculateTotal() + penaltyProviders.sumOf { it.getPenalty(node, region) }
         } ?: throw IllegalStateException("No available nodes!")
