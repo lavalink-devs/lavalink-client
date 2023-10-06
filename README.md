@@ -10,7 +10,33 @@ Feature overview:
 
 Current version (remove the `v` prefix): ![Latest version][VERSION]
 
-Or download it [here](https://maven.arbjerg.dev/#/snapshots/dev/arbjerg/lavalink-client)
+Or copy/download it [here](https://maven.arbjerg.dev/#/snapshots/dev/arbjerg/lavalink-client)
+
+### Gradle instructions
+```gradle
+repositories {
+    maven("https://maven.arbjerg.dev/snapshots")
+}
+
+dependencies {
+    implementation("dev.arbjerg:lavalink-client:VERSION")
+}
+```
+
+### Maven instructions
+```maven
+<repository>
+    <id>arbjerg</id>
+    <name>arbjerg</name>
+    <url>https://maven.arbjerg.dev/snapshots</url>
+</repository>
+
+<dependency>
+  <groupId>dev.arbjerg</groupId>
+  <artifactId>lavalink-client</artifactId>
+  <version>VERSION</version>
+</dependency>
+```
 
 ## Installation and usage with JDA
 
