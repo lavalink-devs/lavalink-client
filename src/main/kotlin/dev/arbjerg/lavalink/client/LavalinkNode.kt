@@ -118,6 +118,10 @@ class LavalinkNode(
             }
     }
 
+    internal fun removeCachedPlayer(guildId: Long) {
+        playerCache.remove(guildId)
+    }
+
     /**
      * Load an item for the player.
      *

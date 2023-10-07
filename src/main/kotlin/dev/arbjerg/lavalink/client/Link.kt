@@ -40,6 +40,7 @@ class Link(
         val player = node.getCachedPlayer(guildId)
 
         if (player != null) {
+            node.removeCachedPlayer(guildId)
             newNode.createOrUpdatePlayer(guildId)
                 .setVoiceState(player.voiceState)
                 .asMono()
