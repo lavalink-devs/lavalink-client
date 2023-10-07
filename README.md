@@ -119,6 +119,7 @@ Sample code for connecting to a voice channel without a discord library:
 
 ```java
 import dev.arbjerg.lavalink.client.LavalinkClient;
+import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion;
 import dev.arbjerg.lavalink.protocol.v4.VoiceState;
 
@@ -126,7 +127,7 @@ import dev.arbjerg.lavalink.protocol.v4.VoiceState;
 LavalinkClient client = new LavalinkClient(/* your bot user id */);
 
 // This is sample code, it will need modifications to work for you
-public void onVoiceServerUpdate(VoiceServerUpdateEvent event) {
+public void onDiscordVoiceServerUpdate(VoiceServerUpdateEvent event) {
     VoiceState lavalinkVoiceState = new VoiceState(
         event.getToken(),
         event.getEndpoint(),
@@ -137,12 +138,9 @@ public void onVoiceServerUpdate(VoiceServerUpdateEvent event) {
     VoiceRegion region = VoiceRegion.fromEndpoint(event.getEndpoint());
 
     // You can omit the region parameter if you dont need region balancing.
-    LavalinkNode node = lavalink.getLink(event.getGuildId(), region).getNode();
+    Link link = lavalink.getLink(event.getGuildId(), region);
 
     // Finally, tell lavalink to connect.
-    node.createOrUpdatePlayer(event.getGuildId())
-        .setVoiceState(lavalinkVoiceState)
-        .asMono()
-        .block()
+    link.onVoiceServerUpdate(lavalinkVoiceState)
 }
 ```

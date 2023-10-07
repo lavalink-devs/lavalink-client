@@ -13,12 +13,9 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
             update.sessionId
         )
         val region = VoiceRegion.fromEndpoint(update.endpoint)
-        val node = lavalink.getLink(update.guildIdLong, region).node
+        val link = lavalink.getLink(update.guildIdLong, region)
 
-        node.createOrUpdatePlayer(update.guildIdLong)
-            .setVoiceState(state)
-            .asMono()
-            .block()
+        link.onVoiceServerUpdate(state)
     }
 
     override fun onVoiceStateUpdate(update: VoiceDispatchInterceptor.VoiceStateUpdate): Boolean {

@@ -1,5 +1,7 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.protocol.v4.VoiceState
+
 /**
  * A "Link" for linking a guild id to a node.
  * Mainly just a data class that contains some shortcuts to the node.
@@ -45,6 +47,15 @@ class Link(
         }
 
         node = newNode
+    }
+
+    fun onVoiceServerUpdate(newVoiceState: VoiceState) {
+        if (node.available) {
+            node.createOrUpdatePlayer(guildId)
+                .setVoiceState(newVoiceState)
+                .asMono()
+                .subscribe()
+        }
     }
 
     override fun equals(other: Any?): Boolean {

@@ -46,11 +46,10 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         )
 
         val region = VoiceRegion.fromEndpoint(update.endpoint!!)
-        val node = lavalink.getLink(update.guildId.asLong(), region).node
+        val link = lavalink.getLink(update.guildId.asLong(), region)
 
-        node.createOrUpdatePlayer(update.guildId.asLong())
-            .setVoiceState(state)
-            .asMono()
+        link.onVoiceServerUpdate(state)
+        Mono.empty<Unit>()
     }.subscribe()
 
     return Disposables.composite(voiceStateUpdate, voiceServerUpdate)

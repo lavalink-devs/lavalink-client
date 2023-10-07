@@ -91,6 +91,10 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     internal fun getLinkIfCached(guildId: Long): Link? = links[guildId]
 
     internal fun onNodeDisconnected(node: LavalinkNode) {
+        if (nodes.size == 1) {
+            return
+        }
+
         links.forEach { (_, link) ->
             if (link.node == node)  {
                 link.transferNode(loadBalancer.selectNode(region = null))

@@ -89,7 +89,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
         when(t) {
             is EOFException -> {
-                logger.error("Got disconnected from ${node.name}, trying to reconnect", t)
+                logger.debug("Got disconnected from ${node.name}, trying to reconnect", t)
                 node.available = false
                 open = false
             }
