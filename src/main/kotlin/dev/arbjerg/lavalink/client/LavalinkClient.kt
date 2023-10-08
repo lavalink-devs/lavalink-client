@@ -85,8 +85,8 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     }
 
     /**
-     * Returns a [Link] if it exists in teh cache.
-     * If we select a region for voice updates we don't have a region to select.
+     * Returns a [Link] if it exists in the cache.
+     * If we select a link for voice updates, we don't know the region yet.
      */
     fun getLinkIfCached(guildId: Long): Link? = links[guildId]
 
