@@ -17,31 +17,28 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 class LavalinkRestClient(val node: LavalinkNode) {
-    private val baseUrl = node.baseUri.replace("ws://", "http://")
-        .replace("wss://", "https://")
-
     fun getPlayers(): Mono<Players> {
         return newRequest {
-            url("$baseUrl/sessions/${node.sessionId}/players")
+            url("${node.baseUri}/sessions/${node.sessionId}/players")
         }.toMono()
     }
 
     fun getPlayer(guildId: Long): Mono<Player> {
         return newRequest {
-            url("$baseUrl/sessions/${node.sessionId}/players/$guildId")
+            url("${node.baseUri}/sessions/${node.sessionId}/players/$guildId")
         }.toMono()
     }
 
     fun updatePlayer(player: PlayerUpdate, guildId: Long, noReplace: Boolean = false): Mono<Player> {
         return newRequest {
-            url("$baseUrl/sessions/${node.sessionId}/players/$guildId?noReplace=$noReplace")
+            url("${node.baseUri}/sessions/${node.sessionId}/players/$guildId?noReplace=$noReplace")
             patch(json.encodeToString(player).toRequestBody("application/json".toMediaType()))
         }.toMono()
     }
 
     fun destroyPlayer(guildId: Long): Mono<Unit> {
         return newRequest {
-            url("$baseUrl/sessions/${node.sessionId}/players/$guildId")
+            url("${node.baseUri}/sessions/${node.sessionId}/players/$guildId")
             delete()
         }.toMono()
     }
@@ -50,26 +47,26 @@ class LavalinkRestClient(val node: LavalinkNode) {
         val encId = URLEncoder.encode(identifier, StandardCharsets.UTF_8)
 
         return newRequest {
-            url("$baseUrl/loadtracks?identifier=$encId")
+            url("${node.baseUri}/loadtracks?identifier=$encId")
         }.toMono()
     }
 
     fun decodeTrack(encoded: String): Mono<Track> {
         return newRequest {
-            url("$baseUrl/decodetrack?encodedTrack=$encoded")
+            url("${node.baseUri}/decodetrack?encodedTrack=$encoded")
         }.toMono()
     }
 
     fun decodeTracks(encoded: List<String>): Mono<Tracks> {
         return newRequest {
-            url("$baseUrl/decodetracks")
+            url("${node.baseUri}/decodetracks")
             post(json.encodeToString(encoded).toRequestBody("application/json".toMediaType()))
         }.toMono()
     }
 
     fun getNodeInfo(): Mono<Info> {
         return newRequest {
-            url("$baseUrl/info")
+            url("${node.baseUri}/info")
         }.toMono()
     }
 

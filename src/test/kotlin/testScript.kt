@@ -70,12 +70,12 @@ fun main() {
 
 fun registerNode(client: LavalinkClient) {
     listOf(
-        client.addNode(
+        /*client.addNode(
             "Testnode",
             URI.create("ws://localhost:2333"),
             "youshallnotpass",
             RegionGroup.EUROPE
-        ),
+        ),*/
 
         client.addNode(
             "Mac-mini",

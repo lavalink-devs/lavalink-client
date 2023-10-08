@@ -10,7 +10,6 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.json.JSONObject
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -25,7 +24,7 @@ import java.util.function.Function
 
 class LavalinkNode(
     val name: String,
-    serverUri: URI,
+    val serverUri: URI,
     val password: String,
     val regionFilter: IRegionFilter?,
     val lavalink: LavalinkClient
@@ -198,14 +197,27 @@ class LavalinkNode(
     }
 
     /**
-     * Send a custom request to the lavalink server.
+     * Send a custom request to the lavalink server. Any host and port you set will be replaced with the node host automatically.
+     * The scheme must match your node's scheme, however.
      *
      * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
+     *
+     * @return The Http response from the node
      */
-    fun customRequest(builderFn: Function<Request.Builder, Request.Builder>): Mono<JSONObject> {
+    fun customRequest(builderFn: Function<Request.Builder, Request.Builder>): Mono<Response> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
-        val call = rest.newRequest { builderFn.apply(this) }
+        val call = rest.newRequest {
+            val request = builderFn.apply(this).build()
+            val urlBuilder = request.url.newBuilder()
+            val newBuilder = request.newBuilder()
+
+            val newUrl = urlBuilder.host(serverUri.host)
+                .port(serverUri.port)
+                .build()
+
+            newBuilder.url(newUrl)
+        }
 
         return Mono.create { sink ->
             sink.onCancel {
@@ -219,9 +231,7 @@ class LavalinkNode(
 
                 override fun onResponse(call: Call, response: Response) {
                     response.use { res ->
-                        res.body?.use { body ->
-                            sink.success(JSONObject(body.string()))
-                        }
+                        sink.success(res)
                     }
                 }
             })
