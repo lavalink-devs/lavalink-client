@@ -37,7 +37,6 @@ dependencies {
     api("io.projectreactor:reactor-core:3.5.6")
     api("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
     api("org.slf4j:slf4j-api:2.0.7")
-    api("org.json:json:20230618")
 
 
     // Discord library support
