@@ -24,7 +24,7 @@ import java.util.function.Function
 
 class LavalinkNode(
     val name: String,
-    val serverUri: URI,
+    private val serverUri: URI,
     val password: String,
     val regionFilter: IRegionFilter?,
     val lavalink: LavalinkClient
@@ -212,7 +212,11 @@ class LavalinkNode(
             val urlBuilder = request.url.newBuilder()
             val newBuilder = request.newBuilder()
 
-            val newUrl = urlBuilder.host(serverUri.host)
+            val newUrl = urlBuilder.scheme(
+                serverUri.scheme.replace("ws", "http")
+                    .replace("wss", "https")
+            )
+                .host(serverUri.host)
                 .port(serverUri.port)
                 .build()
 

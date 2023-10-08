@@ -7,6 +7,7 @@ Feature overview:
 - Works with any discord library (as long as they allow for sending direct request to discord)
 - Load balancing based on server metrics and voice server region.
 - Make your own custom load balancers and penalty providers!
+- Lightweight
 
 Current version (remove the `v` prefix): ![Latest version][VERSION]
 
