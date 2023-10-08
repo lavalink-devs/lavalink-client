@@ -5,7 +5,7 @@ import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 
-// TODO: https://medium.com/javarevisited/load-balancing-algorithms-that-can-be-used-in-java-applications-6f605d1bf19
+// TODO: have a look at this https://medium.com/javarevisited/load-balancing-algorithms-that-can-be-used-in-java-applications-6f605d1bf19
 class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
     private val penaltyProviders = mutableListOf<IPenaltyProvider>()
 
@@ -17,10 +17,6 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
         penaltyProviders.remove(penaltyProvider)
     }
 
-    // TODO: what happens if one of the nodes stops loading ANY tracks? It would gain preference because there's no load on it
-    //  Keep track of stuck tracks?
-    //  Keep track of load failures? (LoadResult.NoMatches)
-    //  Keep track of track exceptions?
     override fun selectNode(region: VoiceRegion?): LavalinkNode {
         val nodes = client.nodes
 
