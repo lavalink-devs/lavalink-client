@@ -20,6 +20,7 @@ import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
 import java.io.IOException
 import java.net.URI
+import java.util.function.Consumer
 import java.util.function.Function
 
 class LavalinkNode(
@@ -111,6 +112,14 @@ class LavalinkNode(
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
             }
+    }
+
+    fun updatePlayer(guildId: Long, updateConsumer: Consumer<PlayerUpdateBuilder>): Mono<LavalinkPlayer> {
+        val update = createOrUpdatePlayer(guildId)
+
+        updateConsumer.accept(update)
+
+        return update.asMono()
     }
 
     /**
