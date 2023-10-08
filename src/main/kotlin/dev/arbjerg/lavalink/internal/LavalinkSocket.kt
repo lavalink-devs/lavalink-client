@@ -38,7 +38,9 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         open = true
         reconnectsAttempted = 0
 
-        // TODO: reconnect voice states from cached players.
+        node.playerCache.values.forEach { player ->
+            player.setVoiceState(player.voiceState).asMono().subscribe()
+        }
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
