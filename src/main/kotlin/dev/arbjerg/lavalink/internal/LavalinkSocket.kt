@@ -2,6 +2,7 @@ package dev.arbjerg.lavalink.internal
 
 import dev.arbjerg.lavalink.LLClientInfo
 import dev.arbjerg.lavalink.client.LavalinkNode
+import dev.arbjerg.lavalink.client.LinkState
 import dev.arbjerg.lavalink.client.toClientEvent
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
@@ -21,7 +22,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
     var mayReconnect = true
     var lastReconnectAttempt = 0L
-    var reconnectsAttempted = 0
+    private var reconnectsAttempted = 0
     val reconnectInterval: Int
         get() = reconnectsAttempted * 2000 - 2000
     var open: Boolean = false
@@ -36,6 +37,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         node.available = true
         open = true
         reconnectsAttempted = 0
+
+        // TODO: reconnect voice states from cached players.
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -58,15 +61,21 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
                 if (idLong in node.playerCache) {
                     node.playerCache[idLong]!!.state = update.state
+                    node.lavalink.getLinkIfCached(idLong)?.state = if (update.state.connected) {
+                        LinkState.CONNECTED
+                    } else {
+                        LinkState.DISCONNECTED
+                    }
                 }
             }
 
             Message.Op.Event -> {
+                // TODO: handle websocket closed event from discord?
                 node.penalties.handleTrackEvent(event as Message.EmittedEvent)
             }
 
             else -> {
-                logger.error("Unknown WS message on ${node.name}, please report the following information to the devs: $text")
+                logger.error("Unknown WS message on ${node.name}, please report the following information to the devs: '$text'")
             }
         }
 

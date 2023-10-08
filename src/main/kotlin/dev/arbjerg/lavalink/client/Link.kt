@@ -15,6 +15,12 @@ class Link(
         private set
 
     /**
+     * The voice connection state of this link
+     */
+    var state = LinkState.DISCONNECTED
+        internal set
+
+    /**
      * Gets the player for this link. If the player is not cached, it will be retrieved from the server.
      */
     fun getPlayer() = node.getPlayer(guildId)

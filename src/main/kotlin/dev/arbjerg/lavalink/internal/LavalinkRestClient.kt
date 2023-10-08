@@ -73,7 +73,10 @@ class LavalinkRestClient(val node: LavalinkNode) {
         }.toMono()
     }
 
-    private fun newRequest(configure: Request.Builder.() -> Request.Builder): Call {
+    /**
+     * Make a request to the lavalink node. This is internal to keep it kotlin first. Java compatibility is in the node.
+     */
+    internal fun newRequest(configure: Request.Builder.() -> Request.Builder): Call {
         val builder = configure(
             Request.Builder()
                 .addHeader("Authorization", node.password)

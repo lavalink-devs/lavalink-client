@@ -6,7 +6,11 @@ import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
+import okhttp3.Call
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -14,7 +18,9 @@ import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
+import java.io.IOException
 import java.net.URI
+import java.util.function.Function
 
 class LavalinkNode(
     val name: String,
@@ -45,6 +51,7 @@ class LavalinkNode(
     var available: Boolean = false
         internal set
 
+    // TODO: cache player per link instead?
     /**
      * A local player cache, allows us to not call the rest client every time we need a player.
      */
@@ -67,7 +74,9 @@ class LavalinkNode(
     inline fun <reified T : ClientEvent<*>> on() = on(T::class.java)
 
     /**
-     * Retrieves a list of all players from the lavalink server.
+     * Retrieves a list of all players from the lavalink node.
+     *
+     * @return A list of all players from the node.
      */
     fun getPlayers(): Mono<List<LavalinkPlayer>> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
@@ -85,6 +94,8 @@ class LavalinkNode(
      * Gets the player from the guild id. If the player is not cached, it will be retrieved from the server.
      *
      * @param guildId The guild id of the player.
+     *
+     * @Returns The player from the guild
      */
     fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
@@ -102,10 +113,17 @@ class LavalinkNode(
             }
     }
 
+    /**
+     * Creates or updates a player.
+     *
+     * @param guildId The guild id that you want to create or update the player for.
+     *
+     * @return The newly created or updated player.
+     */
     fun createOrUpdatePlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
 
     /**
-     * Destroy a player.
+     * Destroy a guild's player.
      *
      * @param guildId The guild id of the player to destroy.
      */
@@ -126,6 +144,8 @@ class LavalinkNode(
      * Load an item for the player.
      *
      * @param identifier The identifier (E.G. youtube url) to load.
+     *
+     * @return The [LoadResult] of whatever you tried to load.
      */
     fun loadItem(identifier: String): Mono<LoadResult> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
@@ -135,6 +155,10 @@ class LavalinkNode(
 
     /**
      * Uses the node to decode a base64 encoded track.
+     *
+     * @param encoded The base64 encoded track to decode.
+     *
+     * @return The decoded track.
      */
     fun decodeTrack(encoded: String): Mono<Track> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
@@ -144,6 +168,10 @@ class LavalinkNode(
 
     /**
      * Uses the node to decode a list of base64 encoded tracks.
+     *
+     * @param encoded The base64 encoded tracks to decode.
+     *
+     * @return The decoded tracks.
      */
     fun decodeTracks(encoded: List<String>): Mono<Tracks> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
@@ -151,10 +179,44 @@ class LavalinkNode(
         return rest.decodeTracks(encoded)
     }
 
+    /**
+     * Get information about the node.
+     */
     fun getNodeInfo(): Mono<Info> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.getNodeInfo()
+    }
+
+    /**
+     * Send a custom request to the lavalink server.
+     *
+     * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
+     */
+    fun customRequest(builderFn: Function<Request.Builder, Request.Builder>): Mono<JSONObject> {
+        if (!available) return Mono.error(IllegalStateException("Node is not available"))
+
+        val call = rest.newRequest { builderFn.apply(this) }
+
+        return Mono.create { sink ->
+            sink.onCancel {
+                call.cancel()
+            }
+
+            call.enqueue(object : okhttp3.Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    sink.error(e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use { res ->
+                        res.body?.use { body ->
+                            sink.success(JSONObject(body.string()))
+                        }
+                    }
+                }
+            })
+        }
     }
 
     internal fun getCachedPlayer(guildId: Long): LavalinkPlayer? {

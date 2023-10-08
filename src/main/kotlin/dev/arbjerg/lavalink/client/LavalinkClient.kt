@@ -92,6 +92,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
 
     internal fun onNodeDisconnected(node: LavalinkNode) {
         if (nodes.size == 1) {
+            // TODO: update link state?
             return
         }
 
