@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import java.util.function.Consumer
 
 /**
  * A "Link" for linking a guild id to a node.
@@ -29,6 +30,8 @@ class Link(
      * Destroys the player for this link.
      */
     fun destroyPlayer() = node.destroyPlayer(guildId)
+
+    fun updatePlayer(updateConsumer: Consumer<PlayerUpdateBuilder>) = node.updatePlayer(guildId, updateConsumer)
 
     /**
      * Creates or updates the player for this link.
