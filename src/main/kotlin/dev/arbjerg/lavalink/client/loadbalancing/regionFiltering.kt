@@ -21,6 +21,7 @@ enum class RegionFilterVerdict {
  * You must register [dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider] as a penalty provider in order for this filter to work.
  */
 object RegionGroup {
+    @JvmField
     val ASIA: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.SIDNEY, VoiceRegion.INDIA, VoiceRegion.JAPAN, VoiceRegion.HONGKONG, VoiceRegion.SOUTH_AFRICA)
 
@@ -28,6 +29,7 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+    @JvmField
     val EUROPE: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.ROTTERDAM, VoiceRegion.RUSSIA)
 
@@ -35,6 +37,7 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+    @JvmField
     val US: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.BRAZIL, VoiceRegion.SIDNEY, VoiceRegion.US_CENTRAL, VoiceRegion.US_EAST, VoiceRegion.US_SOUTH, VoiceRegion.US_WEST)
 

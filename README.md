@@ -111,6 +111,14 @@ memberVoice.sendDisconnectVoiceState().subscribe();
 Alternatively, you can use `Discord4JUtils.leave(gatewayClient, guildId);` as that does not access any voice states.
 
 
+## Examples
+The following examples are minimal implementations but show how the library works.
+- Java examples
+  - JDA: [link](src/test/java/JavaJDAExample.java)
+- Kotlin examples
+  - JDA: [link](src/test/kotlin/testScript.kt)
+  - Discord4J: [link](src/test/kotlin/d4jTestScript.kt)
+
 ## Standalone usage
 This library is made to not rely on and discord libraries and can be used as such.
 In order to connect to a voice channel without any library you will need a [voice server update event from discord](https://discord.com/developers/docs/topics/voice-connections#retrieving-voice-server-information-example-voice-server-update-payload) containing the token, endpoint and session id.
