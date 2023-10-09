@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.libraries.jda
 
 import dev.arbjerg.lavalink.client.LavalinkClient
+import dev.arbjerg.lavalink.client.LinkState
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import net.dv8tion.jda.api.hooks.VoiceDispatchInterceptor
@@ -25,7 +26,10 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
         val playerState = player.state
 
         if (channel == null) {
-            if (!playerState.connected) {
+            if (playerState.connected) {
+                link.state = LinkState.CONNECTED
+            } else {
+                link.state = LinkState.DISCONNECTED
                 link.destroyPlayer().block()
             }
         }

@@ -47,10 +47,7 @@ object RegionGroup {
     }
 }
 
-// TODO
-//  - Class that has all discord voice servers
-//  - Voice servers are being grouped into regions
-//  - In case no exact server match it should look for the closest node in that same region
+// TODO In case no exact server match, should it look for the closest node in that same region?
 enum class VoiceRegion(val id: String, val visibleName: String) {
     BRAZIL("brazil", "Brazil"),
     HONGKONG("hongkong", "Hong Kong"),
