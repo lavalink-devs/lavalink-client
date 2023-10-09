@@ -16,8 +16,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -156,8 +158,11 @@ public class JavaJDAExample extends ListenerAdapter {
                                 .subscribe((ignored) -> {
                                     event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
                                 });
-                    } else if (item instanceof LoadResult.PlaylistLoaded) {
-                        event.getHook().sendMessage("Playlists are not supported atm").queue();
+                    } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
+                        final int trackCount = playlistLoaded.getData().getTracks().size();
+                        event.getHook()
+                                .sendMessage("This playlist has " + trackCount + " tracks!")
+                                .queue();
                     } else if (item instanceof LoadResult.SearchResult searchResult) {
                         final List<Track> tracks = searchResult.getData().getTracks();
 
@@ -184,7 +189,21 @@ public class JavaJDAExample extends ListenerAdapter {
 
                 break;
             case "custom-request":
-                event.reply("Custom request!").queue();
+                // Weird variable names? This is why you don't use switch statements for this :)
+                final long crGuildId = event.getGuild().getIdLong();
+                final Link crLink = this.client.getLink(crGuildId);
+
+                crLink.getNode().customRequest(
+                        (builder) -> builder.get().path("/version").header("Accept", "text/plain")
+                ).subscribe((response) -> {
+                    try (ResponseBody body = response.body()) {
+                        final String bodyText = body.string();
+
+                        event.reply("Response from version endpoint (with custom request): " + bodyText).queue();
+                    } catch (IOException e) {
+                        event.reply("Something went wrong! " + e.getMessage()).queue();
+                    }
+                });
                 break;
             default:
                 event.reply("Unknown command???").queue();
