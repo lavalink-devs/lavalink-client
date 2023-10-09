@@ -1,5 +1,6 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.http.HttpBuilder
 import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
@@ -24,13 +25,13 @@ import java.util.function.Function
 
 class LavalinkNode(
     val name: String,
-    private val serverUri: URI,
+    serverUri: URI,
     val password: String,
     val regionFilter: IRegionFilter?,
     val lavalink: LavalinkClient
 ) : Disposable, Closeable {
     // "safe" uri with all paths removed
-    val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}/v4"
+    val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}"
 
     var sessionId: String? = null
         internal set
@@ -197,31 +198,25 @@ class LavalinkNode(
     }
 
     /**
-     * Send a custom request to the lavalink server. Any host and port you set will be replaced with the node host automatically.
+     * Send a custom request to the lavalink node. Any host and port you set will be replaced with the node host automatically.
      * The scheme must match your node's scheme, however.
+     *
+     * It is recommended to use the path setter instead of the url setter when defining a url, like this:
+     * <pre>{@code
+     * customRequest((builder) -> {
+     *     return builder.path("/some/plugin/path")
+     *                   .get();
+     * }).subscribe(System.out::println);
+     * }</pre>
      *
      * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
      *
-     * @return The Http response from the node
+     * @return The Http response from the node, may error with an IllegalStateException when the node is not available.
      */
-    fun customRequest(builderFn: Function<Request.Builder, Request.Builder>): Mono<Response> {
+    fun customRequest(builderFn: Function<HttpBuilder, HttpBuilder>): Mono<Response> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
-        val call = rest.newRequest {
-            val request = builderFn.apply(this).build()
-            val urlBuilder = request.url.newBuilder()
-            val newBuilder = request.newBuilder()
-
-            val newUrl = urlBuilder.scheme(
-                serverUri.scheme.replace("ws", "http")
-                    .replace("wss", "https")
-            )
-                .host(serverUri.host)
-                .port(serverUri.port)
-                .build()
-
-            newBuilder.url(newUrl)
-        }
+        val call = rest.newRequest { builderFn.apply(this) }
 
         return Mono.create { sink ->
             sink.onCancel {

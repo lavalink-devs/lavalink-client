@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.internal
 
 import dev.arbjerg.lavalink.client.LavalinkNode
+import dev.arbjerg.lavalink.client.http.HttpBuilder
 import dev.arbjerg.lavalink.internal.error.RestException
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlinx.serialization.decodeFromString
@@ -19,26 +20,26 @@ import java.nio.charset.StandardCharsets
 class LavalinkRestClient(val node: LavalinkNode) {
     fun getPlayers(): Mono<Players> {
         return newRequest {
-            url("${node.baseUri}/sessions/${node.sessionId}/players")
+            path("/v4/sessions/${node.sessionId}/players")
         }.toMono()
     }
 
     fun getPlayer(guildId: Long): Mono<Player> {
         return newRequest {
-            url("${node.baseUri}/sessions/${node.sessionId}/players/$guildId")
+            path("/v4/sessions/${node.sessionId}/players/$guildId")
         }.toMono()
     }
 
     fun updatePlayer(player: PlayerUpdate, guildId: Long, noReplace: Boolean = false): Mono<Player> {
         return newRequest {
-            url("${node.baseUri}/sessions/${node.sessionId}/players/$guildId?noReplace=$noReplace")
+            path("/v4/sessions/${node.sessionId}/players/$guildId?noReplace=$noReplace")
             patch(json.encodeToString(player).toRequestBody("application/json".toMediaType()))
         }.toMono()
     }
 
     fun destroyPlayer(guildId: Long): Mono<Unit> {
         return newRequest {
-            url("${node.baseUri}/sessions/${node.sessionId}/players/$guildId")
+            path("/v4/sessions/${node.sessionId}/players/$guildId")
             delete()
         }.toMono()
     }
@@ -47,40 +48,39 @@ class LavalinkRestClient(val node: LavalinkNode) {
         val encId = URLEncoder.encode(identifier, StandardCharsets.UTF_8)
 
         return newRequest {
-            url("${node.baseUri}/loadtracks?identifier=$encId")
+            path("/v4/loadtracks?identifier=$encId")
         }.toMono()
     }
 
     fun decodeTrack(encoded: String): Mono<Track> {
         return newRequest {
-            url("${node.baseUri}/decodetrack?encodedTrack=$encoded")
+            path("/v4/decodetrack?encodedTrack=$encoded")
         }.toMono()
     }
 
     fun decodeTracks(encoded: List<String>): Mono<Tracks> {
         return newRequest {
-            url("${node.baseUri}/decodetracks")
+            path("/v4/decodetracks")
             post(json.encodeToString(encoded).toRequestBody("application/json".toMediaType()))
         }.toMono()
     }
 
     fun getNodeInfo(): Mono<Info> {
         return newRequest {
-            url("${node.baseUri}/info")
+            path("/v4/info")
         }.toMono()
     }
 
     /**
-     * Make a request to the lavalink node. This is internal to keep it kotlin first. Java compatibility is in the node.
+     * Make a request to the lavalink node. This is internal to keep it looking nice in kotlin. Java compatibility is in the node class.
      */
-    internal fun newRequest(configure: Request.Builder.() -> Request.Builder): Call {
-        val builder = configure(
-            Request.Builder()
-                .addHeader("Authorization", node.password)
-                .get()
-        )
+    internal fun newRequest(configure: HttpBuilder.() -> HttpBuilder): Call {
+        val requestBuilder = Request.Builder()
+            .addHeader("Authorization", node.password)
+            .get()
+        val builder = configure(HttpBuilder(requestBuilder))
 
-        return node.httpClient.newCall(builder.build())
+        return node.httpClient.newCall(builder.finalizeUrl(node.baseUri).build())
     }
 
     private inline fun <reified T> Call.toMono(): Mono<T> {

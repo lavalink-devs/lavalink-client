@@ -50,6 +50,7 @@ fun main() {
                     println("${event.jda.selfUser.asTag} is ready!")
                     event.jda.updateCommands()
                         .addCommands(
+                            Commands.slash("custom-request", "Testing custom requests"),
                             Commands.slash("join", "Join the voice channel you are in."),
                             Commands.slash("leave", "Leaves the vc"),
                             Commands.slash("play", "Play a song")
@@ -107,6 +108,24 @@ private fun joinHelper(event: SlashCommandInteractionEvent) {
 
 private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteractionEvent) {
     when (event.fullCommandName) {
+        "custom-request" -> {
+            val guildId = event.guild!!.idLong
+            val link = lavalink.getLink(guildId)
+
+            link.node.customRequest {
+                it.get()
+                    .path("/version")
+                    .header("Accept", "text/html")
+            }.subscribe {
+                it.body?.use { body ->
+                    val bodyStr = body.string()
+
+                    println(bodyStr)
+                    event.reply("Response from version endpoint (with custom request): $bodyStr").queue()
+                }
+            }
+        }
+
         "join" -> {
             joinHelper(event)
         }

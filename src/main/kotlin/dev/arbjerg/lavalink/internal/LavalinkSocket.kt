@@ -147,7 +147,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
     private fun connect() {
         val request = Request.Builder()
-            .url("${node.baseUri}/websocket")
+            .url("${node.baseUri}/v4/websocket")
             .addHeader("Authorization", node.password)
             .addHeader("Client-Name", "Lavalink-Client/${LLClientInfo.VERSION}")
             .addHeader("User-Id", node.lavalink.userId.toString())
