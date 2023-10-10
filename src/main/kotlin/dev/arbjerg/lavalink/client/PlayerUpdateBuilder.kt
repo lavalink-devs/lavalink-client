@@ -72,6 +72,20 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         return this
     }
 
+    internal fun applyBuilder(builder: PlayerUpdateBuilder): PlayerUpdateBuilder {
+        this.encodedTrack = builder.encodedTrack
+        this.identifier = builder.identifier
+        this.position = builder.position
+        this.endTime = builder.endTime
+        this.volume = builder.volume
+        this.paused = builder.paused
+        this.filters = builder.filters
+        this.state = builder.state
+        this.noReplace = builder.noReplace
+
+        return this
+    }
+
     fun build() = PlayerUpdate(
         encodedTrack, identifier, position, endTime, volume, paused, filters, state
     )

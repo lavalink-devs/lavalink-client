@@ -9,7 +9,6 @@ import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
 import okhttp3.Call
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.Response
 import reactor.core.Disposable
 import reactor.core.publisher.Flux

@@ -51,7 +51,7 @@ class Link(
         if (player != null) {
             node.removeCachedPlayer(guildId)
             newNode.createOrUpdatePlayer(guildId)
-                .setVoiceState(player.voiceState)
+                .applyBuilder(player.stateToBuilder())
                 .asMono()
                 .block()
         }
@@ -80,6 +80,4 @@ class Link(
     override fun hashCode(): Int {
         return guildId.hashCode()
     }
-
-
 }
