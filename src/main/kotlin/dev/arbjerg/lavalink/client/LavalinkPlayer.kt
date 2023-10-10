@@ -66,4 +66,15 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
     override fun setVoiceState(state: VoiceState) = PlayerUpdateBuilder(node, guildId)
         .setVoiceState(state)
 
+    // For re-creating the player
+    internal fun stateToBuilder() = PlayerUpdateBuilder(node, guildId)
+        .setEncodedTrack(track?.encoded)
+        .setIdentifier(null)
+        .setPosition(position)
+        .setEndTime(null) // TODO Should we keep track of the end time?
+        .setVolume(volume)
+        .setPaused(paused)
+        .setFilters(filters)
+        .setVoiceState(voiceState)
+
 }

@@ -34,6 +34,7 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
             }
         }
 
+        // We return true if a connection was previously established.
         return playerState.connected
     }
 }

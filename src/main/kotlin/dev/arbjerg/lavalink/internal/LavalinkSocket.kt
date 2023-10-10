@@ -39,7 +39,10 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         reconnectsAttempted = 0
 
         node.playerCache.values.forEach { player ->
-            player.setVoiceState(player.voiceState).asMono().subscribe()
+            // Re-create the player on the node.
+            player.stateToBuilder()
+                .setNoReplace(false)
+                .asMono().subscribe()
         }
     }
 
