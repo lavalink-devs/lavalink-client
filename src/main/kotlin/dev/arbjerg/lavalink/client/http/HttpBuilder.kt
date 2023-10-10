@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client.http
 
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.net.URL
 
 /**
@@ -106,17 +107,17 @@ class HttpBuilder(private val internalBuilder: Request.Builder) : Request.Builde
     }
 
     override fun url(url: URL): HttpBuilder {
-        internalBuilder.url(url)
+        this.path = url.toString().toHttpUrl().encodedPath
         return this
     }
 
     override fun url(url: String): HttpBuilder {
-        internalBuilder.url(url)
+        this.path = url.toHttpUrl().encodedPath
         return this
     }
 
     override fun url(url: HttpUrl): HttpBuilder {
-        internalBuilder.url(url)
+        this.path = url.encodedPath
         return this
     }
 }
