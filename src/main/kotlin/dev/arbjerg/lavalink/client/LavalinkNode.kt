@@ -245,10 +245,37 @@ class LavalinkNode(
      *
      * It is recommended to use the path setter instead of the url setter when defining a url, like this:
      * <pre>{@code
-     * customRequest((builder) -> {
+     * customJsonRequest<SomeType>((builder) -> {
      *     return builder.path("/some/plugin/path")
      *                   .get();
-     * }).subscribe(System.out::println);
+     * }).subscribe((result) -> {
+     *   println(result);
+     * });
+     * }</pre>
+     *
+     * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
+     *
+     * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    inline fun <reified T> customJsonRequest(builderFn: Function<HttpBuilder, HttpBuilder>): Mono<T?> =
+        customJsonRequest(builderFn) { response ->
+            json.decodeFromStream<T>(response.body!!.byteStream())
+        }
+
+
+    /**
+     * Send a custom request to the lavalink node. Any host and port you set will be replaced with the node host automatically.
+     * The scheme must match your node's scheme, however. The response body will be deserialized using the provided deserializer.
+     *
+     * It is recommended to use the path setter instead of the url setter when defining a url, like this:
+     * <pre>{@code
+     * customJsonRequest(SomeType.Serializer.INSTANCE, (builder) -> {
+     *     return builder.path("/some/plugin/path")
+     *                   .get();
+     * }).subscribe((result) -> {
+     *   println(result);
+     * });
      * }</pre>
      *
      * @param deserializer The deserializer to use for the response body (E.G. `LoadResult.Serializer.INSTANCE`)
@@ -260,6 +287,15 @@ class LavalinkNode(
     fun <T> customJsonRequest(
         deserializer: DeserializationStrategy<T>,
         builderFn: Function<HttpBuilder, HttpBuilder>
+    ): Mono<T?> = customJsonRequest(builderFn) { response ->
+        json.decodeFromStream(deserializer, response.body!!.byteStream())
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @PublishedApi
+    internal fun <T> customJsonRequest(
+        builderFn: Function<HttpBuilder, HttpBuilder>,
+        deserialize: (Response) -> T?
     ): Mono<T?> {
         return customRequest(builderFn).mapNotNull { response ->
             response.use {
@@ -273,7 +309,7 @@ class LavalinkNode(
                     return@mapNotNull null
                 }
 
-                return@mapNotNull json.decodeFromStream<T>(deserializer, response.body!!.byteStream())
+                return@mapNotNull deserialize(response)
             }
         }
     }

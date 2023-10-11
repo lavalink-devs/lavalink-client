@@ -51,6 +51,7 @@ fun main() {
                     event.jda.updateCommands()
                         .addCommands(
                             Commands.slash("custom-request", "Testing custom requests"),
+                            Commands.slash("custom-json-request", "Testing custom json requests"),
                             Commands.slash("join", "Join the voice channel you are in."),
                             Commands.slash("leave", "Leaves the vc"),
                             Commands.slash("play", "Play a song")
@@ -122,6 +123,31 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
 
                     println(bodyStr)
                     event.reply("Response from version endpoint (with custom request): $bodyStr").queue()
+                }
+            }
+        }
+
+        "custon-json-request" -> {
+            val guildId = event.guild!!.idLong
+            val link = lavalink.getLink(guildId)
+
+            link.node.customJsonRequest<LoadResult>{
+                it.get()
+                    .path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up")
+            }.subscribe {
+                when (it) {
+                    is LoadResult.SearchResult -> {
+                        event.reply("Loaded ${it.data.tracks.size} tracks!").queue()
+                    }
+
+                    is LoadResult.LoadFailed -> {
+                        event.reply("Failed to load tracks! ${it.data.message}").queue()
+                    }
+
+                    is LoadResult.NoMatches -> Unit
+                    is LoadResult.PlaylistLoaded -> Unit
+                    is LoadResult.TrackLoaded -> Unit
+                    null -> Unit
                 }
             }
         }
