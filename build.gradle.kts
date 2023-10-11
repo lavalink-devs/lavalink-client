@@ -105,8 +105,6 @@ kotlin {
     jvmToolchain(17)
 }
 
-val isSnapshot = System.getenv("SNAPSHOT") == "true"
-
 val mavenUrl: String
     get() {
         if (release) {
@@ -122,8 +120,8 @@ publishing {
             name = "arbjerg"
             url = uri(mavenUrl)
             credentials {
-                username = System.getenv("USERNAME")
-                password = System.getenv("PASSWORD")
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
             }
             authentication {
                 create<BasicAuthentication>("basic")
@@ -172,7 +170,7 @@ afterEvaluate {
         configure<MavenPublishBaseExtension> {
             coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
 
-            if (System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null) {
+            if (System.getenv("MAVEN_USERNAME") != null && System.getenv("MAVEN_PASSWORD") != null) {
                 publishToMavenCentral(SonatypeHost.S01, false)
                 if (release) {
                     signAllPublications()
@@ -207,14 +205,6 @@ afterEvaluate {
             }
         }
     }
-}
-
-fun getSuffix(): String {
-    if (isSnapshot) {
-        return "-SNAPSHOT_${System.getenv("GITHUB_RUN_NUMBER")}"
-    }
-
-    return ""
 }
 
 val publish: Task by tasks
