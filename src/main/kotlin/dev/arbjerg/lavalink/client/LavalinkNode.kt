@@ -245,12 +245,12 @@ class LavalinkNode(
      *
      * It is recommended to use the path setter instead of the url setter when defining a url, like this:
      * <pre>{@code
-     * customJsonRequest<SomeType>((builder) -> {
-     *     return builder.path("/some/plugin/path")
+     * customJsonRequest<SomeType>{
+     *     it.path("/some/plugin/path")
      *                   .get();
-     * }).subscribe((result) -> {
-     *   println(result);
-     * });
+     * }.subscribe {
+     *   println(it);
+     * };
      * }</pre>
      *
      * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
