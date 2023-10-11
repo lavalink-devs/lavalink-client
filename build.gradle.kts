@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.ajoberstar.grgit.Grgit
 
@@ -8,6 +10,7 @@ plugins {
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.serialization") version "1.9.0"
     id("org.ajoberstar.grgit") version "5.2.0"
+    id("com.vanniktech.maven.publish.base") version "0.25.3"
 }
 
 val (gitVersion, release) = versionFromGit()
@@ -124,7 +127,7 @@ publishing {
             pom {
                 name.set(archivesBaseName)
                 description.set("Lavalink v4 client library")
-                url.set("https://github.com/duncte123/lavalink-client")
+                url.set("https://github.com/lavalink-devs/lavalink-client")
                 licenses {
                     license {
                         name.set("MIT")
@@ -139,9 +142,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git:git://github.com/duncte123/lavalink-client.git")
-                    developerConnection.set("scm:git:ssh://git@github.com:duncte123/lavalink-client.git")
-                    url.set("https://github.com/duncte123/lavalink-client")
+                    connection.set("scm:git:git://github.com/lavalink-devs/lavalink-client.git")
+                    developerConnection.set("scm:git:ssh://git@github.com:lavalink-devs/lavalink-client.git")
+                    url.set("https://github.com/lavalink-devs/lavalink-client")
                 }
             }
 
