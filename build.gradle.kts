@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -79,6 +81,12 @@ val sourcesJar = task<Jar>("sourcesJar") {
     from(sourceSets["main"].allSource)
 }
 
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-Xlint:unchecked")
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+
 tasks.compileJava {
     source = generateKotlinSources.source
     dependsOn(generateKotlinSources)
@@ -138,7 +146,7 @@ publishing {
                     developer {
                         id.set("duncte123")
                         name.set("Duncan Sterken")
-                        email.set("contact@duncte123.me")
+                        url.set("https://duncte123.dev/")
                     }
                 }
                 scm {
@@ -155,6 +163,48 @@ publishing {
             version = project.version as String
 
             artifact(sourcesJar)
+        }
+    }
+}
+
+afterEvaluate {
+    plugins.withId("com.vanniktech.maven.publish.base") {
+        configure<MavenPublishBaseExtension> {
+            coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
+
+            if (System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null) {
+                publishToMavenCentral(SonatypeHost.S01, false)
+                if (release) {
+                    signAllPublications()
+                }
+            } else {
+                logger.lifecycle("Not publishing to OSSRH due to missing credentials")
+            }
+
+            pom {
+                url.set("https://github.com/lavalink-devs/lavalink-client")
+
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://mit-license.org/")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("duncte123")
+                        name.set("Duncan Sterken")
+                        url.set("https://duncte123.dev/")
+                    }
+                }
+
+                scm {
+                    url.set("https://github.com/lavalink-devs/lavalink-client")
+                    connection.set("scm:git:git://github.com/lavalink-devs/lavalink-client.git")
+                    developerConnection.set("scm:git:ssh://git@github.com:lavalink-devs/lavalink-client.git")
+                }
+            }
         }
     }
 }
