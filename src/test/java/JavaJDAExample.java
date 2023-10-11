@@ -109,6 +109,7 @@ public class JavaJDAExample extends ListenerAdapter {
         event.getJDA().updateCommands()
                 .addCommands(
                     Commands.slash("custom-request", "Testing custom requests"),
+                    Commands.slash("custom-request", "Testing custom requests"),
                     Commands.slash("join", "Join the voice channel you are in."),
                     Commands.slash("leave", "Leaves the vc"),
                     Commands.slash("pause", "Pause or unpause the plauer"),
@@ -141,7 +142,7 @@ public class JavaJDAExample extends ListenerAdapter {
                             event.reply("Player has been " + (player.getPaused() ? "paused" : "resumed") + "!").queue();
                         });
                 break;
-            case "play":
+            case "play": {
                 final Guild guild = event.getGuild();
 
                 // We are already connected, go ahead and play
@@ -184,7 +185,7 @@ public class JavaJDAExample extends ListenerAdapter {
 
                         // This is a different way of updating the player! Choose your preference!
                         // This method will also create a player if there is not one in the server yet
-                        link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(35) )
+                        link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(35))
                                 .subscribe((ignored) -> {
                                     event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
                                 });
@@ -197,12 +198,11 @@ public class JavaJDAExample extends ListenerAdapter {
                 });
 
                 break;
-            case "custom-request":
-                // Weird variable names? This is why you don't use switch statements for this :)
-                final long crGuildId = event.getGuild().getIdLong();
-                final Link crLink = this.client.getLink(crGuildId);
+            }
+            case "custom-request": {
+                final Link link = this.client.getLink(event.getGuild().getIdLong());
 
-                crLink.getNode().customRequest(
+                link.getNode().customRequest(
                         (builder) -> builder.get().path("/version").header("Accept", "text/plain")
                 ).subscribe((response) -> {
                     try (ResponseBody body = response.body()) {
@@ -214,6 +214,21 @@ public class JavaJDAExample extends ListenerAdapter {
                     }
                 });
                 break;
+            }
+            case "custom-json-request": {
+                final Link link = this.client.getLink(event.getGuild().getIdLong());
+
+                link.getNode().customJsonRequest(LoadResult.Serializer.INSTANCE,
+                        (builder) -> builder.path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up").get()
+                ).subscribe((loadResult -> {
+                    if (loadResult instanceof LoadResult.SearchResult searchResult) {
+                        event.reply("Loaded " + searchResult.getData().getTracks().size() + " tracks!").queue();
+                    } else if (loadResult instanceof LoadResult.LoadFailed loadFailed) {
+                        event.reply("Failed to load tracks! " + loadFailed.getData().getMessage()).queue();
+                    }
+                }));
+                break;
+            }
             default:
                 event.reply("Unknown command???").queue();
                 break;

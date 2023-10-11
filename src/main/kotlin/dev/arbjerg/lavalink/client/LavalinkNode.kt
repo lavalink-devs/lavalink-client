@@ -7,6 +7,9 @@ import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.decodeFromStream
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -233,6 +236,45 @@ class LavalinkNode(
                     }
                 }
             })
+        }
+    }
+
+    /**
+     * Send a custom request to the lavalink node. Any host and port you set will be replaced with the node host automatically.
+     * The scheme must match your node's scheme, however. The response body will be deserialized using the provided deserializer.
+     *
+     * It is recommended to use the path setter instead of the url setter when defining a url, like this:
+     * <pre>{@code
+     * customRequest((builder) -> {
+     *     return builder.path("/some/plugin/path")
+     *                   .get();
+     * }).subscribe(System.out::println);
+     * }</pre>
+     *
+     * @param deserializer The deserializer to use for the response body (E.G. `LoadResult.Serializer.INSTANCE`)
+     * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
+     *
+     * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    fun <T> customJsonRequest(
+        deserializer: DeserializationStrategy<T>,
+        builderFn: Function<HttpBuilder, HttpBuilder>
+    ): Mono<T?> {
+        return customRequest(builderFn).mapNotNull { response ->
+            response.use {
+                if (!response.isSuccessful) {
+                    json.decodeFromStream<Error>(response.body!!.byteStream()).let { error ->
+                        throw IllegalStateException("Request failed with code ${response.code} and message ${error.message}")
+                    }
+                }
+
+                if (response.code == 204) {
+                    return@mapNotNull null
+                }
+
+                return@mapNotNull json.decodeFromStream<T>(deserializer, response.body!!.byteStream())
+            }
         }
     }
 
