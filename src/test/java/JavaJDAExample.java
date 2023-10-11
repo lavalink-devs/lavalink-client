@@ -111,6 +111,7 @@ public class JavaJDAExample extends ListenerAdapter {
                     Commands.slash("custom-request", "Testing custom requests"),
                     Commands.slash("join", "Join the voice channel you are in."),
                     Commands.slash("leave", "Leaves the vc"),
+                    Commands.slash("pause", "Pause or unpause the plauer"),
                     Commands.slash("play", "Play a song")
                             .addOption(
                                 OptionType.STRING,
@@ -131,6 +132,14 @@ public class JavaJDAExample extends ListenerAdapter {
             case "leave":
                 event.getJDA().getDirectAudioController().disconnect(event.getGuild());
                 event.reply("Leaving your channel!").queue();
+                break;
+            case "pause":
+                this.client.getLink(event.getGuild().getIdLong())
+                        .getPlayer()
+                        .flatMap((player) -> player.setPaused(!player.getPaused()).asMono())
+                        .subscribe((player) -> {
+                            event.reply("Player has been " + (player.getPaused() ? "paused" : "resumed") + "!").queue();
+                        });
                 break;
             case "play":
                 final Guild guild = event.getGuild();
