@@ -250,16 +250,19 @@ class LavalinkNode(
      * customJsonRequest<SomeType>{
      *     it.path("/some/plugin/path")
      *                   .get();
-     * }.subscribe {
-     *   println(it);
-     * };
+     * }.doOnSuccess {
+     *     if (it == null) {
+     *        println("http 204");
+     *     }
+     *     println(it);
+     * }.subscribe();
      * }</pre>
      *
      * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
      *
      * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
      */
-    inline fun <reified T> customJsonRequest(builderFn: UnaryOperator<HttpBuilder>): Mono<T?> =
+    inline fun <reified T> customJsonRequest(builderFn: UnaryOperator<HttpBuilder>): Mono<T> =
         customJsonRequest(json.serializersModule.serializer<T>(), builderFn)
 
     /**
@@ -271,9 +274,12 @@ class LavalinkNode(
      * customJsonRequest(SomeType.Serializer.INSTANCE, (builder) -> {
      *     return builder.path("/some/plugin/path")
      *                   .get();
-     * }).subscribe((result) -> {
-     *   println(result);
-     * });
+     * }).doOnSuccess((result) -> {
+     *     if (result == null) {
+     *        println("http 204");
+     *     }
+     *     println(result);
+     * }).subscribe();
      * }</pre>
      *
      * @param deserializer The deserializer to use for the response body (E.G. `LoadResult.Serializer.INSTANCE`)
@@ -285,20 +291,24 @@ class LavalinkNode(
     fun <T> customJsonRequest(
         deserializer: DeserializationStrategy<T>,
         builderFn: UnaryOperator<HttpBuilder>
-    ): Mono<T?> {
-        return customRequest(builderFn).mapNotNull { response ->
+    ): Mono<T> {
+        return customRequest(builderFn).flatMap { response ->
             response.use {
                 if (!response.isSuccessful) {
-                    json.decodeFromStream<Error>(response.body!!.byteStream()).let { error ->
-                        throw IllegalStateException("Request failed with code ${response.code} and message ${error.message}")
+                    val body = response.body!!.string()
+                    if (body.isEmpty()) {
+                        return@flatMap Mono.error(IllegalStateException("Request failed with code ${response.code}"))
+                    }
+                    json.decodeFromString<Error>(body).let { error ->
+                        return@flatMap Mono.error(IllegalStateException("Request failed with code ${response.code} and message ${error.message}"))
                     }
                 }
 
                 if (response.code == 204) {
-                    return@mapNotNull null
+                    return@flatMap Mono.empty()
                 }
 
-                return@mapNotNull json.decodeFromStream(deserializer, response.body!!.byteStream())
+                return@flatMap json.decodeFromStream(deserializer, response.body!!.byteStream())!!.toMono()
             }
         }
     }

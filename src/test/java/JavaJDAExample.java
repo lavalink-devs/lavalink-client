@@ -1,3 +1,4 @@
+import com.github.topi314.lavasearch.protocol.SearchResult;
 import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
@@ -109,7 +110,7 @@ public class JavaJDAExample extends ListenerAdapter {
         event.getJDA().updateCommands()
                 .addCommands(
                     Commands.slash("custom-request", "Testing custom requests"),
-                    Commands.slash("custom-request", "Testing custom requests"),
+                    Commands.slash("custom-json-request", "Testing custom json requests"),
                     Commands.slash("join", "Join the voice channel you are in."),
                     Commands.slash("leave", "Leaves the vc"),
                     Commands.slash("pause", "Pause or unpause the plauer"),
@@ -217,15 +218,22 @@ public class JavaJDAExample extends ListenerAdapter {
             }
             case "custom-json-request": {
                 final Link link = this.client.getLink(event.getGuild().getIdLong());
-                link.getNode().customJsonRequest(LoadResult.Serializer.INSTANCE,
-                        (builder) -> builder.path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up").get()
-                ).subscribe((loadResult -> {
-                    if (loadResult instanceof LoadResult.SearchResult searchResult) {
-                        event.reply("Loaded " + searchResult.getData().getTracks().size() + " tracks!").queue();
-                    } else if (loadResult instanceof LoadResult.LoadFailed loadFailed) {
-                        event.reply("Failed to load tracks! " + loadFailed.getData().getMessage()).queue();
+                link.getNode().customJsonRequest(SearchResult.Companion.serializer(),
+                        (builder) -> builder.path("/v4/loadsearch?query=ytsefarch%3Anever%20gonna%20give%20you%20up").get()
+                ).doOnSuccess((loadResult -> {
+                    if (loadResult == null) {
+                        event.reply("No load result!").queue();
+                        return;
                     }
-                }));
+                    event.reply("Response from loadsearch endpoint."
+                        + "\ntracks: " + loadResult.getTracks().size()
+                        + "\nalbums: " + loadResult.getAlbums().size()
+                        + "\nartists: " + loadResult.getArtists().size()
+                        + "\nplaylists: " + loadResult.getPlaylists().size()
+                        + "\ntexts: " + loadResult.getTexts().size()
+                    ).queue();
+
+                })).subscribe();
                 break;
             }
             default:

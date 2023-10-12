@@ -1,3 +1,4 @@
+import com.github.topi314.lavasearch.protocol.SearchResult
 import dev.arbjerg.lavalink.client.*
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider
@@ -131,25 +132,24 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
             val guildId = event.guild!!.idLong
             val link = lavalink.getLink(guildId)
 
-            link.node.customJsonRequest<LoadResult>{
-                it.get()
-                    .path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up")
-            }.subscribe {
-                when (it) {
-                    is LoadResult.SearchResult -> {
-                        event.reply("Loaded ${it.data.tracks.size} tracks!").queue()
-                    }
-
-                    is LoadResult.LoadFailed -> {
-                        event.reply("Failed to load tracks! ${it.data.message}").queue()
-                    }
-
-                    is LoadResult.NoMatches -> Unit
-                    is LoadResult.PlaylistLoaded -> Unit
-                    is LoadResult.TrackLoaded -> Unit
-                    null -> Unit
+            link.node.customJsonRequest<SearchResult>{
+                it.get().path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up")
+            }.doOnSuccess {
+                if (it == null) {
+                    event.reply("Failed to load tracks!").queue()
+                    return@doOnSuccess
                 }
-            }
+                event.reply(
+                    """
+                        Response from loadsearch endpoint.
+                        tracks: ${it.tracks.size}
+                        albums: ${it.albums.size}
+                        artists: ${it.artists.size}
+                        playlists: ${it.playlists.size}
+                        texts: ${it.texts.size}
+                        """.trimIndent()
+                ).queue()
+            }.subscribe()
         }
 
         "join" -> {
