@@ -39,8 +39,8 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
     override fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(node, guildId)
         .setEncodedTrack(encodedTrack)
 
-    override fun clearEncodedTrack() = PlayerUpdateBuilder(node, guildId)
-        .clearEncodedTrack()
+    override fun omitEncodedTrack() = PlayerUpdateBuilder(node, guildId)
+        .omitEncodedTrack()
 
     override fun setIdentifier(identifier: String?) = PlayerUpdateBuilder(node, guildId)
         .setIdentifier(identifier)
@@ -51,8 +51,8 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
     override fun setEndTime(endTime: Long?) = PlayerUpdateBuilder(node, guildId)
         .setEndTime(endTime)
 
-    override fun clearEndTime() = PlayerUpdateBuilder(node, guildId)
-        .clearEndTime()
+    override fun omitEndTime() = PlayerUpdateBuilder(node, guildId)
+        .omitEndTime()
 
     override fun setVolume(volume: Int) = PlayerUpdateBuilder(node, guildId)
         .setVolume(volume)

@@ -62,8 +62,8 @@ then connect to vc by using the [direct audio controller](https://ci.dv8tion.net
 jda.getDirectAudioController().connect(voiceChannel);
 ```
 
-
-Note: Using `Guild#getAudioManager()` will ***NOT*** work.
+> [!IMPORTANT]
+> Using `Guild#getAudioManager()` will ***NOT*** work. This is because the audio manager makes **JDA** connect to the voice channel, and we want to send the even to LavaLink.
 
 ## Installation and usage with Discord4j
 
