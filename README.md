@@ -1,4 +1,4 @@
-[VERSION]: https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.arbjerg.dev%2Fsnapshots%2Fdev%2Farbjerg%2Flavalink-client%2Fmaven-metadata.xml
+[VERSION]: https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.lavalink.dev%2Fsnapshots%2Fdev%2Farbjerg%2Flavalink-client%2Fmaven-metadata.xml
 
 # Java Lavalink client
 This is a client for Lavalink v4 only. You cannot use this with Lavalink v3.
@@ -62,8 +62,8 @@ then connect to vc by using the [direct audio controller](https://ci.dv8tion.net
 jda.getDirectAudioController().connect(voiceChannel);
 ```
 
-
-Note: Using `Guild#getAudioManager()` will ***NOT*** work.
+> [!IMPORTANT]
+> Using `Guild#getAudioManager()` will ***NOT*** work. This is because the audio manager makes **JDA** connect to the voice channel, and we want to send the even to LavaLink.
 
 ## Installation and usage with Discord4j
 

@@ -1,3 +1,7 @@
+@file:Suppress("UnstableApiUsage")
+
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.ajoberstar.grgit.Grgit
 
@@ -8,6 +12,7 @@ plugins {
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.serialization") version "1.9.0"
     id("org.ajoberstar.grgit") version "5.2.0"
+    id("com.vanniktech.maven.publish.base") version "0.25.3"
 }
 
 val (gitVersion, release) = versionFromGit()
@@ -76,6 +81,12 @@ val sourcesJar = task<Jar>("sourcesJar") {
     from(sourceSets["main"].allSource)
 }
 
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-Xlint:unchecked")
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+
 tasks.compileJava {
     source = generateKotlinSources.source
     dependsOn(generateKotlinSources)
@@ -94,15 +105,13 @@ kotlin {
     jvmToolchain(17)
 }
 
-val isSnapshot = System.getenv("SNAPSHOT") == "true"
-
 val mavenUrl: String
     get() {
         if (release) {
-            return "https://maven.arbjerg.dev/releases"
+            return "https://maven.lavalink.dev/releases"
         }
 
-        return "https://maven.arbjerg.dev/snapshots"
+        return "https://maven.lavalink.dev/snapshots"
     }
 
 publishing {
@@ -111,8 +120,8 @@ publishing {
             name = "arbjerg"
             url = uri(mavenUrl)
             credentials {
-                username = System.getenv("USERNAME")
-                password = System.getenv("PASSWORD")
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
             }
             authentication {
                 create<BasicAuthentication>("basic")
@@ -124,24 +133,24 @@ publishing {
             pom {
                 name.set(archivesBaseName)
                 description.set("Lavalink v4 client library")
-                url.set("https://github.com/duncte123/lavalink-client")
+                url.set("https://github.com/lavalink-devs/lavalink-client")
                 licenses {
                     license {
                         name.set("MIT")
-                        url.set("https://mit-license.org/")
+                        url.set("https://github.com/lavalink-devs/lavalink-client/blob/main/LICENSE")
                     }
                 }
                 developers {
                     developer {
                         id.set("duncte123")
                         name.set("Duncan Sterken")
-                        email.set("contact@duncte123.me")
+                        url.set("https://duncte123.dev/")
                     }
                 }
                 scm {
-                    connection.set("scm:git:git://github.com/duncte123/lavalink-client.git")
-                    developerConnection.set("scm:git:ssh://git@github.com:duncte123/lavalink-client.git")
-                    url.set("https://github.com/duncte123/lavalink-client")
+                    url.set("https://github.com/lavalink-devs/lavalink-client")
+                    connection.set("scm:git:git://github.com/lavalink-devs/lavalink-client.git")
+                    developerConnection.set("scm:git:ssh://git@github.com:lavalink-devs/lavalink-client.git")
                 }
             }
 
@@ -156,12 +165,46 @@ publishing {
     }
 }
 
-fun getSuffix(): String {
-    if (isSnapshot) {
-        return "-SNAPSHOT_${System.getenv("GITHUB_RUN_NUMBER")}"
-    }
+afterEvaluate {
+    plugins.withId("com.vanniktech.maven.publish.base") {
+        configure<MavenPublishBaseExtension> {
+            coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
 
-    return ""
+            if (findProperty("mavenCentralUsername") != null && findProperty("mavenCentralPassword") != null) {
+                publishToMavenCentral(SonatypeHost.S01, false)
+                if (release) {
+                    signAllPublications()
+                }
+            } else {
+                logger.lifecycle("Not publishing to OSSRH due to missing credentials")
+            }
+
+            pom {
+                url.set("https://github.com/lavalink-devs/lavalink-client")
+
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://github.com/lavalink-devs/lavalink-client/blob/main/LICENSE")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("duncte123")
+                        name.set("Duncan Sterken")
+                        url.set("https://duncte123.dev/")
+                    }
+                }
+
+                scm {
+                    url.set("https://github.com/lavalink-devs/lavalink-client")
+                    connection.set("scm:git:git://github.com/lavalink-devs/lavalink-client.git")
+                    developerConnection.set("scm:git:ssh://git@github.com:lavalink-devs/lavalink-client.git")
+                }
+            }
+        }
+    }
 }
 
 val publish: Task by tasks
@@ -170,7 +213,7 @@ publish.apply {
     dependsOn(tasks.build)
 
     onlyIf {
-        System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null
+        System.getenv("MAVEN_USERNAME") != null && System.getenv("MAVEN_PASSWORD") != null
     }
 }
 

@@ -4,12 +4,21 @@ import dev.arbjerg.lavalink.protocol.v4.Filters
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 
 interface IUpdatablePlayer {
+    /**
+     * Sets the encoded track to be played.
+     *
+     * @param encodedTrack The encoded track to be played. Set it to {@code null} to make the player stop playing.
+     */
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder
-    fun clearEncodedTrack(): PlayerUpdateBuilder
+
+    /**
+     * Omits the encoded track field from being sent during updates.
+     */
+    fun omitEncodedTrack(): PlayerUpdateBuilder
     fun setIdentifier(identifier: String?): PlayerUpdateBuilder
     fun setPosition(position: Long?): PlayerUpdateBuilder
     fun setEndTime(endTime: Long?): PlayerUpdateBuilder
-    fun clearEndTime(): PlayerUpdateBuilder
+    fun omitEndTime(): PlayerUpdateBuilder
 
     /**
      * While you could use the filters to set volume as well, do note that that is float based (1.0f is 100% volume)

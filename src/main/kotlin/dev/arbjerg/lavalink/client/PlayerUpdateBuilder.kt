@@ -22,7 +22,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         return this
     }
 
-    override fun clearEncodedTrack(): PlayerUpdateBuilder {
+    override fun omitEncodedTrack(): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.omitted()
         return this
     }
@@ -42,7 +42,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         return this
     }
 
-    override fun clearEndTime(): PlayerUpdateBuilder {
+    override fun omitEndTime(): PlayerUpdateBuilder {
         this.endTime = Omissible.omitted()
         return this
     }
