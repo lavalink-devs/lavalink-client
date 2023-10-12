@@ -7,6 +7,10 @@ import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -21,6 +25,7 @@ import java.io.IOException
 import java.net.URI
 import java.util.function.Consumer
 import java.util.function.Function
+import java.util.function.UnaryOperator
 
 class LavalinkNode(
     val name: String,
@@ -212,7 +217,7 @@ class LavalinkNode(
      *
      * @return The Http response from the node, may error with an IllegalStateException when the node is not available.
      */
-    fun customRequest(builderFn: Function<HttpBuilder, HttpBuilder>): Mono<Response> {
+    fun customRequest(builderFn: UnaryOperator<HttpBuilder>): Mono<Response> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         val call = rest.newRequest { builderFn.apply(this) }
@@ -233,6 +238,78 @@ class LavalinkNode(
                     }
                 }
             })
+        }
+    }
+
+    /**
+     * Send a custom request to the lavalink node. Any host and port you set will be replaced with the node host automatically.
+     * The scheme must match your node's scheme, however. The response body will be deserialized using the provided deserializer.
+     *
+     * It is recommended to use the path setter instead of the url setter when defining a url, like this:
+     * <pre>{@code
+     * customJsonRequest<SomeType>{
+     *     it.path("/some/plugin/path")
+     *                   .get();
+     * }.doOnSuccess {
+     *     if (it == null) {
+     *        println("http 204");
+     *     }
+     *     println(it);
+     * }.subscribe();
+     * }</pre>
+     *
+     * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
+     *
+     * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
+     */
+    inline fun <reified T> customJsonRequest(builderFn: UnaryOperator<HttpBuilder>): Mono<T> =
+        customJsonRequest(json.serializersModule.serializer<T>(), builderFn)
+
+    /**
+     * Send a custom request to the lavalink node. Any host and port you set will be replaced with the node host automatically.
+     * The scheme must match your node's scheme, however. The response body will be deserialized using the provided deserializer.
+     *
+     * It is recommended to use the path setter instead of the url setter when defining a url, like this:
+     * <pre>{@code
+     * customJsonRequest(SomeType.Serializer.INSTANCE, (builder) -> {
+     *     return builder.path("/some/plugin/path")
+     *                   .get();
+     * }).doOnSuccess((result) -> {
+     *     if (result == null) {
+     *        println("http 204");
+     *     }
+     *     println(result);
+     * }).subscribe();
+     * }</pre>
+     *
+     * @param deserializer The deserializer to use for the response body (E.G. `LoadResult.Serializer.INSTANCE`)
+     * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
+     *
+     * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    fun <T> customJsonRequest(
+        deserializer: DeserializationStrategy<T>,
+        builderFn: UnaryOperator<HttpBuilder>
+    ): Mono<T> {
+        return customRequest(builderFn).flatMap { response ->
+            response.use {
+                if (!response.isSuccessful) {
+                    val body = response.body!!.string()
+                    if (body.isEmpty()) {
+                        return@flatMap Mono.error(IllegalStateException("Request failed with code ${response.code}"))
+                    }
+                    json.decodeFromString<Error>(body).let { error ->
+                        return@flatMap Mono.error(IllegalStateException("Request failed with code ${response.code} and message ${error.message}"))
+                    }
+                }
+
+                if (response.code == 204) {
+                    return@flatMap Mono.empty()
+                }
+
+                return@flatMap json.decodeFromStream(deserializer, response.body!!.byteStream())!!.toMono()
+            }
         }
     }
 

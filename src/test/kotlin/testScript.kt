@@ -1,3 +1,4 @@
+import com.github.topi314.lavasearch.protocol.SearchResult
 import dev.arbjerg.lavalink.client.*
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider
@@ -51,6 +52,7 @@ fun main() {
                     event.jda.updateCommands()
                         .addCommands(
                             Commands.slash("custom-request", "Testing custom requests"),
+                            Commands.slash("custom-json-request", "Testing custom json requests"),
                             Commands.slash("join", "Join the voice channel you are in."),
                             Commands.slash("leave", "Leaves the vc"),
                             Commands.slash("play", "Play a song")
@@ -124,6 +126,30 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
                     event.reply("Response from version endpoint (with custom request): $bodyStr").queue()
                 }
             }
+        }
+
+        "custon-json-request" -> {
+            val guildId = event.guild!!.idLong
+            val link = lavalink.getLink(guildId)
+
+            link.node.customJsonRequest<SearchResult>{
+                it.get().path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up")
+            }.doOnSuccess {
+                if (it == null) {
+                    event.reply("Failed to load tracks!").queue()
+                    return@doOnSuccess
+                }
+                event.reply(
+                    """
+                        Response from loadsearch endpoint.
+                        tracks: ${it.tracks.size}
+                        albums: ${it.albums.size}
+                        artists: ${it.artists.size}
+                        playlists: ${it.playlists.size}
+                        texts: ${it.texts.size}
+                        """.trimIndent()
+                ).queue()
+            }.subscribe()
         }
 
         "join" -> {

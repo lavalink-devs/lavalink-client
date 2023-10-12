@@ -31,6 +31,7 @@ repositories {
     mavenCentral()
     maven("https://maven.arbjerg.dev/releases")
     maven("https://maven.arbjerg.dev/snapshots")
+    maven("https://maven.topi.wtf/releases")
     // Note to self: jitpack always comes last
     maven("https://jitpack.io")
 }
@@ -52,6 +53,7 @@ dependencies {
     testImplementation("net.dv8tion:JDA:5.0.0-beta.11")
     testImplementation("com.discord4j:discord4j-core:3.2.3")
     testImplementation("org.slf4j:slf4j-simple:2.0.7")
+    testImplementation("com.github.topi314.lavasearch:lavasearch-protocol:1.0.0-beta.2")
 }
 
 val sourcesForRelease = task<Copy>("sourcesForRelease") {
