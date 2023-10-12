@@ -137,7 +137,7 @@ publishing {
                 licenses {
                     license {
                         name.set("MIT")
-                        url.set("https://mit-license.org/")
+                        url.set("https://github.com/lavalink-devs/lavalink-client/blob/main/LICENSE")
                     }
                 }
                 developers {
@@ -148,9 +148,9 @@ publishing {
                     }
                 }
                 scm {
+                    url.set("https://github.com/lavalink-devs/lavalink-client")
                     connection.set("scm:git:git://github.com/lavalink-devs/lavalink-client.git")
                     developerConnection.set("scm:git:ssh://git@github.com:lavalink-devs/lavalink-client.git")
-                    url.set("https://github.com/lavalink-devs/lavalink-client")
                 }
             }
 
@@ -170,7 +170,7 @@ afterEvaluate {
         configure<MavenPublishBaseExtension> {
             coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
 
-            if (System.getenv("MAVEN_USERNAME") != null && System.getenv("MAVEN_PASSWORD") != null) {
+            if (findProperty("mavenCentralUsername") != null && findProperty("mavenCentralPassword") != null) {
                 publishToMavenCentral(SonatypeHost.S01, false)
                 if (release) {
                     signAllPublications()
@@ -185,7 +185,7 @@ afterEvaluate {
                 licenses {
                     license {
                         name.set("MIT")
-                        url.set("https://mit-license.org/")
+                        url.set("https://github.com/lavalink-devs/lavalink-client/blob/main/LICENSE")
                     }
                 }
 
