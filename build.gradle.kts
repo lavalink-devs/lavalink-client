@@ -108,10 +108,10 @@ kotlin {
 val mavenUrl: String
     get() {
         if (release) {
-            return "https://maven.arbjerg.dev/releases"
+            return "https://maven.lavalink.dev/releases"
         }
 
-        return "https://maven.arbjerg.dev/snapshots"
+        return "https://maven.lavalink.dev/snapshots"
     }
 
 publishing {
