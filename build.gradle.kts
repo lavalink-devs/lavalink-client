@@ -213,7 +213,7 @@ publish.apply {
     dependsOn(tasks.build)
 
     onlyIf {
-        System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null
+        System.getenv("MAVEN_USERNAME") != null && System.getenv("MAVEN_PASSWORD") != null
     }
 }
 
