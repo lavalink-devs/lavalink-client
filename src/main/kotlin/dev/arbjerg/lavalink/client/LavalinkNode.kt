@@ -69,7 +69,9 @@ class LavalinkNode(
     override fun close() {
         available = false
         ws.close()
+        httpClient.dispatcher.executorService.shutdown()
         httpClient.connectionPool.evictAll()
+        httpClient.cache?.close()
         reference.dispose()
     }
 
