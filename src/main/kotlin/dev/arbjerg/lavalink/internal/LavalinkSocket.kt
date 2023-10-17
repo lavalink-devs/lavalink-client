@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.io.EOFException
 import java.net.ConnectException
+import java.net.SocketException
 
 class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Closeable {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
@@ -94,7 +95,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         if (mayReconnect) {
-            logger.info("${node.name} disconnected! (yell at devs to implement auto re-connect)")
+            logger.info("${node.name} disconnected, reconnecting in ${reconnectInterval / 1000} seconds")
             node.available = false
             open = false
         }
@@ -112,6 +113,18 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
             is ConnectException -> {
                 logger.error("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds", t)
+            }
+
+            is SocketException -> {
+                if (!open) {
+                    // We closed the connection, ty okhttp for informing us.
+                    logger.debug("Got a socket exception on ${node.name}, but the socket is closed. Ignoring it", t)
+                    return
+                }
+
+                logger.error("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds", t)
+                node.available = false
+                open = false
             }
 
             else -> {
