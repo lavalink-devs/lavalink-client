@@ -69,6 +69,7 @@ class LavalinkNode(
     override fun close() {
         available = false
         ws.close()
+        httpClient.connectionPool.evictAll()
         reference.dispose()
     }
 
