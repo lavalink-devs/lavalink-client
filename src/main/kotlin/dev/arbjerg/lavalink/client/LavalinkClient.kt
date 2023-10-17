@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit
 class LavalinkClient(val userId: Long) : Closeable, Disposable {
     private val internalNodes = mutableListOf<LavalinkNode>()
     private val links = mutableMapOf<Long, Link>()
+    private var clientOpen = true
 
     // Immutable public list
     val nodes: List<LavalinkNode> = internalNodes
@@ -91,6 +92,11 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     fun getLinkIfCached(guildId: Long): Link? = links[guildId]
 
     internal fun onNodeDisconnected(node: LavalinkNode) {
+        // Don't do anything if we are shutting down.
+        if (!clientOpen) {
+            return
+        }
+
         if (nodes.size == 1) {
             links.forEach { (_, link) ->
                 link.state = LinkState.DISCONNECTED
@@ -116,9 +122,10 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      * Close the client and disconnect all nodes.
      */
     override fun close() {
-        reconnectService.shutdown()
-        reference.dispose()
+        clientOpen = false
+        reconnectService.shutdownNow()
         nodes.forEach { it.close() }
+        reference.dispose()
     }
 
     override fun dispose() {

@@ -93,9 +93,11 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        logger.info("${node.name} disconnected! (yell at devs to implement auto re-connect)")
-        node.available = false
-        open = false
+        if (mayReconnect) {
+            logger.info("${node.name} disconnected! (yell at devs to implement auto re-connect)")
+            node.available = false
+            open = false
+        }
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -167,6 +169,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     override fun close() {
         mayReconnect = false
         open = false
+        socket?.close(1000, "Client shutdown")
         socket?.cancel()
     }
 }

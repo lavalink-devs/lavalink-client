@@ -63,12 +63,13 @@ class LavalinkNode(
     internal val playerCache = mutableMapOf<Long, LavalinkPlayer>()
 
     override fun dispose() {
-        reference.dispose()
+        close()
     }
 
     override fun close() {
+        available = false
         ws.close()
-        dispose()
+        reference.dispose()
     }
 
     // For the java people
