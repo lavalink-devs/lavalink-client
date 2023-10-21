@@ -16,7 +16,8 @@ Or copy/download it [here](https://maven.arbjerg.dev/#/snapshots/dev/arbjerg/lav
 ### Gradle instructions
 ```gradle
 repositories {
-    maven("https://maven.arbjerg.dev/snapshots")
+    maven("https://maven.lavalink.dev/releases") // Required for the protocol library
+    maven("https://maven.lavalink.dev/snapshots") // This is for the client
 }
 
 dependencies {
@@ -26,11 +27,18 @@ dependencies {
 
 ### Maven instructions
 ```maven
-<repository>
-    <id>arbjerg</id>
-    <name>arbjerg</name>
-    <url>https://maven.arbjerg.dev/snapshots</url>
-</repository>
+<repositories>
+    <repository>
+        <id>ll-releases</id>
+        <name>Lavalink Releases</name>
+        <url>https://maven.lavalink.dev/releases</url>
+    </repository>
+    <repository>
+        <id>ll-snapshots</id>
+        <name>Lavalink Snapshots</name>
+        <url>https://maven.lavalink.dev/snapshots</url>
+    </repository>
+</repositories>
 
 <dependency>
   <groupId>dev.arbjerg</groupId>
@@ -64,6 +72,7 @@ jda.getDirectAudioController().connect(voiceChannel);
 
 > [!IMPORTANT]
 > Using `Guild#getAudioManager()` will ***NOT*** work. This is because the audio manager makes **JDA** connect to the voice channel, and we want to send the even to LavaLink.
+> You can however use `Member#getVoiceState` perfectly fine
 
 ## Installation and usage with Discord4j
 
