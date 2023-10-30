@@ -2,10 +2,8 @@
 
 package dev.arbjerg.lavalink.client
 
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
+import java.util.Base64
 
-@OptIn(ExperimentalEncodingApi::class)
 fun getUserIdFromToken(token: String): Long {
     val parts = token.split(".")
 
@@ -14,7 +12,7 @@ fun getUserIdFromToken(token: String): Long {
     }
 
     try {
-        val uIdStr = String(Base64.decode(parts[0]))
+        val uIdStr = String(Base64.getDecoder().decode(parts[0]))
 
         return uIdStr.toLong()
     } catch (e: Exception) {
