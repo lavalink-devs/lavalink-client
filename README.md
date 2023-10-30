@@ -8,6 +8,7 @@ Feature overview:
 - Load balancing based on server metrics and voice server region.
 - Make your own custom load balancers and penalty providers!
 - Lightweight
+- Compiled for java 17
 
 Current version (remove the `v` prefix): ![Latest version][VERSION]
 
