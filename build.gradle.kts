@@ -177,7 +177,7 @@ publishing {
 mavenPublishing {
     configure(KotlinJvm(
         javadocJar = JavadocJar.Dokka("dokkaJavadoc"),
-        sourcesJar = true
+        sourcesJar = false
     ))
 }
 
