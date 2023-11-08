@@ -147,41 +147,6 @@ publishing {
             }
         }
     }
-    /*publications {
-        register<MavenPublication>("arbjerg") {
-            pom {
-                name.set(archivesBaseName)
-                description.set("Lavalink v4 client library")
-                url.set("https://github.com/lavalink-devs/lavalink-client")
-                licenses {
-                    license {
-                        name.set("MIT")
-                        url.set("https://github.com/lavalink-devs/lavalink-client/blob/main/LICENSE")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("duncte123")
-                        name.set("Duncan Sterken")
-                        url.set("https://duncte123.dev/")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/lavalink-devs/lavalink-client")
-                    connection.set("scm:git:git://github.com/lavalink-devs/lavalink-client.git")
-                    developerConnection.set("scm:git:ssh://git@github.com:lavalink-devs/lavalink-client.git")
-                }
-            }
-
-            from(components["java"])
-
-            artifactId = archivesBaseName
-            groupId = project.group as String
-            version = project.version as String
-
-            artifact(sourcesJar)
-        }
-    }*/
 }
 
 mavenPublishing {
@@ -206,6 +171,8 @@ afterEvaluate {
             }
 
             pom {
+                name.set(archivesBaseName)
+                description.set("Lavalink v4 client library")
                 url.set("https://github.com/lavalink-devs/lavalink-client")
 
                 licenses {
