@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -11,6 +13,7 @@ plugins {
     `maven-publish`
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.serialization") version "1.9.0"
+    id("org.jetbrains.dokka") version "1.9.10"
     id("org.ajoberstar.grgit") version "5.2.0"
     id("com.vanniktech.maven.publish.base") version "0.25.3"
 }
@@ -95,7 +98,7 @@ tasks.compileJava {
 }
 
 tasks.build {
-    dependsOn(tasks.javadoc)
+    dependsOn(tasks.dokkaJavadoc)
 }
 
 tasks.test {
@@ -169,6 +172,13 @@ publishing {
             artifact(sourcesJar)
         }
     }
+}
+
+mavenPublishing {
+    configure(KotlinJvm(
+        javadocJar = JavadocJar.Dokka("dokkaJavadoc"),
+        sourcesJar = true
+    ))
 }
 
 afterEvaluate {
