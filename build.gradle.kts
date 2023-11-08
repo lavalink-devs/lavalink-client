@@ -110,6 +110,10 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.BIN
 }
 
+tasks.withType<PublishToMavenRepository> {
+    dependsOn(tasks.kotlinSourcesJar)
+}
+
 kotlin {
     jvmToolchain(17)
 }
@@ -177,7 +181,7 @@ publishing {
 mavenPublishing {
     configure(KotlinJvm(
         javadocJar = JavadocJar.Dokka("dokkaJavadoc"),
-        sourcesJar = false
+        sourcesJar = true
     ))
 }
 
