@@ -111,6 +111,7 @@ tasks.wrapper {
 }
 
 tasks.withType<PublishToMavenRepository> {
+    dependsOn(sourcesJar)
     dependsOn(tasks.kotlinSourcesJar)
 }
 
