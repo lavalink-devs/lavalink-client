@@ -147,7 +147,7 @@ publishing {
             }
         }
     }
-    publications {
+    /*publications {
         register<MavenPublication>("arbjerg") {
             pom {
                 name.set(archivesBaseName)
@@ -181,7 +181,7 @@ publishing {
 
             artifact(sourcesJar)
         }
-    }
+    }*/
 }
 
 mavenPublishing {
