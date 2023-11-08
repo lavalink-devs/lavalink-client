@@ -110,6 +110,11 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.BIN
 }
 
+tasks.withType<Sign> {
+    dependsOn(sourcesJar)
+    dependsOn(tasks.kotlinSourcesJar)
+}
+
 tasks.withType<PublishToMavenRepository> {
     dependsOn(sourcesJar)
     dependsOn(tasks.kotlinSourcesJar)
