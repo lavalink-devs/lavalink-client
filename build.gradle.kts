@@ -94,6 +94,10 @@ tasks.compileJava {
     dependsOn(generateKotlinSources)
 }
 
+tasks.build {
+    dependsOn(tasks.javadoc)
+}
+
 tasks.test {
     useJUnitPlatform()
 }
