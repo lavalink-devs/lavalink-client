@@ -1,4 +1,4 @@
-[VERSION]: https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.lavalink.dev%2Fsnapshots%2Fdev%2Farbjerg%2Flavalink-client%2Fmaven-metadata.xml
+[VERSION]: https://img.shields.io/maven-central/v/dev.arbjerg/lavalink-client
 
 # Java Lavalink client
 This is a client for Lavalink v4 only. You cannot use this with Lavalink v3.
@@ -18,7 +18,6 @@ Or copy/download it [here](https://maven.arbjerg.dev/#/snapshots/dev/arbjerg/lav
 ```gradle
 repositories {
     maven("https://maven.lavalink.dev/releases") // Required for the protocol library
-    maven("https://maven.lavalink.dev/snapshots") // This is for the client
 }
 
 dependencies {
@@ -33,11 +32,6 @@ dependencies {
         <id>ll-releases</id>
         <name>Lavalink Releases</name>
         <url>https://maven.lavalink.dev/releases</url>
-    </repository>
-    <repository>
-        <id>ll-snapshots</id>
-        <name>Lavalink Snapshots</name>
-        <url>https://maven.lavalink.dev/snapshots</url>
     </repository>
 </repositories>
 
