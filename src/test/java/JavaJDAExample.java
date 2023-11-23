@@ -101,6 +101,21 @@ public class JavaJDAExample extends ListenerAdapter {
                     event.getPlayers()
             );
         });
+
+        this.client.on(EmittedEvent.class).subscribe((data) -> {
+            if (data instanceof TrackStartEvent) {
+                System.out.println("Is a track start event!");
+            }
+
+            final var node = data.getNode();
+            final var event = data.getEvent();
+
+            System.out.printf(
+                    "Node '%s' emitted event: %s%n",
+                    node.getName(),
+                    event
+            );
+        });
     }
 
     @Override

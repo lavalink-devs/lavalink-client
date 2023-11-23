@@ -33,6 +33,18 @@ fun main() {
             println("Node '${node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
         }
 
+    client.on<EmittedEvent<*>>()
+        .subscribe { raw ->
+            if (raw is TrackStartEvent) {
+                println("Is a track start event!")
+            }
+
+            val node = raw.node
+            val event = raw.event
+
+            println("Node '${node.name}' emitted event: $event")
+        }
+
     JDABuilder.createDefault(token)
         .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
         .enableIntents(

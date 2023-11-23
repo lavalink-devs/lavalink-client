@@ -26,20 +26,20 @@ data class StatsEvent(override val node: LavalinkNode, override val event: Messa
     : ClientEvent<Message.StatsEvent>(node, event)
 
 // Player events
-data class EmittedEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent)
-    : ClientEvent<Message.EmittedEvent>(node, event)
+sealed class EmittedEvent<T : Message.EmittedEvent>(override val node: LavalinkNode, override val event: T)
+    : ClientEvent<T>(node, event)
 
 data class TrackStartEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackStartEvent)
-    : ClientEvent<Message.EmittedEvent.TrackStartEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackStartEvent>(node, event)
 
 data class TrackEndEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackEndEvent)
-    : ClientEvent<Message.EmittedEvent.TrackEndEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackEndEvent>(node, event)
 
 data class TrackExceptionEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackExceptionEvent)
-    : ClientEvent<Message.EmittedEvent.TrackExceptionEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackExceptionEvent>(node, event)
 
 data class TrackStuckEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackStuckEvent)
-    : ClientEvent<Message.EmittedEvent.TrackStuckEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackStuckEvent>(node, event)
 
 data class WebSocketClosedEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.WebSocketClosedEvent)
-    : ClientEvent<Message.EmittedEvent.WebSocketClosedEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.WebSocketClosedEvent>(node, event)
