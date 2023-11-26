@@ -10,7 +10,7 @@ import kotlin.math.min
 class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : IUpdatablePlayer {
     private var encodedTrack: Omissible<String?> = Omissible.omitted()
     private var identifier: Omissible<String> = Omissible.omitted()
-    private var tracKUserData: Omissible<JsonObject> = Omissible.Omitted()
+    private var trackUserData: Omissible<JsonObject> = Omissible.Omitted()
     private var position: Omissible<Long> = Omissible.omitted()
     private var endTime: Omissible<Long?> = Omissible.omitted()
     private var volume: Omissible<Int> = Omissible.omitted()
@@ -21,7 +21,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
 
     override fun applyTrack(track: Track): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.of(track.encoded)
-        this.tracKUserData = Omissible.of(track.userData)
+        this.trackUserData = Omissible.of(track.userData)
         return this
     }
 
@@ -96,19 +96,17 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun build() = PlayerUpdate(
-        Omissible.omitted(),
-        Omissible.omitted(),
-        PlayerUpdateTrack(
+        track = PlayerUpdateTrack(
             encodedTrack,
             identifier,
-            tracKUserData,
+            trackUserData,
         ).toOmissible(),
-        position,
-        endTime,
-        volume,
-        paused,
-        filters,
-        state
+        position = position,
+        endTime = endTime,
+        volume = volume,
+        paused = paused,
+        filters = filters,
+        voice = state
     )
 
     fun asMono(): Mono<LavalinkPlayer> {
