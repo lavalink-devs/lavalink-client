@@ -20,7 +20,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     private var noReplace = false
 
     override fun applyTrack(track: Track): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.of(track.info.identifier)
+        this.encodedTrack = Omissible.of(track.encoded)
         this.tracKUserData = Omissible.of(track.userData)
         return this
     }
