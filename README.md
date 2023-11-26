@@ -1,7 +1,11 @@
 [VERSION]: https://img.shields.io/maven-central/v/dev.arbjerg/lavalink-client
 
 # Java Lavalink client
-This is a client for Lavalink v4 only. You cannot use this with Lavalink v3.
+
+> [!WARNING]
+> This is a client for Lavalink v4 only.
+> You cannot use this with Lavalink v3.
+
 
 Feature overview:
 - Works with any discord library (as long as they allow for sending direct request to discord)

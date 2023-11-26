@@ -2,6 +2,7 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
+import kotlinx.serialization.json.JsonObject
 import reactor.core.publisher.Mono
 import kotlin.math.max
 import kotlin.math.min
@@ -9,6 +10,7 @@ import kotlin.math.min
 class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : IUpdatablePlayer {
     private var encodedTrack: Omissible<String?> = Omissible.omitted()
     private var identifier: Omissible<String> = Omissible.omitted()
+    private var tracKUserData: Omissible<JsonObject> = Omissible.Omitted()
     private var position: Omissible<Long> = Omissible.omitted()
     private var endTime: Omissible<Long?> = Omissible.omitted()
     private var volume: Omissible<Int> = Omissible.omitted()
@@ -16,6 +18,12 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     private var filters: Omissible<Filters> = Omissible.omitted()
     private var state: Omissible<VoiceState> = Omissible.omitted()
     private var noReplace = false
+
+    override fun applyTrack(track: Track): PlayerUpdateBuilder {
+        this.encodedTrack = Omissible.of(track.info.identifier)
+        this.tracKUserData = Omissible.of(track.userData)
+        return this
+    }
 
     override fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.of(encodedTrack)
@@ -86,17 +94,24 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         return this
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun build() = PlayerUpdate(
-        encodedTrack, identifier, position, endTime, volume, paused, filters, state
+        Omissible.omitted(),
+        Omissible.omitted(),
+        PlayerUpdateTrack(
+            encodedTrack,
+            identifier,
+            tracKUserData,
+        ).toOmissible(),
+        position,
+        endTime,
+        volume,
+        paused,
+        filters,
+        state
     )
 
     fun asMono(): Mono<LavalinkPlayer> {
-        /*val cachedPlayer = node.playerCache[guildId]
-
-        if ((cachedPlayer == null || !cachedPlayer.state.connected) && state.isOmitted()) {
-            return Mono.error(IllegalStateException("Player is not connected to a voice channel."))
-        }*/
-
         return node.rest.updatePlayer(build(), guildId, noReplace)
             .map { it.toLavalinkPlayer(node) }
             .doOnNext {

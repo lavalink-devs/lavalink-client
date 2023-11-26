@@ -1,9 +1,6 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.protocol.v4.Filters
-import dev.arbjerg.lavalink.protocol.v4.Player
-import dev.arbjerg.lavalink.protocol.v4.PlayerState
-import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import dev.arbjerg.lavalink.protocol.v4.*
 import kotlin.math.min
 
 class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : IUpdatablePlayer {
@@ -35,6 +32,9 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
                 else -> min(state.position + (System.currentTimeMillis() - state.time), track.info.length)
             }
         }
+
+    override fun applyTrack(track: Track) = PlayerUpdateBuilder(node, guildId)
+        .applyTrack(track)
 
     override fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(node, guildId)
         .setEncodedTrack(encodedTrack)

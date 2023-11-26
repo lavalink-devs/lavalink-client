@@ -1,9 +1,19 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.protocol.v4.Filters
+import dev.arbjerg.lavalink.protocol.v4.Track
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 
 interface IUpdatablePlayer {
+    /**
+     * Shortcut for setting the encoded track. This will also send any user-data supplied.
+     *
+     * @param track The track to apply to this builder
+     *
+     * @return The updated builder, useful for chaining
+     */
+    fun applyTrack(track: Track): PlayerUpdateBuilder
+
     /**
      * Sets the encoded track to be played.
      *
