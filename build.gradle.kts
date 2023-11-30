@@ -11,11 +11,11 @@ plugins {
     java
     `java-library`
     `maven-publish`
-    kotlin("jvm") version "1.9.21"
-    kotlin("plugin.serialization") version "1.9.21"
-    id("org.jetbrains.dokka") version "1.9.10"
-    id("org.ajoberstar.grgit") version "5.2.0"
-    id("com.vanniktech.maven.publish.base") version "0.25.3"
+    kotlin("jvm") version libs.versions.kotlin
+    kotlin("plugin.serialization") version libs.versions.kotlin
+    id("org.jetbrains.dokka") version libs.versions.dokka
+    id("org.ajoberstar.grgit") version libs.versions.grgit
+    id("com.vanniktech.maven.publish.base") version libs.versions.maven.publish
 }
 
 val (gitVersion, release) = versionFromGit()
@@ -42,21 +42,21 @@ repositories {
 dependencies {
     // package libraries
     api(kotlin("stdlib"))
-    api("dev.arbjerg.lavalink:protocol:47201924be7d5a459753fc85f00ca30e49ba3cd1-SNAPSHOT")
-    api("com.squareup.okhttp3:okhttp:4.10.0")
-    api("io.projectreactor:reactor-core:3.5.6")
-    api("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
-    api("org.slf4j:slf4j-api:2.0.7")
+    api(libs.kotlin)
+    api(libs.lavalink.protocol)
+    api(libs.okhttp)
+    api(libs.bundles.reactor)
+    api(libs.logger.api)
 
     // Discord library support
-    compileOnly("net.dv8tion:JDA:5.0.0-beta.11")
-    compileOnly("com.discord4j:discord4j-core:3.2.3")
+    compileOnly(libs.jda)
+    compileOnly(libs.d4j)
 
     testImplementation(kotlin("test"))
-    testImplementation("net.dv8tion:JDA:5.0.0-beta.11")
-    testImplementation("com.discord4j:discord4j-core:3.2.3")
-    testImplementation("org.slf4j:slf4j-simple:2.0.7")
-    testImplementation("com.github.topi314.lavasearch:lavasearch-protocol:1.0.0-beta.2")
+    testImplementation(libs.jda)
+    testImplementation(libs.d4j)
+    testImplementation(libs.logger.impl)
+    testImplementation(libs.lavasearch)
 }
 
 val sourcesForRelease = task<Copy>("sourcesForRelease") {
