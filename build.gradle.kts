@@ -11,8 +11,8 @@ plugins {
     java
     `java-library`
     `maven-publish`
-    kotlin("jvm") version "1.9.0"
-    kotlin("plugin.serialization") version "1.9.0"
+    kotlin("jvm") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.21"
     id("org.jetbrains.dokka") version "1.9.10"
     id("org.ajoberstar.grgit") version "5.2.0"
     id("com.vanniktech.maven.publish.base") version "0.25.3"
@@ -41,12 +41,13 @@ repositories {
 
 dependencies {
     // package libraries
-    api("dev.arbjerg.lavalink:protocol:47201924be7d5a459753fc85f00ca30e49ba3cd1-SNAPSHOT")
+    api(kotlin("stdlib"))
+//    api("dev.arbjerg.lavalink:protocol:47201924be7d5a459753fc85f00ca30e49ba3cd1-SNAPSHOT")
+    api("dev.arbjerg.lavalink:protocol:4.0.0-beta.5")
     api("com.squareup.okhttp3:okhttp:4.10.0")
     api("io.projectreactor:reactor-core:3.5.6")
     api("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
     api("org.slf4j:slf4j-api:2.0.7")
-
 
     // Discord library support
     compileOnly("net.dv8tion:JDA:5.0.0-beta.11")
