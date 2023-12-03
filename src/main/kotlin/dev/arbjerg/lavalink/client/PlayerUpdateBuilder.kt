@@ -19,9 +19,16 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     private var state: Omissible<VoiceState> = Omissible.omitted()
     private var noReplace = false
 
-    override fun applyTrack(track: Track): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.of(track.encoded)
-        this.trackUserData = Omissible.of(track.userData)
+    override fun applyTrack(track: Track?): PlayerUpdateBuilder {
+        this.encodedTrack = Omissible.of(track?.encoded)
+        this.trackUserData = track?.userData.toOmissible()
+        return this
+    }
+
+    override fun stopTrack(): PlayerUpdateBuilder {
+        this.encodedTrack = Omissible.of(null)
+        this.identifier = null.toOmissible()
+        this.trackUserData = null.toOmissible()
         return this
     }
 

@@ -33,8 +33,11 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
             }
         }
 
-    override fun applyTrack(track: Track) = PlayerUpdateBuilder(node, guildId)
+    override fun applyTrack(track: Track?) = PlayerUpdateBuilder(node, guildId)
         .applyTrack(track)
+
+    override fun stopTrack() = PlayerUpdateBuilder(node, guildId)
+        .stopTrack()
 
     override fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(node, guildId)
         .setEncodedTrack(encodedTrack)

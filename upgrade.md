@@ -14,6 +14,7 @@ This client also uses project reactor, their docs are over at https://projectrea
 - `LavalinkRestClient` -> `Node`
 - `LavalinkLoadBalancer` -> `DefaultLoadBalancer`
 - `PenaltyProvider` -> `IPenaltyProvider`
+- `IPlayer#stopTrack` -> Set encodedTrack to `null` on the player. 
 - Any filters -> they are in `dev.arbjerg.lavalink.protocol.v4.Filters` class.
 
 If you are missing anything from here, feel free to let me know in the lavalink discord

@@ -12,7 +12,12 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      */
-    fun applyTrack(track: Track): PlayerUpdateBuilder
+    fun applyTrack(track: Track?): PlayerUpdateBuilder
+
+    /**
+     * Shortcut for setting the encoded track to {@code null}. This will also clear the user data.
+     */
+    fun stopTrack(): PlayerUpdateBuilder
 
     /**
      * Sets the encoded track to be played.
