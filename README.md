@@ -71,7 +71,7 @@ jda.getDirectAudioController().connect(voiceChannel);
 
 > [!IMPORTANT]
 > Using `Guild#getAudioManager()` will ***NOT*** work. This is because the audio manager makes **JDA** connect to the voice channel, and we want to send the even to LavaLink.
-> You can however use `Member#getVoiceState` perfectly fine
+> You can however use `Member#getVoiceState` perfectly fine, this is also how you get the voice channel that your bot is in.
 
 ## Installation and usage with Discord4j
 
