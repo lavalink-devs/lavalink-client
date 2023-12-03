@@ -27,12 +27,16 @@ interface IUpdatablePlayer {
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder
 
     /**
-     * Omits the encoded track field from being sent during updates.
+     * Omits the encoded track field from being sent to the node during updates.
      */
     fun omitEncodedTrack(): PlayerUpdateBuilder
     fun setIdentifier(identifier: String?): PlayerUpdateBuilder
     fun setPosition(position: Long?): PlayerUpdateBuilder
     fun setEndTime(endTime: Long?): PlayerUpdateBuilder
+
+    /**
+     * Omits the end time from being sent to the node during updates.
+     */
     fun omitEndTime(): PlayerUpdateBuilder
 
     /**
@@ -44,5 +48,10 @@ interface IUpdatablePlayer {
     fun setVolume(volume: Int): PlayerUpdateBuilder
     fun setPaused(paused: Boolean): PlayerUpdateBuilder
     fun setFilters(filters: Filters): PlayerUpdateBuilder
+
+    /**
+     * Update the voice state for the player.<br>
+     * <strong>IMPORTANT:</strong> Only ever use [Link.onVoiceServerUpdate] to update the voice server as this sets the state of the link to [LinkState.CONNECTING]
+     */
     fun setVoiceState(state: VoiceState): PlayerUpdateBuilder
 }

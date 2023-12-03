@@ -61,6 +61,7 @@ class Link(
 
     fun onVoiceServerUpdate(newVoiceState: VoiceState) {
         if (node.available) {
+            state = LinkState.CONNECTING
             node.createOrUpdatePlayer(guildId)
                 .setVoiceState(newVoiceState)
                 .asMono()
