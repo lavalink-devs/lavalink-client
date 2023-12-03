@@ -3,6 +3,7 @@
 package dev.arbjerg.lavalink.libraries.discord4j
 
 import dev.arbjerg.lavalink.client.LavalinkClient
+import dev.arbjerg.lavalink.client.LinkState
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import discord4j.core.GatewayDiscordClient
@@ -32,8 +33,10 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         val playerState = player.state
 
         if (channel == null && playerState.connected) {
+            link.state = LinkState.DISCONNECTED
             link.destroyPlayer()
         } else {
+            link.state = LinkState.CONNECTED
             Mono.empty()
         }
     }.subscribe()
