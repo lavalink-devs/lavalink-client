@@ -12,7 +12,15 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      */
-    fun applyTrack(track: Track?): PlayerUpdateBuilder
+    fun setTrack(track: Track?): PlayerUpdateBuilder
+
+    @Deprecated(
+        message = "Use setTrack instead",
+        replaceWith = ReplaceWith("setTrack(track)")
+    )
+    fun applyTrack(track: Track?): PlayerUpdateBuilder {
+        return setTrack(track)
+    }
 
     /**
      * Shortcut for setting the encoded track to {@code null}. This will also clear the user data.

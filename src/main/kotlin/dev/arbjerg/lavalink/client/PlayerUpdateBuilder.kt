@@ -3,6 +3,7 @@ package dev.arbjerg.lavalink.client
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlinx.serialization.json.JsonObject
+import org.checkerframework.checker.optional.qual.Present
 import reactor.core.publisher.Mono
 import kotlin.math.max
 import kotlin.math.min
@@ -19,7 +20,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     private var state: Omissible<VoiceState> = Omissible.omitted()
     private var noReplace = false
 
-    override fun applyTrack(track: Track?): PlayerUpdateBuilder {
+    override fun setTrack(track: Track?): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.of(track?.encoded)
         this.trackUserData = track?.userData.toOmissible()
         return this
@@ -107,11 +108,14 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun build() = PlayerUpdate(
-        track = PlayerUpdateTrack(
-            encodedTrack,
-            identifier,
-            trackUserData,
-        ).toOmissible(),
+        track = if (encodedTrack is Omissible.Present || identifier.isPresent())
+            PlayerUpdateTrack(
+                encodedTrack,
+                identifier,
+                trackUserData,
+            ).toOmissible()
+        else
+            Omissible.omitted(),
         position = position,
         endTime = endTime,
         volume = volume,

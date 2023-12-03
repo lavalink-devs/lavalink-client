@@ -11,7 +11,8 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
      *
      * To get the current position of the track, use [position].
      */
-    val track = protocolPlayer.track
+    var track = protocolPlayer.track
+        internal set
 
     /**
      * Number between 0 and 1000, where 100 is 100% volume.
@@ -30,15 +31,16 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
 
     val position: Long
         get() {
+            val checkedTrack = track
             return when {
-                track == null -> 0
+                checkedTrack == null -> 0
                 paused -> state.position
-                else -> min(state.position + (System.currentTimeMillis() - state.time), track.info.length)
+                else -> min(state.position + (System.currentTimeMillis() - state.time), checkedTrack.info.length)
             }
         }
 
-    override fun applyTrack(track: Track?) = PlayerUpdateBuilder(node, guildId)
-        .applyTrack(track)
+    override fun setTrack(track: Track?) = PlayerUpdateBuilder(node, guildId)
+        .setTrack(track)
 
     override fun stopTrack() = PlayerUpdateBuilder(node, guildId)
         .stopTrack()
