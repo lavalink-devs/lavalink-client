@@ -173,24 +173,31 @@ public class JavaJDAExample extends ListenerAdapter {
                 final long guildId = guild.getIdLong();
                 final Link link = this.client.getLink(guildId);
 
-                link.loadItem(identifier).subscribe((item) -> {
-                    if (item instanceof LoadResult.TrackLoaded trackLoaded) {
-                        final Track track = trackLoaded.getData();
+                link.loadItem(identifier).subscribe(new AbstractAudioLoadResultHandler() {
+                    @Override
+                    public void ontrackLoaded(@NotNull LoadResult.TrackLoaded result) {
+                        final Track track = result.getData();
 
                         link.createOrUpdatePlayer()
-                                .setEncodedTrack(track.getEncoded())
-                                .setVolume(35)
-                                .asMono()
-                                .subscribe((ignored) -> {
-                                    event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
-                                });
-                    } else if (item instanceof LoadResult.PlaylistLoaded playlistLoaded) {
-                        final int trackCount = playlistLoaded.getData().getTracks().size();
+                            .setEncodedTrack(track.getEncoded())
+                            .setVolume(35)
+                            .asMono()
+                            .subscribe((ignored) -> {
+                                event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
+                            });
+                    }
+
+                    @Override
+                    public void onPlaylistLoaded(@NotNull LoadResult.PlaylistLoaded result) {
+                        final int trackCount = result.getData().getTracks().size();
                         event.getHook()
-                                .sendMessage("This playlist has " + trackCount + " tracks!")
-                                .queue();
-                    } else if (item instanceof LoadResult.SearchResult searchResult) {
-                        final List<Track> tracks = searchResult.getData().getTracks();
+                            .sendMessage("This playlist has " + trackCount + " tracks!")
+                            .queue();
+                    }
+
+                    @Override
+                    public void onSearchResultLoaded(@NotNull LoadResult.SearchResult result) {
+                        final List<Track> tracks = result.getData().getTracks();
 
                         if (tracks.isEmpty()) {
                             event.getHook().sendMessage("No tracks found!").queue();
@@ -202,14 +209,19 @@ public class JavaJDAExample extends ListenerAdapter {
                         // This is a different way of updating the player! Choose your preference!
                         // This method will also create a player if there is not one in the server yet
                         link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(35))
-                                .subscribe((ignored) -> {
-                                    event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
-                                });
+                            .subscribe((ignored) -> {
+                                event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
+                            });
+                    }
 
-                    } else if (item instanceof LoadResult.NoMatches) {
+                    @Override
+                    public void noMatches() {
                         event.getHook().sendMessage("No matches found for your input!").queue();
-                    } else if (item instanceof LoadResult.LoadFailed fail) {
-                        event.getHook().sendMessage("Failed to load track! " + fail.getData().getMessage()).queue();
+                    }
+
+                    @Override
+                    public void loadFailed(@NotNull LoadResult.LoadFailed result) {
+                        event.getHook().sendMessage("Failed to load track! " + result.getData().getMessage()).queue();
                     }
                 });
 
