@@ -78,8 +78,14 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             Message.Op.Event -> {
                 event as Message.EmittedEvent
 
-                if (event is Message.EmittedEvent.TrackStartEvent) {
-                    node.playerCache[event.guildId.toLong()]?.track = event.track
+                when (event) {
+                    is Message.EmittedEvent.TrackStartEvent -> {
+                        node.playerCache[event.guildId.toLong()]?.track = event.track
+                    }
+                    is Message.EmittedEvent.TrackEndEvent -> {
+                        node.playerCache[event.guildId.toLong()]?.track = null
+                    }
+                    else -> {}
                 }
 
                 // TODO: handle websocket closed event from discord?

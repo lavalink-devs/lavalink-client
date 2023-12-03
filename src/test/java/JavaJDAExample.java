@@ -178,13 +178,13 @@ public class JavaJDAExample extends ListenerAdapter {
                     public void ontrackLoaded(@NotNull LoadResult.TrackLoaded result) {
                         final Track track = result.getData();
 
-                        link.createOrUpdatePlayer()
-                            .setEncodedTrack(track.getEncoded())
-                            .setVolume(35)
-                            .asMono()
-                            .subscribe((ignored) -> {
-                                event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
-                            });
+                        link.getPlayer()
+                                .flatMap((p) -> p.setTrack(track)
+                                        .setVolume(35)
+                                        .asMono())
+                                    .subscribe((ignored) -> {
+                                        event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
+                                    });
                     }
 
                     @Override
