@@ -12,6 +12,10 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
      * To get the current position of the track, use [position].
      */
     val track = protocolPlayer.track
+
+    /**
+     * Number between 0 and 1000, where 100 is 100% volume.
+     */
     val volume = protocolPlayer.volume
     val paused = protocolPlayer.paused
 

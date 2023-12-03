@@ -63,7 +63,11 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     }
 
     override fun setVolume(volume: Int): PlayerUpdateBuilder {
-        this.volume = min(1000, max(0, volume)).toOmissible()
+        if (volume < 0 || volume > 1000) {
+            throw IllegalArgumentException("Volume must not be less than 0 or greater than 1000");
+        }
+
+        this.volume = volume.toOmissible()
         return this
     }
 
