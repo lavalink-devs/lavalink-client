@@ -24,7 +24,7 @@ fun VersionCatalogBuilder.versionRefs() {
 
 fun VersionCatalogBuilder.common() {
     library("kotlin", "org.jetbrains.kotlin", "kotlin-stdlib").versionRef("kotlin")
-    library("lavalink-protocol", "dev.arbjerg.lavalink", "protocol").version("47201924be7d5a459753fc85f00ca30e49ba3cd1-SNAPSHOT")
+    library("lavalink-protocol", "dev.arbjerg.lavalink", "protocol").version("4.0.0")
     library("okhttp", "com.squareup.okhttp3", "okhttp").version("4.10.0")
     library("reactor-core", "io.projectreactor", "reactor-core").version("3.5.6")
     library("reactor-kotlin", "io.projectreactor.kotlin", "reactor-kotlin-extensions").version("1.2.2")

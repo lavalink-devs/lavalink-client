@@ -32,8 +32,8 @@ java {
 
 repositories {
     mavenCentral()
-    maven("https://maven.arbjerg.dev/releases")
-    maven("https://maven.arbjerg.dev/snapshots")
+    maven("https://maven.lavalink.dev/releases")
+    maven("https://maven.lavalink.dev/snapshots")
     maven("https://maven.topi.wtf/releases")
     // Note to self: jitpack always comes last
     maven("https://jitpack.io")
