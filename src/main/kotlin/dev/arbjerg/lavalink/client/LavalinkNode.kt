@@ -2,6 +2,9 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.http.HttpBuilder
 import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
+import dev.arbjerg.lavalink.client.protocol.LavalinkLoadResult
+import dev.arbjerg.lavalink.client.protocol.Track
+import dev.arbjerg.lavalink.client.protocol.toLavalinkLoadResult
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
@@ -164,10 +167,10 @@ class LavalinkNode(
      *
      * @return The [LoadResult] of whatever you tried to load.
      */
-    fun loadItem(identifier: String): Mono<LoadResult> {
+    fun loadItem(identifier: String): Mono<LavalinkLoadResult> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
-        return rest.loadItem(identifier)
+        return rest.loadItem(identifier).map { it.toLavalinkLoadResult() }
     }
 
     /**
@@ -181,6 +184,7 @@ class LavalinkNode(
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.decodeTrack(encoded)
+            .map { Track(it) }
     }
 
     /**
@@ -190,10 +194,11 @@ class LavalinkNode(
      *
      * @return The decoded tracks.
      */
-    fun decodeTracks(encoded: List<String>): Mono<Tracks> {
+    fun decodeTracks(encoded: List<String>): Mono<List<Track>> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.decodeTracks(encoded)
+            .map { it.tracks.map { track -> Track(track) } }
     }
 
     /**

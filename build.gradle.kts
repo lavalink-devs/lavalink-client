@@ -42,9 +42,10 @@ repositories {
 dependencies {
     // package libraries
     api(kotlin("stdlib"))
-    api(libs.kotlin)
+//    api(libs.kotlin)
     api(libs.lavalink.protocol)
     api(libs.okhttp)
+    api(libs.jackson)
     api(libs.bundles.reactor)
     api(libs.logger.api)
 

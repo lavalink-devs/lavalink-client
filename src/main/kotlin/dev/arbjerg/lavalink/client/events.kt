@@ -1,5 +1,6 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.protocol.v4.Message
 
 internal fun Message.toClientEvent(node: LavalinkNode) = when (this) {
@@ -30,16 +31,24 @@ sealed class EmittedEvent<T : Message.EmittedEvent>(override val node: LavalinkN
     : ClientEvent<T>(node, event)
 
 data class TrackStartEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackStartEvent)
-    : EmittedEvent<Message.EmittedEvent.TrackStartEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackStartEvent>(node, event) {
+        val track = Track(event.track)
+    }
 
 data class TrackEndEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackEndEvent)
-    : EmittedEvent<Message.EmittedEvent.TrackEndEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackEndEvent>(node, event) {
+    val track = Track(event.track)
+}
 
 data class TrackExceptionEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackExceptionEvent)
-    : EmittedEvent<Message.EmittedEvent.TrackExceptionEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackExceptionEvent>(node, event) {
+    val track = Track(event.track)
+}
 
 data class TrackStuckEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.TrackStuckEvent)
-    : EmittedEvent<Message.EmittedEvent.TrackStuckEvent>(node, event)
+    : EmittedEvent<Message.EmittedEvent.TrackStuckEvent>(node, event) {
+    val track = Track(event.track)
+}
 
 data class WebSocketClosedEvent(override val node: LavalinkNode, override val event: Message.EmittedEvent.WebSocketClosedEvent)
     : EmittedEvent<Message.EmittedEvent.WebSocketClosedEvent>(node, event)

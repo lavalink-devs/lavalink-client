@@ -1,5 +1,6 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlin.math.min
 
@@ -45,12 +46,15 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
     override fun stopTrack() = PlayerUpdateBuilder(node, guildId)
         .stopTrack()
 
+    @Deprecated("Use setTrack instead")
     override fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(node, guildId)
         .setEncodedTrack(encodedTrack)
 
+    @Deprecated("Use setTrack instead")
     override fun omitEncodedTrack() = PlayerUpdateBuilder(node, guildId)
         .omitEncodedTrack()
 
+    @Deprecated("Use setTrack instead")
     override fun setIdentifier(identifier: String?) = PlayerUpdateBuilder(node, guildId)
         .setIdentifier(identifier)
 
@@ -77,8 +81,7 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
 
     // For re-creating the player
     internal fun stateToBuilder() = PlayerUpdateBuilder(node, guildId)
-        .setEncodedTrack(track?.encoded)
-        .setIdentifier(null)
+        .setTrack(track?.let { Track(it) })
         .setPosition(position)
         .setEndTime(null) // TODO Should we keep track of the end time?
         .setVolume(volume)

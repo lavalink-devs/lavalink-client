@@ -1,12 +1,10 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlinx.serialization.json.JsonObject
-import org.checkerframework.checker.optional.qual.Present
 import reactor.core.publisher.Mono
-import kotlin.math.max
-import kotlin.math.min
 
 class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : IUpdatablePlayer {
     private var encodedTrack: Omissible<String?> = Omissible.omitted()
@@ -21,8 +19,8 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     private var noReplace = false
 
     override fun setTrack(track: Track?): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.of(track?.encoded)
-        this.trackUserData = track?.userData.toOmissible()
+        this.encodedTrack = Omissible.of(track?.internalTrack?.encoded)
+        this.trackUserData = track?.internalTrack?.userData.toOmissible()
         return this
     }
 
@@ -33,16 +31,19 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         return this
     }
 
+    @Deprecated("Use setTrack instead")
     override fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.of(encodedTrack)
         return this
     }
 
+    @Deprecated("Use setTrack instead")
     override fun omitEncodedTrack(): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.omitted()
         return this
     }
 
+    @Deprecated("Use setTrack instead")
     override fun setIdentifier(identifier: String?): PlayerUpdateBuilder {
         this.identifier = identifier.toOmissible()
         return this

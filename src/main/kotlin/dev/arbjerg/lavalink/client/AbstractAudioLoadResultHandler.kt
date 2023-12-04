@@ -1,36 +1,36 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.protocol.v4.LoadResult
+import dev.arbjerg.lavalink.client.protocol.*
 import java.util.function.Consumer
 
-abstract class AbstractAudioLoadResultHandler : Consumer<LoadResult> {
-    override fun accept(loadResult: LoadResult) {
+abstract class AbstractAudioLoadResultHandler : Consumer<LavalinkLoadResult> {
+    override fun accept(loadResult: LavalinkLoadResult) {
         when (loadResult) {
-            is LoadResult.TrackLoaded -> {
+            is TrackLoaded -> {
                 this.ontrackLoaded(loadResult)
             }
 
-            is LoadResult.PlaylistLoaded -> {
+            is PlaylistLoaded -> {
                 this.onPlaylistLoaded(loadResult)
             }
 
-            is LoadResult.SearchResult -> {
+            is SearchResult -> {
                 this.onSearchResultLoaded(loadResult)
             }
 
-            is LoadResult.NoMatches -> {
+            is NoMatches -> {
                 this.noMatches()
             }
 
-            is LoadResult.LoadFailed -> {
+            is LoadFailed -> {
                 this.loadFailed(loadResult)
             }
         }
     }
 
-    abstract fun ontrackLoaded(result: LoadResult.TrackLoaded)
-    abstract fun onPlaylistLoaded(result: LoadResult.PlaylistLoaded)
-    abstract fun onSearchResultLoaded(result: LoadResult.SearchResult)
+    abstract fun ontrackLoaded(result: TrackLoaded)
+    abstract fun onPlaylistLoaded(result: PlaylistLoaded)
+    abstract fun onSearchResultLoaded(result: SearchResult)
     abstract fun noMatches()
-    abstract fun loadFailed(result: LoadResult.LoadFailed)
+    abstract fun loadFailed(result: LoadFailed)
 }
