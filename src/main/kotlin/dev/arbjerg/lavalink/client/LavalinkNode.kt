@@ -8,6 +8,7 @@ import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.client.protocol.toLavalinkLoadResult
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
+import dev.arbjerg.lavalink.internal.fromRawJson
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
@@ -318,6 +319,53 @@ class LavalinkNode(
                 }
 
                 return@flatMap json.decodeFromStream(deserializer, response.body!!.byteStream())!!.toMono()
+            }
+        }
+    }
+
+    /**
+     * Send a custom request to the lavalink node. Any host and port you set will be replaced with the node host automatically.
+     * The scheme must match your node's scheme, however. The response body will be deserialized using the provided deserializer.
+     *
+     * It is recommended to use the path setter instead of the url setter when defining a url, like this:
+     * <pre>{@code
+     * customJsonRequest(SomeType.class, (builder) -> {
+     *     return builder.path("/some/plugin/path")
+     *                   .get();
+     * }).doOnSuccess((result) -> {
+     *     if (result == null) {
+     *        println("http 204");
+     *     }
+     *     println(result);
+     * }).subscribe();
+     * }</pre>
+     *
+     * @param decodeTo The class that jackson will deserialize the response body into.
+     * @param builderFn The request builder function, defaults such as the Authorization header have already been applied
+     *
+     * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
+     */
+    fun <T> customJsonRequest(
+        decodeTo: Class<T>,
+        builderFn: UnaryOperator<HttpBuilder>
+    ): Mono<T> {
+        return customRequest(builderFn).flatMap { response ->
+            response.use {
+                if (!response.isSuccessful) {
+                    val body = response.body!!.string()
+                    if (body.isEmpty()) {
+                        return@flatMap Mono.error(IllegalStateException("Request failed with code ${response.code}"))
+                    }
+                    json.decodeFromString<Error>(body).let { error ->
+                        return@flatMap Mono.error(IllegalStateException("Request failed with code ${response.code} and message ${error.message}"))
+                    }
+                }
+
+                if (response.code == 204) {
+                    return@flatMap Mono.empty()
+                }
+
+                return@flatMap fromRawJson(response.body!!.byteStream(), decodeTo)!!.toMono()
             }
         }
     }
