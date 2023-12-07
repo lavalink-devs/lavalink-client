@@ -1,8 +1,10 @@
 package dev.arbjerg.lavalink.client.protocol
 
+import dev.arbjerg.lavalink.internal.toJackson
+import dev.arbjerg.lavalink.protocol.v4.Exception as ProtocolException
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
 
-sealed class LavalinkLoadResult
+open class LavalinkLoadResult
 
 fun LoadResult.toLavalinkLoadResult() = when (this) {
     is LoadResult.TrackLoaded -> TrackLoaded(this)
@@ -13,21 +15,29 @@ fun LoadResult.toLavalinkLoadResult() = when (this) {
 }
 
 class TrackLoaded(result: LoadResult.TrackLoaded) : LavalinkLoadResult() {
-    val track = Track(result.data)
+    val track = result.data.toCustom()
 }
 
 class PlaylistLoaded(result: LoadResult.PlaylistLoaded) : LavalinkLoadResult() {
     val info = result.data.info
-    val pluginInfo = result.data.pluginInfo
-    val tracks = result.data.tracks.map { Track(it) }
+    val pluginInfo = result.data.pluginInfo.toJackson()
+    val tracks = result.data.tracks.map { it.toCustom() }
 }
 
-class NoMatches : LavalinkLoadResult() {}
+class NoMatches : LavalinkLoadResult()
 
 class SearchResult(result: LoadResult.SearchResult) : LavalinkLoadResult() {
-    val tracks = result.data.tracks.map { Track(it) }
+    val tracks = result.data.tracks.map { it.toCustom() }
 }
 
+internal fun ProtocolException.toCustom() = TrackException(message, severity, cause)
+
+data class TrackException(
+    val message: String?,
+    val severity: ProtocolException.Severity,
+    val cause: String
+)
+
 class LoadFailed(result: LoadResult.LoadFailed) : LavalinkLoadResult() {
-    val exception = result.data
+    val exception = result.data.toCustom()
 }

@@ -24,23 +24,22 @@ fun main() {
     client.loadBalancer.addPenaltyProvider(VoiceRegionPenaltyProvider())
 
     client.on<ReadyEvent>()
-        .subscribe { (node, event) ->
-            println("Node '${node.name}' is ready, session id is '${event.sessionId}'!")
+        .subscribe { event ->
+            println("Node '${event.node.name}' is ready, session id is '${event.sessionId}'!")
         }
 
     client.on<StatsEvent>()
-        .subscribe { (node, event) ->
-            println("Node '${node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
+        .subscribe { event ->
+            println("Node '${event.node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
         }
 
     client.on<EmittedEvent<*>>()
-        .subscribe { raw ->
-            if (raw is TrackStartEvent) {
+        .subscribe { event ->
+            if (event is TrackStartEvent) {
                 println("Is a track start event!")
             }
 
-            val node = raw.node
-            val event = raw.event
+            val node = event.node
 
             println("Node '${node.name}' emitted event: $event")
         }
@@ -102,9 +101,9 @@ fun registerNode(client: LavalinkClient) {
         .forEach { node ->
             node.on<TrackStartEvent>()
                 // .next() // Adding next turns this into a 'once' listener.
-                .subscribe { (node, event) ->
+                .subscribe { event ->
                     // A new track is started!
-                    println("${node.name}: track started: ${event.track.info}")
+                    println("${event.node.name}: track started: ${event.track.info}")
                 }
         }
 }

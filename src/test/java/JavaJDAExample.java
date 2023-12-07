@@ -3,7 +3,6 @@ import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.client.protocol.*;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
-import dev.arbjerg.lavalink.protocol.v4.Message;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -63,9 +62,8 @@ public class JavaJDAExample extends ListenerAdapter {
                 RegionGroup.US
             )
         ).forEach((node) -> {
-            node.on(TrackStartEvent.class).subscribe((data) -> {
-                final LavalinkNode node1 = data.getNode();
-                final var event = data.getEvent();
+            node.on(TrackStartEvent.class).subscribe((event) -> {
+                final LavalinkNode node1 = event.getNode();
 
                 System.out.printf(
                         "%s: track started: %s%n",
@@ -77,9 +75,8 @@ public class JavaJDAExample extends ListenerAdapter {
     }
 
     private void registerLavalinkListeners() {
-        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((data) -> {
-            final LavalinkNode node = data.getNode();
-            final Message.ReadyEvent event = data.getEvent();
+        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((event) -> {
+            final LavalinkNode node = event.getNode();
 
             System.out.printf(
                     "Node '%s' is ready, session id is '%s'!%n",
@@ -88,9 +85,8 @@ public class JavaJDAExample extends ListenerAdapter {
             );
         });
 
-        this.client.on(StatsEvent.class).subscribe((data) -> {
-            final LavalinkNode node = data.getNode();
-            final Message.StatsEvent event = data.getEvent();
+        this.client.on(StatsEvent.class).subscribe((event) -> {
+            final LavalinkNode node = event.getNode();
 
             System.out.printf(
                     "Node '%s' has stats, current players: %d/%d%n",
@@ -100,13 +96,12 @@ public class JavaJDAExample extends ListenerAdapter {
             );
         });
 
-        this.client.on(EmittedEvent.class).subscribe((data) -> {
-            if (data instanceof TrackStartEvent) {
+        this.client.on(EmittedEvent.class).subscribe((event) -> {
+            if (event instanceof TrackStartEvent) {
                 System.out.println("Is a track start event!");
             }
 
-            final var node = data.getNode();
-            final var event = data.getEvent();
+            final var node = event.getNode();
 
             System.out.printf(
                     "Node '%s' emitted event: %s%n",
