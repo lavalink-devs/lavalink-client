@@ -1,7 +1,10 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.protocol.Track
-import dev.arbjerg.lavalink.protocol.v4.*
+import dev.arbjerg.lavalink.protocol.v4.Filters
+import dev.arbjerg.lavalink.protocol.v4.Player
+import dev.arbjerg.lavalink.protocol.v4.PlayerState
+import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import kotlin.math.min
 
 class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : IUpdatablePlayer {
@@ -46,15 +49,12 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
     override fun stopTrack() = PlayerUpdateBuilder(node, guildId)
         .stopTrack()
 
-    @Deprecated("Use setTrack instead")
     override fun setEncodedTrack(encodedTrack: String?) = PlayerUpdateBuilder(node, guildId)
         .setEncodedTrack(encodedTrack)
 
-    @Deprecated("Use setTrack instead")
     override fun omitEncodedTrack() = PlayerUpdateBuilder(node, guildId)
         .omitEncodedTrack()
 
-    @Deprecated("Use setTrack instead")
     override fun setIdentifier(identifier: String?) = PlayerUpdateBuilder(node, guildId)
         .setIdentifier(identifier)
 

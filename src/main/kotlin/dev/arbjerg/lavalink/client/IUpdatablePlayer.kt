@@ -32,15 +32,12 @@ interface IUpdatablePlayer {
      *
      * @param encodedTrack The encoded track to be played. Set it to {@code null} to make the player stop playing.
      */
-    @Deprecated(message = "Use setTrack instead")
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder
 
     /**
      * Omits the encoded track field from being sent to the node during updates.
      */
-    @Deprecated(message = "Use setTrack instead")
     fun omitEncodedTrack(): PlayerUpdateBuilder
-    @Deprecated(message = "Use setTrack instead")
     fun setIdentifier(identifier: String?): PlayerUpdateBuilder
     fun setPosition(position: Long?): PlayerUpdateBuilder
     fun setEndTime(endTime: Long?): PlayerUpdateBuilder

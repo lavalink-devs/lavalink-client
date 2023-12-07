@@ -19,33 +19,34 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     private var noReplace = false
 
     override fun setTrack(track: Track?): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.of(track?.internalTrack?.encoded)
-        this.trackUserData = track?.internalTrack?.userData.toOmissible()
+        this.encodedTrack = Omissible.of(track?.encoded)
+        this.trackUserData = track?.rawUserData.toOmissible()
         return this
     }
 
     override fun stopTrack(): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.of(null)
-        this.identifier = null.toOmissible()
-        this.trackUserData = null.toOmissible()
+        this.identifier = Omissible.omitted()
+        this.trackUserData = Omissible.omitted()
         return this
     }
 
-    @Deprecated("Use setTrack instead")
     override fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.of(encodedTrack)
+        this.identifier = Omissible.omitted()
+        this.trackUserData = Omissible.omitted()
         return this
     }
 
-    @Deprecated("Use setTrack instead")
     override fun omitEncodedTrack(): PlayerUpdateBuilder {
         this.encodedTrack = Omissible.omitted()
         return this
     }
 
-    @Deprecated("Use setTrack instead")
     override fun setIdentifier(identifier: String?): PlayerUpdateBuilder {
+        this.encodedTrack = Omissible.omitted()
         this.identifier = identifier.toOmissible()
+        this.trackUserData = Omissible.omitted()
         return this
     }
 

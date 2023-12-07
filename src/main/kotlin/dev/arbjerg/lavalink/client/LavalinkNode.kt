@@ -4,6 +4,7 @@ import dev.arbjerg.lavalink.client.http.HttpBuilder
 import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.client.protocol.LavalinkLoadResult
 import dev.arbjerg.lavalink.client.protocol.Track
+import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.client.protocol.toLavalinkLoadResult
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
@@ -27,7 +28,6 @@ import java.io.Closeable
 import java.io.IOException
 import java.net.URI
 import java.util.function.Consumer
-import java.util.function.Function
 import java.util.function.UnaryOperator
 
 class LavalinkNode(
@@ -184,7 +184,7 @@ class LavalinkNode(
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.decodeTrack(encoded)
-            .map { Track(it) }
+            .map { it.toCustom() }
     }
 
     /**
@@ -198,7 +198,7 @@ class LavalinkNode(
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.decodeTracks(encoded)
-            .map { it.tracks.map { track -> Track(track) } }
+            .map { it.tracks.map { track -> track.toCustom() } }
     }
 
     /**

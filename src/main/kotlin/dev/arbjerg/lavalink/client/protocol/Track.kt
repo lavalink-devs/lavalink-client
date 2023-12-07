@@ -8,7 +8,9 @@ import dev.arbjerg.lavalink.protocol.v4.Track as ProtocolTrack
 
 internal fun ProtocolTrack.toCustom() = Track(this)
 
-class Track internal constructor(internal var internalTrack: ProtocolTrack) {
+class Track internal constructor(private var internalTrack: ProtocolTrack) {
+    val encoded = internalTrack.encoded
+    val rawUserData = internalTrack.userData
     val info = internalTrack.info
     val pluginInfo = internalTrack.pluginInfo.toJackson()
 
