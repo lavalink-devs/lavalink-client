@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.protocol.Track
+import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.protocol.v4.Filters
 import dev.arbjerg.lavalink.protocol.v4.Player
 import dev.arbjerg.lavalink.protocol.v4.PlayerState
@@ -15,7 +16,7 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
      *
      * To get the current position of the track, use [position].
      */
-    var track = protocolPlayer.track
+    var track = protocolPlayer.track?.toCustom()
         internal set
 
     /**
@@ -81,7 +82,7 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
 
     // For re-creating the player
     internal fun stateToBuilder() = PlayerUpdateBuilder(node, guildId)
-        .setTrack(track?.let { Track(it) })
+        .setTrack(track)
         .setPosition(position)
         .setEndTime(null) // TODO Should we keep track of the end time?
         .setVolume(volume)

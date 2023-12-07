@@ -10,7 +10,8 @@ internal fun ProtocolTrack.toCustom() = Track(this)
 
 class Track internal constructor(private var internalTrack: ProtocolTrack) {
     val encoded = internalTrack.encoded
-    val rawUserData = internalTrack.userData
+    val rawUserData: JsonObject
+        get() = internalTrack.userData
     val info = internalTrack.info
     val pluginInfo = internalTrack.pluginInfo.toJackson()
 

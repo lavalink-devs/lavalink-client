@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Random;
 
 public class JavaJDAExample extends ListenerAdapter {
     private final LavalinkClient client;
@@ -181,15 +182,36 @@ public class JavaJDAExample extends ListenerAdapter {
                     public void ontrackLoaded(@NotNull TrackLoaded result) {
                         final Track track = result.getTrack();
 
-                        track.setUserData("Potato!");
+                        // Inner class at the end of this file
+                        var userData = new MyUserData(event.getUser().getIdLong());
 
-                        link.getPlayer()
-                                .flatMap((p) -> p.setTrack(track)
-                                        .setVolume(35)
-                                        .asMono())
-                                    .subscribe((ignored) -> {
-                                        event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
-                                    });
+                        track.setUserData(userData);
+
+                        // there are a few ways of updating the player! Just pick whatever you prefer
+                        if (new Random().nextBoolean()) {
+                            link.getPlayer()
+                                .flatMap(
+                                    (p) -> p.setTrack(track).setVolume(35)
+                                )
+                                .subscribe((player) -> {
+                                    final Track playingTrack = player.getTrack();
+                                    final var trackTitle = playingTrack.getInfo().getTitle();
+                                    final MyUserData customData = playingTrack.getUserData(MyUserData.class);
+
+                                    event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
+                                });
+                        } else {
+                            link.createOrUpdatePlayer()
+                                .setTrack(track)
+                                .setVolume(35)
+                                .subscribe((player) -> {
+                                    final Track playingTrack = player.getTrack();
+                                    final var trackTitle = playingTrack.getInfo().getTitle();
+                                    final MyUserData customData = playingTrack.getUserData(MyUserData.class);
+
+                                    event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
+                                });
+                        }
                     }
 
                     @Override
@@ -285,4 +307,6 @@ public class JavaJDAExample extends ListenerAdapter {
 
         event.reply("Joining your channel!").queue();
     }
+
+    record MyUserData(long requester) {}
 }

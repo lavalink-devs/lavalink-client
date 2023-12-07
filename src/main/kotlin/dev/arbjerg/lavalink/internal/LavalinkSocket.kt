@@ -3,6 +3,7 @@ package dev.arbjerg.lavalink.internal
 import dev.arbjerg.lavalink.LLClientInfo
 import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.LinkState
+import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.client.toClientEvent
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
@@ -80,7 +81,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
                 when (event) {
                     is Message.EmittedEvent.TrackStartEvent -> {
-                        node.playerCache[event.guildId.toLong()]?.track = event.track
+                        node.playerCache[event.guildId.toLong()]?.track = event.track.toCustom()
                     }
                     is Message.EmittedEvent.TrackEndEvent -> {
                         node.playerCache[event.guildId.toLong()]?.track = null

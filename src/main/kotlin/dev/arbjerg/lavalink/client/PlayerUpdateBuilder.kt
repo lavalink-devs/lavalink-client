@@ -4,9 +4,10 @@ import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlinx.serialization.json.JsonObject
+import reactor.core.CoreSubscriber
 import reactor.core.publisher.Mono
 
-class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : IUpdatablePlayer {
+class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : Mono<LavalinkPlayer>(), IUpdatablePlayer {
     private var encodedTrack: Omissible<String?> = Omissible.omitted()
     private var identifier: Omissible<String> = Omissible.omitted()
     private var trackUserData: Omissible<JsonObject> = Omissible.Omitted()
@@ -134,4 +135,6 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
                 node.playerCache[guildId] = it
             }
     }
+
+    override fun subscribe(actual: CoreSubscriber<in LavalinkPlayer>) = asMono().subscribe(actual)
 }
