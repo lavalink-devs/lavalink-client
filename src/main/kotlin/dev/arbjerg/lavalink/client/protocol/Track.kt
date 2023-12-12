@@ -1,5 +1,6 @@
 package dev.arbjerg.lavalink.client.protocol
 
+import com.fasterxml.jackson.databind.JsonNode
 import dev.arbjerg.lavalink.internal.fromJsonElement
 import dev.arbjerg.lavalink.internal.toJackson
 import dev.arbjerg.lavalink.internal.toJsonElement
@@ -10,8 +11,8 @@ internal fun ProtocolTrack.toCustom() = Track(this)
 
 class Track internal constructor(private var internalTrack: ProtocolTrack) {
     val encoded = internalTrack.encoded
-    val rawUserData: JsonObject
-        get() = internalTrack.userData
+    val userData: JsonNode
+        get() = internalTrack.userData.toJackson()
     val info = internalTrack.info
     val pluginInfo = internalTrack.pluginInfo.toJackson()
 

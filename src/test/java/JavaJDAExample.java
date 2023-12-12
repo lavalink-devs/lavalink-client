@@ -273,7 +273,7 @@ public class JavaJDAExample extends ListenerAdapter {
             case "custom-json-request": {
                 final Link link = this.client.getLink(event.getGuild().getIdLong());
                 link.getNode().customJsonRequest(com.github.topi314.lavasearch.protocol.SearchResult.Companion.serializer(),
-                        (builder) -> builder.path("/v4/loadsearch?query=ytsefarch%3Anever%20gonna%20give%20you%20up").get()
+                        (builder) -> builder.path("/v4/loadsearch?query=ytsearch%3Anever%20gonna%20give%20you%20up").get()
                 ).doOnSuccess((loadResult -> {
                     if (loadResult == null) {
                         event.reply("No load result!").queue();

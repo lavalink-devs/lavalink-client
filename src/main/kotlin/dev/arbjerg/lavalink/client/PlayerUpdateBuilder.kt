@@ -1,16 +1,14 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.protocol.Track
+import dev.arbjerg.lavalink.internal.toKotlin
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
-import kotlinx.serialization.json.JsonObject
 import reactor.core.CoreSubscriber
 import reactor.core.publisher.Mono
 
 class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : Mono<LavalinkPlayer>(), IUpdatablePlayer {
-    private var encodedTrack: Omissible<String?> = Omissible.omitted()
-    private var identifier: Omissible<String> = Omissible.omitted()
-    private var trackUserData: Omissible<JsonObject> = Omissible.Omitted()
+    private var trackUpdate: Omissible<PlayerUpdateTrack> = Omissible.omitted()
     private var position: Omissible<Long> = Omissible.omitted()
     private var endTime: Omissible<Long?> = Omissible.omitted()
     private var volume: Omissible<Int> = Omissible.omitted()
@@ -20,34 +18,43 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     private var noReplace = false
 
     override fun setTrack(track: Track?): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.of(track?.encoded)
-        this.trackUserData = track?.rawUserData.toOmissible()
+        this.trackUpdate = PlayerUpdateTrack(
+            encoded = Omissible.of(track?.encoded),
+            userData = track?.userData?.toKotlin().toOmissible()
+        ).toOmissible()
+
         return this
     }
 
     override fun stopTrack(): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.of(null)
-        this.identifier = Omissible.omitted()
-        this.trackUserData = Omissible.omitted()
+        this.trackUpdate = PlayerUpdateTrack(
+            encoded = Omissible.of(null),
+        ).toOmissible()
         return this
     }
 
     override fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.of(encodedTrack)
-        this.identifier = Omissible.omitted()
-        this.trackUserData = Omissible.omitted()
+        this.trackUpdate = PlayerUpdateTrack(
+            encoded = Omissible.of(encodedTrack),
+        ).toOmissible()
         return this
     }
 
+    // TODO: keep this?
     override fun omitEncodedTrack(): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.omitted()
+        val curTrackUpdate = this.trackUpdate
+
+        if (curTrackUpdate.isPresent()) {
+            this.trackUpdate = curTrackUpdate.value.copy(encoded = Omissible.omitted()).toOmissible()
+        }
+
         return this
     }
 
     override fun setIdentifier(identifier: String?): PlayerUpdateBuilder {
-        this.encodedTrack = Omissible.omitted()
-        this.identifier = identifier.toOmissible()
-        this.trackUserData = Omissible.omitted()
+        this.trackUpdate = PlayerUpdateTrack(
+            identifier = identifier.toOmissible(),
+        ).toOmissible()
         return this
     }
 
@@ -68,7 +75,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
 
     override fun setVolume(volume: Int): PlayerUpdateBuilder {
         if (volume < 0 || volume > 1000) {
-            throw IllegalArgumentException("Volume must not be less than 0 or greater than 1000");
+            throw IllegalArgumentException("Volume must not be less than 0 or greater than 1000")
         }
 
         this.volume = volume.toOmissible()
@@ -96,8 +103,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     }
 
     internal fun applyBuilder(builder: PlayerUpdateBuilder): PlayerUpdateBuilder {
-        this.encodedTrack = builder.encodedTrack
-        this.identifier = builder.identifier
+        this.trackUpdate = builder.trackUpdate
         this.position = builder.position
         this.endTime = builder.endTime
         this.volume = builder.volume
@@ -111,14 +117,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun build() = PlayerUpdate(
-        track = if (encodedTrack is Omissible.Present || identifier.isPresent())
-            PlayerUpdateTrack(
-                encodedTrack,
-                identifier,
-                trackUserData,
-            ).toOmissible()
-        else
-            Omissible.omitted(),
+        track = trackUpdate,
         position = position,
         endTime = endTime,
         volume = volume,

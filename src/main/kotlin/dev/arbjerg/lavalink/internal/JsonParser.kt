@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.arbjerg.lavalink.protocol.v4.json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import java.io.InputStream
 
 
 private val objectMapper = ObjectMapper()
 
 fun JsonElement.toJackson(): JsonNode = objectMapper.readTree(this.toString())
+fun JsonNode.toKotlin(): JsonObject = toJsonElement(this) as JsonObject
 
 fun toJsonElement(obj: Any): JsonElement {
     val jsonString = objectMapper.writeValueAsString(obj)
