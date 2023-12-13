@@ -6,6 +6,10 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.ajoberstar.grgit.Grgit
+import org.jetbrains.dokka.base.DokkaBase
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.base.DokkaBaseConfiguration
+import java.time.LocalDate
 
 plugins {
     java
@@ -16,6 +20,12 @@ plugins {
     id("org.jetbrains.dokka") version libs.versions.dokka
     id("org.ajoberstar.grgit") version libs.versions.grgit
     id("com.vanniktech.maven.publish.base") version libs.versions.maven.publish
+}
+
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.dokka:dokka-base:${libs.versions.dokka.get()}")
+    }
 }
 
 val (gitVersion, release) = versionFromGit()
@@ -123,6 +133,14 @@ tasks.withType<PublishToMavenRepository> {
 
 kotlin {
     jvmToolchain(17)
+}
+
+tasks.withType<DokkaTask>().configureEach {
+    pluginConfiguration<DokkaBase, DokkaBaseConfiguration> {
+        customAssets = listOf(file("dokka/assets/logo-icon.svg"))
+        footerMessage = "&copy; ${LocalDate.now().year} Lavalink devs<br />Licensed under the MIT license"
+        separateInheritedMembers = false
+    }
 }
 
 val mavenUrl: String
