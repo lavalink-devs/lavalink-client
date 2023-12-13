@@ -1,9 +1,9 @@
-import com.github.topi314.lavasearch.protocol.SearchResult
+import com.github.topi314.lavasearch.protocol.SearchResult as TopiSearchResult
 import dev.arbjerg.lavalink.client.*
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider
+import dev.arbjerg.lavalink.client.protocol.*
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener
-import dev.arbjerg.lavalink.protocol.v4.LoadResult
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -24,23 +24,22 @@ fun main() {
     client.loadBalancer.addPenaltyProvider(VoiceRegionPenaltyProvider())
 
     client.on<ReadyEvent>()
-        .subscribe { (node, event) ->
-            println("Node '${node.name}' is ready, session id is '${event.sessionId}'!")
+        .subscribe { event ->
+            println("Node '${event.node.name}' is ready, session id is '${event.sessionId}'!")
         }
 
     client.on<StatsEvent>()
-        .subscribe { (node, event) ->
-            println("Node '${node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
+        .subscribe { event ->
+            println("Node '${event.node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
         }
 
     client.on<EmittedEvent<*>>()
-        .subscribe { raw ->
-            if (raw is TrackStartEvent) {
+        .subscribe { event ->
+            if (event is TrackStartEvent) {
                 println("Is a track start event!")
             }
 
-            val node = raw.node
-            val event = raw.event
+            val node = event.node
 
             println("Node '${node.name}' emitted event: $event")
         }
@@ -102,9 +101,9 @@ fun registerNode(client: LavalinkClient) {
         .forEach { node ->
             node.on<TrackStartEvent>()
                 // .next() // Adding next turns this into a 'once' listener.
-                .subscribe { (node, event) ->
+                .subscribe { event ->
                     // A new track is started!
-                    println("${node.name}: track started: ${event.track.info}")
+                    println("${event.node.name}: track started: ${event.track.info}")
                 }
         }
 }
@@ -144,7 +143,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
             val guildId = event.guild!!.idLong
             val link = lavalink.getLink(guildId)
 
-            link.node.customJsonRequest<SearchResult>{
+            link.node.customJsonRequest<TopiSearchResult>{
                 it.get().path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up")
             }.doOnSuccess {
                 if (it == null) {
@@ -187,32 +186,32 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
 
             link.loadItem(identifier).subscribe loadItem@ { item ->
                 when (item) {
-                    is LoadResult.TrackLoaded -> {
-                        link.createOrUpdatePlayer().setEncodedTrack(item.data.encoded)
+                    is TrackLoaded -> {
+                        link.createOrUpdatePlayer().setTrack(item.track)
                             .asMono()
                             .subscribe {
-                                event.hook.sendMessage("Now playing ${item.data.info.title}!").queue()
+                                event.hook.sendMessage("Now playing ${item.track.info.title}!").queue()
                             }
                     }
 
-                    is LoadResult.LoadFailed -> {
-                        event.hook.sendMessage("Failed to load track! ${item.data.message}").queue()
+                    is LoadFailed -> {
+                        event.hook.sendMessage("Failed to load track! ${item.exception.message}").queue()
                     }
-                    is LoadResult.NoMatches -> {
+                    is NoMatches -> {
                         event.hook.sendMessage("No matches found for your input!").queue()
                     }
-                    is LoadResult.PlaylistLoaded -> {
+                    is PlaylistLoaded -> {
                         event.hook.sendMessage("IMPLEMENT PLAYLIST LOADED").queue()
                     }
-                    is LoadResult.SearchResult -> {
-                        if (item.data.tracks.isEmpty()) {
+                    is SearchResult -> {
+                        if (item.tracks.isEmpty()) {
                             event.hook.sendMessage("Nothing found").queue()
                             return@loadItem
                         }
 
-                        val track = item.data.tracks.first()
+                        val track = item.tracks.first()
 
-                        link.createOrUpdatePlayer().setEncodedTrack(track.encoded)
+                        link.createOrUpdatePlayer().setTrack(track)
                             .asMono()
                             .subscribe {
                                 event.hook.sendMessage("Now playing ${track.info.title}!").queue()

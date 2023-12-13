@@ -4,11 +4,9 @@ import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.http.HttpBuilder
 import dev.arbjerg.lavalink.internal.error.RestException
 import dev.arbjerg.lavalink.protocol.v4.*
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response

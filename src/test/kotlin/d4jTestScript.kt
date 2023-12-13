@@ -69,7 +69,7 @@ fun registerNodeD4j(client: LavalinkClient) {
     )
     node.on<TrackStartEvent>()
         .next()
-        .subscribe {(_, event) ->
+        .subscribe { event ->
             // A new track is started!
             println("A new track is started!")
             println(event.track.info)

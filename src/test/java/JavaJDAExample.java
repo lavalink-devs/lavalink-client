@@ -1,11 +1,8 @@
-import com.github.topi314.lavasearch.protocol.SearchResult;
 import dev.arbjerg.lavalink.client.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
+import dev.arbjerg.lavalink.client.protocol.*;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
-import dev.arbjerg.lavalink.protocol.v4.LoadResult;
-import dev.arbjerg.lavalink.protocol.v4.Message;
-import dev.arbjerg.lavalink.protocol.v4.Track;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -23,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Random;
 
 public class JavaJDAExample extends ListenerAdapter {
     private final LavalinkClient client;
@@ -65,9 +63,8 @@ public class JavaJDAExample extends ListenerAdapter {
                 RegionGroup.US
             )
         ).forEach((node) -> {
-            node.on(TrackStartEvent.class).subscribe((data) -> {
-                final LavalinkNode node1 = data.getNode();
-                final var event = data.getEvent();
+            node.on(TrackStartEvent.class).subscribe((event) -> {
+                final LavalinkNode node1 = event.getNode();
 
                 System.out.printf(
                         "%s: track started: %s%n",
@@ -79,9 +76,8 @@ public class JavaJDAExample extends ListenerAdapter {
     }
 
     private void registerLavalinkListeners() {
-        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((data) -> {
-            final LavalinkNode node = data.getNode();
-            final Message.ReadyEvent event = data.getEvent();
+        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((event) -> {
+            final LavalinkNode node = event.getNode();
 
             System.out.printf(
                     "Node '%s' is ready, session id is '%s'!%n",
@@ -90,9 +86,8 @@ public class JavaJDAExample extends ListenerAdapter {
             );
         });
 
-        this.client.on(StatsEvent.class).subscribe((data) -> {
-            final LavalinkNode node = data.getNode();
-            final Message.StatsEvent event = data.getEvent();
+        this.client.on(StatsEvent.class).subscribe((event) -> {
+            final LavalinkNode node = event.getNode();
 
             System.out.printf(
                     "Node '%s' has stats, current players: %d/%d%n",
@@ -102,13 +97,12 @@ public class JavaJDAExample extends ListenerAdapter {
             );
         });
 
-        this.client.on(EmittedEvent.class).subscribe((data) -> {
-            if (data instanceof TrackStartEvent) {
+        this.client.on(EmittedEvent.class).subscribe((event) -> {
+            if (event instanceof TrackStartEvent) {
                 System.out.println("Is a track start event!");
             }
 
-            final var node = data.getNode();
-            final var event = data.getEvent();
+            final var node = event.getNode();
 
             System.out.printf(
                     "Node '%s' emitted event: %s%n",
@@ -128,6 +122,7 @@ public class JavaJDAExample extends ListenerAdapter {
                     Commands.slash("custom-json-request", "Testing custom json requests"),
                     Commands.slash("join", "Join the voice channel you are in."),
                     Commands.slash("leave", "Leaves the vc"),
+                    Commands.slash("stop", "Stops the current track"),
                     Commands.slash("pause", "Pause or unpause the plauer"),
                     Commands.slash("play", "Play a song")
                             .addOption(
@@ -145,6 +140,15 @@ public class JavaJDAExample extends ListenerAdapter {
         switch (event.getFullCommandName()) {
             case "join":
                 joinHelper(event);
+                break;
+            case "stop":
+                this.client.getLink(event.getGuild().getIdLong())
+                    .updatePlayer(
+                        (update) -> update.setTrack(null).setPaused(false)
+                    )
+                    .subscribe((__) -> {
+                        event.reply("Stopped the current track").queue();
+                    });
                 break;
             case "leave":
                 event.getJDA().getDirectAudioController().disconnect(event.getGuild());
@@ -175,29 +179,52 @@ public class JavaJDAExample extends ListenerAdapter {
 
                 link.loadItem(identifier).subscribe(new AbstractAudioLoadResultHandler() {
                     @Override
-                    public void ontrackLoaded(@NotNull LoadResult.TrackLoaded result) {
-                        final Track track = result.getData();
+                    public void ontrackLoaded(@NotNull TrackLoaded result) {
+                        final Track track = result.getTrack();
 
-                        link.getPlayer()
-                                .flatMap((p) -> p.setTrack(track)
-                                        .setVolume(35)
-                                        .asMono())
-                                    .subscribe((ignored) -> {
-                                        event.getHook().sendMessage("Now playing: " + track.getInfo().getTitle()).queue();
-                                    });
+                        // Inner class at the end of this file
+                        var userData = new MyUserData(event.getUser().getIdLong());
+
+                        track.setUserData(userData);
+
+                        // there are a few ways of updating the player! Just pick whatever you prefer
+                        if (new Random().nextBoolean()) {
+                            link.getPlayer()
+                                .flatMap(
+                                    (p) -> p.setTrack(track).setVolume(35)
+                                )
+                                .subscribe((player) -> {
+                                    final Track playingTrack = player.getTrack();
+                                    final var trackTitle = playingTrack.getInfo().getTitle();
+                                    final MyUserData customData = playingTrack.getUserData(MyUserData.class);
+
+                                    event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
+                                });
+                        } else {
+                            link.createOrUpdatePlayer()
+                                .setTrack(track)
+                                .setVolume(35)
+                                .subscribe((player) -> {
+                                    final Track playingTrack = player.getTrack();
+                                    final var trackTitle = playingTrack.getInfo().getTitle();
+                                    final MyUserData customData = playingTrack.getUserData(MyUserData.class);
+
+                                    event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
+                                });
+                        }
                     }
 
                     @Override
-                    public void onPlaylistLoaded(@NotNull LoadResult.PlaylistLoaded result) {
-                        final int trackCount = result.getData().getTracks().size();
+                    public void onPlaylistLoaded(@NotNull PlaylistLoaded result) {
+                        final int trackCount = result.getTracks().size();
                         event.getHook()
                             .sendMessage("This playlist has " + trackCount + " tracks!")
                             .queue();
                     }
 
                     @Override
-                    public void onSearchResultLoaded(@NotNull LoadResult.SearchResult result) {
-                        final List<Track> tracks = result.getData().getTracks();
+                    public void onSearchResultLoaded(@NotNull SearchResult result) {
+                        final List<Track> tracks = result.getTracks();
 
                         if (tracks.isEmpty()) {
                             event.getHook().sendMessage("No tracks found!").queue();
@@ -208,7 +235,7 @@ public class JavaJDAExample extends ListenerAdapter {
 
                         // This is a different way of updating the player! Choose your preference!
                         // This method will also create a player if there is not one in the server yet
-                        link.updatePlayer((update) -> update.setEncodedTrack(firstTrack.getEncoded()).setVolume(35))
+                        link.updatePlayer((update) -> update.setTrack(firstTrack).setVolume(35))
                             .subscribe((ignored) -> {
                                 event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
                             });
@@ -220,8 +247,8 @@ public class JavaJDAExample extends ListenerAdapter {
                     }
 
                     @Override
-                    public void loadFailed(@NotNull LoadResult.LoadFailed result) {
-                        event.getHook().sendMessage("Failed to load track! " + result.getData().getMessage()).queue();
+                    public void loadFailed(@NotNull LoadFailed result) {
+                        event.getHook().sendMessage("Failed to load track! " + result.getException().getMessage()).queue();
                     }
                 });
 
@@ -245,8 +272,8 @@ public class JavaJDAExample extends ListenerAdapter {
             }
             case "custom-json-request": {
                 final Link link = this.client.getLink(event.getGuild().getIdLong());
-                link.getNode().customJsonRequest(SearchResult.Companion.serializer(),
-                        (builder) -> builder.path("/v4/loadsearch?query=ytsefarch%3Anever%20gonna%20give%20you%20up").get()
+                link.getNode().customJsonRequest(com.github.topi314.lavasearch.protocol.SearchResult.Companion.serializer(),
+                        (builder) -> builder.path("/v4/loadsearch?query=ytsearch%3Anever%20gonna%20give%20you%20up").get()
                 ).doOnSuccess((loadResult -> {
                     if (loadResult == null) {
                         event.reply("No load result!").queue();
@@ -280,4 +307,6 @@ public class JavaJDAExample extends ListenerAdapter {
 
         event.reply("Joining your channel!").queue();
     }
+
+    record MyUserData(long requester) {}
 }
