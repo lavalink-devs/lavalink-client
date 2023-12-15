@@ -9,7 +9,7 @@ import dev.arbjerg.lavalink.protocol.v4.Track as ProtocolTrack
 
 internal fun ProtocolTrack.toCustom() = Track(this)
 
-data class Track internal constructor(private var internalTrack: ProtocolTrack) {
+class Track internal constructor(private var internalTrack: ProtocolTrack) {
     val encoded = internalTrack.encoded
     val userData: JsonNode
         get() = internalTrack.userData.toJackson()
@@ -24,5 +24,20 @@ data class Track internal constructor(private var internalTrack: ProtocolTrack) 
 
     fun <T> getUserData(klass: Class<T>): T {
         return fromJsonElement(internalTrack.userData, klass)
+    }
+
+    /**
+     * Clones this [Track] based on the current [ProtocolTrack] from the server. Custom user data will be cloned as well.
+     */
+    fun makeClone(): Track {
+        val clone = Track(
+            internalTrack.copy(
+                info = info.copy(position = 0L)
+            )
+        )
+
+        clone.setUserData(userData)
+
+        return clone
     }
 }
