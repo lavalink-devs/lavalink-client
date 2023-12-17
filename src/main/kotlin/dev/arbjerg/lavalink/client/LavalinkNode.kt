@@ -31,6 +31,9 @@ import java.net.URI
 import java.util.function.Consumer
 import java.util.function.UnaryOperator
 
+/**
+ * The Node is a physical instance of the lavalink server software.
+ */
 class LavalinkNode(
     val name: String,
     serverUri: URI,

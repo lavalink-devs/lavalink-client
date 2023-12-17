@@ -16,7 +16,11 @@ Feature overview:
 
 Current version (remove the `v` prefix): ![Latest version][VERSION]
 
-Or copy/download it [here](https://maven.arbjerg.dev/#/snapshots/dev/arbjerg/lavalink-client)
+Or copy/download it [here](https://maven.arbjerg.dev/#/releases/dev/arbjerg/lavalink-client)
+
+Documentation can be found over at [https://client.lavalink.dev/](https://client.lavalink.dev/)
+
+If you prefer javadoc-style documentation, you can find those [here](https://client.lavalink.dev/javadoc/)
 
 ### Gradle instructions
 ```gradle

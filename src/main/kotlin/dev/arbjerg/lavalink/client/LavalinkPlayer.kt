@@ -8,6 +8,9 @@ import dev.arbjerg.lavalink.protocol.v4.PlayerState
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import kotlin.math.min
 
+/**
+ * Represents a player that is tied to a guild.
+ */
 class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : IUpdatablePlayer {
     val guildId = protocolPlayer.guildId.toLong()
 
