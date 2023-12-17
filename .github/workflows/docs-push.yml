@@ -1,11 +1,10 @@
 name: Docs PR
 
 on:
-    pull_request_target:
-        branches: [ '**' ]
+    push:
+        branches: [ 'main' ]
         paths:
-            - 'dokka/**'
-            - 'src/main/**'
+            - '.github/workflows/docs-push.yml'
 
 concurrency:
     group: pages
@@ -40,5 +39,5 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
                   directory: build/dokka/html
-                  branch: pr-${{ github.event.pull_request.number }}
+                  branch: ${{ github.ref_name }}
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
