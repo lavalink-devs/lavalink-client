@@ -6,6 +6,7 @@ on:
         paths:
             - 'dokka/**'
             - 'src/main/**'
+            - '.github/workflows/docs-pr.yml'
 
 concurrency:
     group: pages
