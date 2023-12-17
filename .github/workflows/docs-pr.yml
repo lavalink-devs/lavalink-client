@@ -28,7 +28,9 @@ jobs:
                 distribution: zulu
                 cache: gradle
             -   name: Build docs
-                run: ./gradlew --no-daemon dokkaHtml
+                run: ./gradlew --no-daemon dokkaHtml dokkaJavadoc
+            - name: Copy javadoc subfolder
+              run: mv build/dokka/javadoc build/dokka/html/
             - uses: actions/upload-pages-artifact@v1
               with:
                   path: 'build/dokka/html'
