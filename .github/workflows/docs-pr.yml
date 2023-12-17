@@ -1,6 +1,10 @@
 name: Docs PR
 
 on:
+    push:
+        branches: [ '**' ]
+        paths:
+            - '.github/workflows/docs-pr.yml'
     pull_request_target:
         branches: [ '**' ]
         paths:
