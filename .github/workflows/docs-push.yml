@@ -4,6 +4,8 @@ on:
     push:
         branches: [ 'main' ]
         paths:
+            - 'dokka/**'
+            - 'src/main/**'
             - '.github/workflows/docs-push.yml'
 
 concurrency:
