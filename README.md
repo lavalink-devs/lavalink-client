@@ -63,7 +63,7 @@ LavalinkClient client = new LavalinkClient(
 
 JDABuilder.createDefault(botToken)
     // .... your jda configuration
-    .setVoiceDispatchInterceptor(JDAVoiceUpdateListener(client))
+    .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
     // .... your jda configuration
     .build();
 ```
@@ -74,8 +74,10 @@ jda.getDirectAudioController().connect(voiceChannel);
 ```
 
 > [!IMPORTANT]
-> Using `Guild#getAudioManager()` will ***NOT*** work. This is because the audio manager makes **JDA** connect to the voice channel, and we want to send the even to LavaLink.
+> Using `Guild#getAudioManager()` will ***NOT*** work. This is because the audio manager makes **JDA** connect to the voice channel, and we want to send the event to LavaLink.
 > You can however use `Member#getVoiceState` perfectly fine, this is also how you get the voice channel that your bot is in.
+>
+> You can get the current voice channel of your bot by calling `Guild#getSelfMember()#getVoiceState()#getChannel`
 
 ## Installation and usage with Discord4j
 
