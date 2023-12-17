@@ -9,7 +9,7 @@ on:
             - '.github/workflows/docs-push.yml'
 
 concurrency:
-    group: pages
+    group: pages-${{ github.ref_name }}
     cancel-in-progress: true
 
 jobs:
@@ -21,7 +21,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
               with:
-                  ref: "${{ github.event.pull_request.merge_commit_sha }}"
                   fetch-depth: 0
             - uses: actions/setup-java@v4
               with:
