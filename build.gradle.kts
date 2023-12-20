@@ -35,18 +35,20 @@ group = "dev.arbjerg"
 version = gitVersion
 val archivesBaseName = "lavalink-client"
 
+allprojects {
+    repositories {
+        mavenCentral()
+        maven("https://maven.lavalink.dev/releases")
+        maven("https://maven.lavalink.dev/snapshots")
+        maven("https://maven.topi.wtf/releases")
+        // Note to self: jitpack always comes last
+        maven("https://jitpack.io")
+    }
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-}
-
-repositories {
-    mavenCentral()
-    maven("https://maven.lavalink.dev/releases")
-    maven("https://maven.lavalink.dev/snapshots")
-    maven("https://maven.topi.wtf/releases")
-    // Note to self: jitpack always comes last
-    maven("https://jitpack.io")
 }
 
 dependencies {
