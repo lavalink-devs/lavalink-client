@@ -112,7 +112,7 @@ interface IUpdatablePlayer {
      * Please use [setVolume] to update the player's volume instead. Setting the volume via filters is
      * float based (1.0f is 100% volume) and takes the time of your buffer size to apply.
      *
-     * @param filters The new filters to apply to the player.
+     * @param filters The new filters to apply to the player. You can use the [dev.arbjerg.lavalink.client.protocol.FilterBuilder] to easily create this object.
      *
      * @return The updated builder, useful for chaining
      */

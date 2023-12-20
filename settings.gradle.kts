@@ -2,6 +2,8 @@ rootProject.name = "lavalink-client"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+include(":testbot")
+
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
