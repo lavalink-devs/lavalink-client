@@ -45,6 +45,18 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+
+    /**
+     * Gets a [RegionGroup] from a string. This method is case-insensitive.
+     *
+     * @param region The region to get the [RegionGroup] for. Valid values are [ASIA], [EUROPE], and [US].
+     */
+    fun valueOf(region: String) = when (region.uppercase()) {
+        "ASIA" -> ASIA
+        "EUROPE" -> EUROPE
+        "US" -> US
+        else -> throw IllegalArgumentException("No region constant: $region")
+    }
 }
 
 // TODO In case no exact server match, should it look for the closest node in that same region?
