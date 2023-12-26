@@ -129,7 +129,7 @@ Alternatively, you can use `Discord4JUtils.leave(gatewayClient, guildId);` as th
 The following examples are minimal implementations but show how the library works.
 - Java examples
   - JDA (simple): [link](src/test/java/JavaJDAExample.java)
-  - JDA (more complex example): [link](testbot/src/main/java/me/duncte123/testbot/Main.java)
+  - JDA (more real-world like example): [link](testbot/src/main/java/me/duncte123/testbot/Main.java)
 - Kotlin examples
   - JDA: [link](src/test/kotlin/testScript.kt)
   - Discord4J: [link](src/test/kotlin/d4jTestScript.kt)
@@ -165,6 +165,6 @@ public void onDiscordVoiceServerUpdate(VoiceServerUpdateEvent event) {
     Link link = lavalink.getLink(event.getGuildId(), region);
 
     // Finally, tell lavalink to connect.
-    link.onVoiceServerUpdate(lavalinkVoiceState)
+    link.onVoiceServerUpdate(lavalinkVoiceState);
 }
 ```

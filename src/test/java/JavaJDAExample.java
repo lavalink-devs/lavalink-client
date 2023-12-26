@@ -177,13 +177,13 @@ public class JavaJDAExample extends ListenerAdapter {
                 final long guildId = guild.getIdLong();
                 final Link link = this.client.getLink(guildId);
 
-                link.loadItem(identifier).subscribe(new AbstractAudioLoadResultHandler() {
-                    @Override
-                    public void ontrackLoaded(@NotNull TrackLoaded result) {
-                        final Track track = result.getTrack();
+                link.loadItem(identifier).subscribe(new FunctionalLoadResultHandler(
+                    // Track loaded
+                    (trackLoad) -> {
+                        final Track track = trackLoad.getTrack();
 
                         // Inner class at the end of this file
-                        var userData = new MyUserData(event.getUser().getIdLong());
+                        final var userData = new MyUserData(event.getUser().getIdLong());
 
                         track.setUserData(userData);
 
@@ -212,19 +212,11 @@ public class JavaJDAExample extends ListenerAdapter {
                                     event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
                                 });
                         }
-                    }
-
-                    @Override
-                    public void onPlaylistLoaded(@NotNull PlaylistLoaded result) {
-                        final int trackCount = result.getTracks().size();
-                        event.getHook()
-                            .sendMessage("This playlist has " + trackCount + " tracks!")
-                            .queue();
-                    }
-
-                    @Override
-                    public void onSearchResultLoaded(@NotNull SearchResult result) {
-                        final List<Track> tracks = result.getTracks();
+                    },
+                    null, // playlist loaded
+                    // search result loaded
+                    (search) -> {
+                        final List<Track> tracks = search.getTracks();
 
                         if (tracks.isEmpty()) {
                             event.getHook().sendMessage("No tracks found!").queue();
@@ -239,18 +231,10 @@ public class JavaJDAExample extends ListenerAdapter {
                             .subscribe((ignored) -> {
                                 event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
                             });
-                    }
-
-                    @Override
-                    public void noMatches() {
-                        event.getHook().sendMessage("No matches found for your input!").queue();
-                    }
-
-                    @Override
-                    public void loadFailed(@NotNull LoadFailed result) {
-                        event.getHook().sendMessage("Failed to load track! " + result.getException().getMessage()).queue();
-                    }
-                });
+                    },
+                    null, // no matches
+                    null // load failed
+                ));
 
                 break;
             }
