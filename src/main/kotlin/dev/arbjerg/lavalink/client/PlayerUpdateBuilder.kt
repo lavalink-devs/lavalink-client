@@ -126,14 +126,19 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         voice = state
     )
 
-    fun asMono(): Mono<LavalinkPlayer> {
-        return node.rest.updatePlayer(build(), guildId, noReplace)
+    @Deprecated(
+        message = "This method causes improper usage of the reactor system",
+        replaceWith = ReplaceWith("subscribe()")
+    )
+    fun asMono(): Mono<LavalinkPlayer>  = this
+
+    override fun subscribe(actual: CoreSubscriber<in LavalinkPlayer>) {
+        node.rest.updatePlayer(build(), guildId, noReplace)
             .map { it.toLavalinkPlayer(node) }
             .doOnNext {
                 // Update player in cache
                 node.playerCache[guildId] = it
             }
+            .subscribe(actual)
     }
-
-    override fun subscribe(actual: CoreSubscriber<in LavalinkPlayer>) = asMono().subscribe(actual)
 }

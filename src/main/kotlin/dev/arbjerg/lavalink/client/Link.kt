@@ -52,7 +52,6 @@ class Link(
             node.removeCachedPlayer(guildId)
             newNode.createOrUpdatePlayer(guildId)
                 .applyBuilder(player.stateToBuilder())
-                .asMono()
                 .block()
         }
 
@@ -64,7 +63,6 @@ class Link(
             state = LinkState.CONNECTING
             node.createOrUpdatePlayer(guildId)
                 .setVoiceState(newVoiceState)
-                .asMono()
                 .subscribe()
         }
     }

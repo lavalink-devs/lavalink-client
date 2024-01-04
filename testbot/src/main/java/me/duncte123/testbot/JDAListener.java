@@ -78,7 +78,7 @@ public class JDAListener extends ListenerAdapter {
             case "pause":
                 this.client.getLink(event.getGuild().getIdLong())
                     .getPlayer()
-                    .flatMap((player) -> player.setPaused(!player.getPaused()).asMono())
+                    .flatMap((player) -> player.setPaused(!player.getPaused()))
                     .subscribe((player) -> {
                         event.reply("Player has been " + (player.getPaused() ? "paused" : "resumed") + "!").queue();
                     });

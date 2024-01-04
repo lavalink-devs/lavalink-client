@@ -44,7 +44,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             // Re-create the player on the node.
             player.stateToBuilder()
                 .setNoReplace(false)
-                .asMono().subscribe()
+                .subscribe()
         }
     }
 

@@ -122,7 +122,7 @@ class LavalinkNode(
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
-            .onErrorResume { createOrUpdatePlayer(guildId).asMono() }
+            .onErrorResume { createOrUpdatePlayer(guildId) }
             .doOnNext {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
@@ -134,7 +134,7 @@ class LavalinkNode(
 
         updateConsumer.accept(update)
 
-        return update.asMono()
+        return update
     }
 
     /**
