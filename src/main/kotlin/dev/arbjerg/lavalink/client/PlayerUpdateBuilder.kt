@@ -128,7 +128,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
 
     @Deprecated(
         message = "This method causes improper usage of the reactor system",
-        replaceWith = ReplaceWith("subscribe()")
+        replaceWith = ReplaceWith("this")
     )
     fun asMono(): Mono<LavalinkPlayer>  = this
 
