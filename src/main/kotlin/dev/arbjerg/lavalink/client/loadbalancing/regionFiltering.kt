@@ -23,7 +23,7 @@ enum class RegionFilterVerdict {
 object RegionGroup {
     @JvmField
     val ASIA: IRegionFilter = object : IRegionFilter {
-        val regions = listOf(VoiceRegion.SIDNEY, VoiceRegion.INDIA, VoiceRegion.JAPAN, VoiceRegion.HONGKONG, VoiceRegion.SOUTH_AFRICA)
+        val regions = listOf(VoiceRegion.SYDNEY, VoiceRegion.INDIA, VoiceRegion.JAPAN, VoiceRegion.HONGKONG, VoiceRegion.SINGAPORE)
 
         override fun isRegionAllowed(node: LavalinkNode, region: VoiceRegion): RegionFilterVerdict {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
@@ -39,12 +39,29 @@ object RegionGroup {
     }
     @JvmField
     val US: IRegionFilter = object : IRegionFilter {
-        val regions = listOf(VoiceRegion.BRAZIL, VoiceRegion.SIDNEY, VoiceRegion.US_CENTRAL, VoiceRegion.US_EAST, VoiceRegion.US_SOUTH, VoiceRegion.US_WEST)
+        val regions = listOf(VoiceRegion.US_CENTRAL, VoiceRegion.US_EAST, VoiceRegion.US_SOUTH, VoiceRegion.US_WEST)
 
         override fun isRegionAllowed(node: LavalinkNode, region: VoiceRegion): RegionFilterVerdict {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+    @JvmField
+    val SOUTH_AMERICA: IRegionFilter = object : IRegionFilter {
+        val regions = listOf(VoiceRegion.BRAZIL)
+
+        override fun isRegionAllowed(node: LavalinkNode, region: VoiceRegion): RegionFilterVerdict {
+            return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
+        }
+    }
+    @JvmField
+    val AFRICA: IRegionFilter = object : IRegionFilter {
+        val regions = listOf(VoiceRegion.SOUTH_AFRICA)
+
+        override fun isRegionAllowed(node: LavalinkNode, region: VoiceRegion): RegionFilterVerdict {
+            return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
+        }
+    }
+
 
     /**
      * Gets a [RegionGroup] from a string. This method is case-insensitive.
@@ -55,40 +72,46 @@ object RegionGroup {
         "ASIA" -> ASIA
         "EUROPE" -> EUROPE
         "US" -> US
+        "SOUTH_AMERICA" -> SOUTH_AMERICA
+        "AFRICA" -> AFRICA
         else -> throw IllegalArgumentException("No region constant: $region")
     }
 }
 
 // TODO In case no exact server match, should it look for the closest node in that same region?
-enum class VoiceRegion(val id: String, val visibleName: String) {
-    BRAZIL("brazil", "Brazil"),
-    HONGKONG("hongkong", "Hong Kong"),
-    INDIA("india", "India"),
-    JAPAN("japan", "Japan"),
-    ROTTERDAM("rotterdam", "Rotterdam"),
-    RUSSIA("russia", "Russia"),
-    SINGAPORE("singapore", "Singapore"),
-    SOUTH_AFRICA("southafrica", "South Africa"),
-    SIDNEY("sidney", "Sidney"),
-    US_CENTRAL("us-central", "US Central"),
-    US_EAST("us-east", "US East"),
-    US_SOUTH("us-south", "US South"),
-    US_WEST("us-west", "US West"),
+enum class VoiceRegion(val id: String, val subregions: HashSet<String>, val visibleName: String) {
+    BRAZIL("brazil", hashSetOf("buenos-aires"), "Brazil"),
+    HONGKONG("hongkong", hashSetOf(), "Hong Kong"),
+    INDIA("india", hashSetOf(), "India"),
+    JAPAN("japan", hashSetOf("south-korea"),"Japan"),
+    ROTTERDAM("rotterdam", hashSetOf("frankfurt", "stockholm", "bucharest", "milan", "madrid"),"Rotterdam"),
+    RUSSIA("russia", hashSetOf(),"Russia"),
+    SINGAPORE("singapore", hashSetOf(),"Singapore"),
+    SOUTH_AFRICA("southafrica", hashSetOf("dubai", "tel-aviv"),"South Africa"),
+    SYDNEY("sydney", hashSetOf(), "Sydney"),
+    US_CENTRAL("us-central", hashSetOf(), "US Central"),
+    US_EAST("us-east", hashSetOf("newark"), "US East"),
+    US_SOUTH("us-south", hashSetOf("atlanta"), "US South"),
+    US_WEST("us-west", hashSetOf("seattle", "santa-clara"), "US West"),
 
-    UNKNOWN("", "Unknown");
+    UNKNOWN("", hashSetOf(), "Unknown");
 
     companion object {
         @JvmStatic
         fun fromEndpoint(endpoint: String): VoiceRegion {
-            val endpointRegex = "^([a-z\\-]+)[0-9]+.*:443\$".toRegex()
-            val match = endpointRegex.find(endpoint) ?: return UNKNOWN
-            val idFromEndpoint = match.groupValues[1]
+            // Endpoints come in format like "seattle1865.discord.gg", trim to subdomain with no numbers
+            val trimmedEndpoint =  endpoint.split(".")[0].filter { !it.isDigit() }
 
-            return entries.find { it.id == idFromEndpoint } ?: UNKNOWN
+            for(region in VoiceRegion.values()) {
+                if (trimmedEndpoint == region.id || region.subregions.contains(trimmedEndpoint)) {
+                    return region
+                }
+            }
+            return UNKNOWN
         }
     }
 
     override fun toString(): String {
-        return "${name}($id, $visibleName)"
+        return "${name}($id, $visibleName, subregions: ${subregions.toArray()})"
     }
 }
