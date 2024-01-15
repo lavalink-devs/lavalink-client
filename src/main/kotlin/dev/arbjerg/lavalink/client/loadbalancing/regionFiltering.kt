@@ -80,7 +80,7 @@ object RegionGroup {
 
 // TODO In case no exact server match, should it look for the closest node in that same region?
 enum class VoiceRegion(val id: String, val subregions: HashSet<String>, val visibleName: String) {
-    BRAZIL("brazil", hashSetOf("buenos-aires"), "Brazil"),
+    BRAZIL("brazil", hashSetOf("buenos-aires", "santiago"), "Brazil"),
     HONGKONG("hongkong", hashSetOf(), "Hong Kong"),
     INDIA("india", hashSetOf(), "India"),
     JAPAN("japan", hashSetOf("south-korea"),"Japan"),
