@@ -63,7 +63,6 @@ class LavalinkNode(
     var available: Boolean = false
         internal set
 
-    // TODO: cache player per link instead?
     /**
      * A local player cache, allows us to not call the rest client every time we need a player.
      */
@@ -99,7 +98,7 @@ class LavalinkNode(
 
         return rest.getPlayers()
             .map { it.players.map { pl -> pl.toLavalinkPlayer(this) } }
-            .doOnNext {
+            .doOnSuccess {
                 it.forEach { player ->
                     playerCache[player.guildId] = player
                 }
@@ -123,7 +122,7 @@ class LavalinkNode(
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
             .onErrorResume { createOrUpdatePlayer(guildId) }
-            .doOnNext {
+            .doOnSuccess {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
             }
@@ -155,8 +154,8 @@ class LavalinkNode(
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.destroyPlayer(guildId)
-            .doOnNext {
-                playerCache.remove(guildId)
+            .doOnSuccess {
+                removeCachedPlayer(guildId)
             }
     }
 

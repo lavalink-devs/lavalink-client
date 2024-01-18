@@ -84,19 +84,19 @@ fun main() {
 
 fun registerNode(client: LavalinkClient) {
     listOf(
-        /*client.addNode(
+        client.addNode(
             "Testnode",
             URI.create("ws://localhost:2333"),
             "youshallnotpass",
             RegionGroup.EUROPE
-        ),*/
+        ),
 
-        client.addNode(
+        /*client.addNode(
             "Mac-mini",
             URI.create("ws://192.168.1.139:2333/bepis"),
             "youshallnotpass",
             RegionGroup.US
-        )
+        )*/
     )
         .forEach { node ->
             node.on<TrackStartEvent>()
@@ -171,6 +171,11 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
             // Disconnecting automatically destroys the player
             event.jda.directAudioController.disconnect(event.guild!!)
             event.reply("Leaving your channel!").queue()
+
+            val guildId = event.guild!!.idLong
+            val link = lavalink.getLink(guildId)
+
+            println(link.node.playerCache)
         }
 
         "play" -> {

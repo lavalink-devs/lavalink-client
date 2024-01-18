@@ -81,10 +81,10 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
                 when (event) {
                     is Message.EmittedEvent.TrackStartEvent -> {
-                        node.playerCache[event.guildId.toLong()]?.track = event.track.toCustom()
+                        node.getCachedPlayer(event.guildId.toLong())?.track = event.track.toCustom()
                     }
                     is Message.EmittedEvent.TrackEndEvent -> {
-                        node.playerCache[event.guildId.toLong()]?.track = null
+                        node.getCachedPlayer(event.guildId.toLong())?.track = null
                     }
                     else -> {}
                 }

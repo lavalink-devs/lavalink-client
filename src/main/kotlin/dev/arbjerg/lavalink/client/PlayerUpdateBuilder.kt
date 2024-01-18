@@ -135,7 +135,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     override fun subscribe(actual: CoreSubscriber<in LavalinkPlayer>) {
         node.rest.updatePlayer(build(), guildId, noReplace)
             .map { it.toLavalinkPlayer(node) }
-            .doOnNext {
+            .doOnSuccess {
                 // Update player in cache
                 node.playerCache[guildId] = it
             }
