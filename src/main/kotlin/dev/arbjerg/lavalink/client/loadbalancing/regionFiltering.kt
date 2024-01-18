@@ -21,6 +21,9 @@ enum class RegionFilterVerdict {
  * You must register [dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider] as a penalty provider in order for this filter to work.
  */
 object RegionGroup {
+    /**
+     * An [IRegionFilter] for [VoiceRegion.SYDNEY], [VoiceRegion.INDIA], [VoiceRegion.JAPAN], [VoiceRegion.HONGKONG], [VoiceRegion.SINGAPORE], and [VoiceRegion.SOUTH_KOREA].
+     */
     @JvmField
     val ASIA: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.SYDNEY, VoiceRegion.INDIA, VoiceRegion.JAPAN, VoiceRegion.HONGKONG, VoiceRegion.SINGAPORE, VoiceRegion.SOUTH_KOREA)
@@ -29,6 +32,11 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+
+    /**
+     * An [IRegionFilter] for [VoiceRegion.ROTTERDAM], [VoiceRegion.RUSSIA], [VoiceRegion.AMSTERDAM], [VoiceRegion.MADRID], [VoiceRegion.MILAN],
+     * [VoiceRegion.BUCHAREST], [VoiceRegion.EUROPE], [VoiceRegion.LONDON], [VoiceRegion.FINLAND], [VoiceRegion.FRANKFURT], and [VoiceRegion.STOCKHOLM].
+     */
     @JvmField
     val EUROPE: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.ROTTERDAM, VoiceRegion.RUSSIA, VoiceRegion.AMSTERDAM, VoiceRegion.MADRID, VoiceRegion.MILAN,
@@ -38,6 +46,11 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+
+    /**
+     * An [IRegionFilter] for [VoiceRegion.US_CENTRAL], [VoiceRegion.US_EAST], [VoiceRegion.US_WEST], [VoiceRegion.US_SOUTH], [VoiceRegion.ATLANTA],
+     * [VoiceRegion.SEATTLE], [VoiceRegion.SANTA_CLARA], [VoiceRegion.NEWARK], [VoiceRegion.MONTREAL], [VoiceRegion.OREGON], and [VoiceRegion.ST_PETE].
+     */
     @JvmField
     val US: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.US_CENTRAL, VoiceRegion.US_EAST, VoiceRegion.US_SOUTH, VoiceRegion.US_WEST, VoiceRegion.ATLANTA,
@@ -47,6 +60,10 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+
+    /**
+     * An [IRegionFilter] for [VoiceRegion.BRAZIL], [VoiceRegion.SANTIAGO], and [VoiceRegion.BUENOS_AIRES].
+     */
     @JvmField
     val SOUTH_AMERICA: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.BRAZIL, VoiceRegion.SANTIAGO, VoiceRegion.BUENOS_AIRES)
@@ -55,6 +72,10 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+
+    /**
+     * An [IRegionFilter] for [VoiceRegion.SOUTH_AFRICA].
+     */
     @JvmField
     val AFRICA: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.SOUTH_AFRICA)
@@ -63,6 +84,10 @@ object RegionGroup {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
         }
     }
+
+    /**
+     * An [IRegionFilter] for [VoiceRegion.TEL_AVIV] and [VoiceRegion.DUBAI].
+     */
     @JvmField
     val MIDDLE_EAST: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.TEL_AVIV, VoiceRegion.DUBAI)
