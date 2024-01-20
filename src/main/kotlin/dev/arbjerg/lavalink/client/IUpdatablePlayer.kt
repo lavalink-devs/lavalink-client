@@ -2,7 +2,9 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.protocol.v4.Filters
+import dev.arbjerg.lavalink.protocol.v4.PlayerUpdateTrack
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import dev.arbjerg.lavalink.client.protocol.TrackUpdateBuilder
 
 interface IUpdatablePlayer {
     /**
@@ -13,6 +15,28 @@ interface IUpdatablePlayer {
      * @return The updated builder, useful for chaining
      */
     fun setTrack(track: Track?): PlayerUpdateBuilder
+
+    /**
+     * Allows you to set the track via the [TrackUpdateBuilder].
+     * To stop the player, you can use [stopTrack] or [setTrack] with a null track.
+     *
+     * @param update the update params created via the [TrackUpdateBuilder].
+     *
+     * @return The updated builder, useful for chaining
+     */
+    fun setTrack(update: TrackUpdateBuilder): PlayerUpdateBuilder {
+        return setTrack(update.build())
+    }
+
+    /**
+     * Allows you to set the track via the [TrackUpdateBuilder].
+     * To stop the player, you can use [stopTrack] or [setTrack] with a null track.
+     *
+     * @param update the update params created via the [TrackUpdateBuilder].
+     *
+     * @return The updated builder, useful for chaining
+     */
+    fun setTrack(update: PlayerUpdateTrack): PlayerUpdateBuilder
 
     /**
      * @deprecated Use [setTrack] instead.
@@ -41,6 +65,8 @@ interface IUpdatablePlayer {
      * @param encodedTrack The encoded track to be played. Set it to {@code null} to make the player stop playing.
      *
      * @return The updated builder, useful for chaining
+     *
+     * @deprecated Use [setTrack] with the [TrackUpdateBuilder] instead.
      */
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder
 
@@ -48,6 +74,8 @@ interface IUpdatablePlayer {
      * Omits the encoded track field from being sent to the node during updates.
      *
      * @return The updated builder, useful for chaining
+     *
+     * @deprecated Use [setTrack] with the [TrackUpdateBuilder] instead.
      */
     fun omitEncodedTrack(): PlayerUpdateBuilder
 
@@ -59,6 +87,8 @@ interface IUpdatablePlayer {
      * @param identifier the identifier to be played
      *
      * @return The updated builder, useful for chaining
+     *
+     * @deprecated Use [setTrack] with the [TrackUpdateBuilder] instead.
      */
     fun setIdentifier(identifier: String?): PlayerUpdateBuilder
 

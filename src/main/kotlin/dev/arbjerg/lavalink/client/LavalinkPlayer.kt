@@ -2,10 +2,7 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.client.protocol.toCustom
-import dev.arbjerg.lavalink.protocol.v4.Filters
-import dev.arbjerg.lavalink.protocol.v4.Player
-import dev.arbjerg.lavalink.protocol.v4.PlayerState
-import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import dev.arbjerg.lavalink.protocol.v4.*
 import kotlin.math.min
 
 /**
@@ -49,6 +46,9 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
 
     override fun setTrack(track: Track?) = PlayerUpdateBuilder(node, guildId)
         .setTrack(track)
+
+    override fun setTrack(update: PlayerUpdateTrack) = PlayerUpdateBuilder(node, guildId)
+        .setTrack(update)
 
     override fun stopTrack() = PlayerUpdateBuilder(node, guildId)
         .stopTrack()
