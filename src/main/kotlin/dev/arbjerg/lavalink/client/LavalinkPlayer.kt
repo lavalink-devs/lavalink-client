@@ -47,8 +47,8 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
     override fun setTrack(track: Track?) = PlayerUpdateBuilder(node, guildId)
         .setTrack(track)
 
-    override fun setTrack(update: PlayerUpdateTrack) = PlayerUpdateBuilder(node, guildId)
-        .setTrack(update)
+    override fun updateTrack(update: PlayerUpdateTrack) = PlayerUpdateBuilder(node, guildId)
+        .updateTrack(update)
 
     override fun stopTrack() = PlayerUpdateBuilder(node, guildId)
         .stopTrack()

@@ -24,8 +24,8 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      */
-    fun setTrack(update: TrackUpdateBuilder): PlayerUpdateBuilder {
-        return setTrack(update.build())
+    fun updateTrack(update: TrackUpdateBuilder): PlayerUpdateBuilder {
+        return updateTrack(update.build())
     }
 
     /**
@@ -36,7 +36,7 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      */
-    fun setTrack(update: PlayerUpdateTrack): PlayerUpdateBuilder
+    fun updateTrack(update: PlayerUpdateTrack): PlayerUpdateBuilder
 
     /**
      * @deprecated Use [setTrack] instead.
@@ -66,7 +66,7 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      *
-     * @deprecated Use [setTrack] with the [TrackUpdateBuilder] instead.
+     * @deprecated Use [updateTrack] with the [TrackUpdateBuilder] instead.
      */
     fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder
 
@@ -75,7 +75,7 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      *
-     * @deprecated Use [setTrack] with the [TrackUpdateBuilder] instead.
+     * @deprecated Use [updateTrack] with the [TrackUpdateBuilder] instead.
      */
     fun omitEncodedTrack(): PlayerUpdateBuilder
 
@@ -88,7 +88,7 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      *
-     * @deprecated Use [setTrack] with the [TrackUpdateBuilder] instead.
+     * @deprecated Use [updateTrack] with the [TrackUpdateBuilder] instead.
      */
     fun setIdentifier(identifier: String?): PlayerUpdateBuilder
 

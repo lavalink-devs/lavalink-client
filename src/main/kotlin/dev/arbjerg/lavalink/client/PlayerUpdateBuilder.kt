@@ -26,7 +26,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         return this
     }
 
-    override fun setTrack(update: PlayerUpdateTrack): PlayerUpdateBuilder {
+    override fun updateTrack(update: PlayerUpdateTrack): PlayerUpdateBuilder {
         this.trackUpdate = update.toOmissible()
 
         return this
