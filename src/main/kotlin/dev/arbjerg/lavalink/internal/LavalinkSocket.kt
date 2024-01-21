@@ -179,6 +179,11 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     }
 
     private fun connect() {
+        if (socket != null) {
+            socket?.close(1000, "New connection requested")
+            socket?.cancel()
+        }
+
         val request = Request.Builder()
             .url("${node.baseUri}/v4/websocket")
             .addHeader("Authorization", node.password)
