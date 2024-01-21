@@ -49,6 +49,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
+        logger.debug("-> {}", text)
+
         val event = json.decodeFromString<Message>(text)
 
         when (event.op) {
