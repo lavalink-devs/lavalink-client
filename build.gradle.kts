@@ -72,13 +72,19 @@ dependencies {
     testImplementation(libs.lavasearch)
 }
 
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 val sourcesForRelease = task<Copy>("sourcesForRelease") {
     from("src/main/kotlin") {
-        include("**/LLClientInfo.java")
+        include("**/LLClientInfo.kt.txt")
 
         filter<ReplaceTokens>(mapOf("tokens" to mapOf(
             "VERSION" to project.version
         )))
+
+        rename("LLClientInfo.kt.txt", "LLClientInfo.kt")
     }
     into("build/filteredSrc")
 
@@ -87,7 +93,7 @@ val sourcesForRelease = task<Copy>("sourcesForRelease") {
 
 val generateKotlinSources = task<SourceTask>("generateKotlinSources") {
     val javaSources = sourceSets["main"].allSource.filter {
-        it.name != "LLClientInfo.java"
+        it.name != "LLClientInfo.kt"
     }.asFileTree
 
     source = javaSources + fileTree(sourcesForRelease.destinationDir)
@@ -105,8 +111,8 @@ tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:deprecation")
 }
 
-tasks.compileJava {
-    source = generateKotlinSources.source
+tasks.compileKotlin {
+    source(generateKotlinSources.source)
     dependsOn(generateKotlinSources)
 }
 

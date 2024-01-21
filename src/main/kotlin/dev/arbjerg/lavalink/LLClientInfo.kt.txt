@@ -1,0 +1,8 @@
+@file:JvmName("LLClientInfo")
+
+package dev.arbjerg.lavalink
+
+/**
+ * Contains the current version of the client
+ */
+const val VERSION: String = "@VERSION@"
