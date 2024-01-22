@@ -21,7 +21,6 @@ public class AudioLoader extends AbstractAudioLoadResultHandler {
     public void ontrackLoaded(@NotNull TrackLoaded result) {
         final Track track = result.getTrack();
 
-        // Inner class at the end of this file
         var userData = new MyUserData(event.getUser().getIdLong());
 
         track.setUserData(userData);

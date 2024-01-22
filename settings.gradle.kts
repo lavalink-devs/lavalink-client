@@ -43,6 +43,6 @@ fun VersionCatalogBuilder.discordLibs() {
 }
 
 fun VersionCatalogBuilder.testLibs() {
-    library("logger-impl", "org.slf4j", "slf4j-simple").versionRef("logger")
+    library("logger-impl", "ch.qos.logback", "logback-classic").version("1.4.14")
     library("lavasearch", "com.github.topi314.lavasearch", "lavasearch-protocol").version("1.0.0-beta.2")
 }
