@@ -93,7 +93,7 @@ fun registerNode(client: LavalinkClient) {
 
         /*client.addNode(
             "Mac-mini",
-            URI.create("ws://192.168.1.139:2333/bepis"),
+            URI.create("ws://mac-mini.local.duncte123.lgbt:2333/bepis"),
             "youshallnotpass",
             RegionGroup.US
         )*/

@@ -47,7 +47,7 @@ public class Main {
 
             client.addNode(
                 "Mac-mini",
-                URI.create("ws://192.168.1.139:2333"),
+                URI.create("ws://mac-mini.local.duncte123.lgbt:2333"),
                 "youshallnotpass",
                 RegionGroup.US
             )
