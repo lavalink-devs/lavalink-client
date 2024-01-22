@@ -97,6 +97,7 @@ public class JDAListener extends ListenerAdapter {
                             .build()
                     )
                     .subscribe();
+                event.reply("turning karaoke on!").queue();
                 break;
             }
             case "karaoke off": {
@@ -111,6 +112,7 @@ public class JDAListener extends ListenerAdapter {
                             .build()
                     )
                     .subscribe();
+                event.reply("turning karaoke off!").queue();
                 break;
             }
             case "play": {

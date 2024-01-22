@@ -88,10 +88,19 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                     is Message.EmittedEvent.TrackEndEvent -> {
                         node.getCachedPlayer(event.guildId.toLong())?.track = null
                     }
+                    is Message.EmittedEvent.WebSocketClosedEvent -> {
+                        // These codes represent an invalid session
+                        // See https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+
+                        if (event.code == 4004 || event.code == 4006 || event.code == 4009 || event.code == 4014) {
+                            logger.debug("Node '{}' received close code {} for guild {}", node.name, event.code, event.guildId)
+                            // TODO: auto-reconnect?
+                            node.destroyPlayer(event.guildId.toLong()).subscribe()
+                        }
+                    }
                     else -> {}
                 }
 
-                // TODO: handle websocket closed event from discord?
                 node.penalties.handleTrackEvent(event)
             }
 

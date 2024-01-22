@@ -6,6 +6,8 @@
         </encoder>
     </appender>
 
+    <logger name="dev.arbjerg.lavalink" level="DEBUG" />
+
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
