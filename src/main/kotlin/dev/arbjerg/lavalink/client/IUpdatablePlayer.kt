@@ -24,6 +24,10 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      */
+    @Deprecated(
+        message = "Just call .build on the builder",
+        replaceWith = ReplaceWith("setTrack(update.build())")
+    )
     fun updateTrack(update: TrackUpdateBuilder): PlayerUpdateBuilder {
         return updateTrack(update.build())
     }
