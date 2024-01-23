@@ -28,9 +28,25 @@ fun main() {
             println("Node '${event.node.name}' is ready, session id is '${event.sessionId}'!")
         }
 
+    // Testing for exceptions thrown in the handler
+    var counter = 0
+
+    client.on<StatsEvent>()
+        .subscribe({ event ->
+            counter++
+            println("Node '${event.node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
+
+            // WARNING: if you do not catch your exception here, the subscription will be canceled.
+            if (counter == 2) {
+                throw RuntimeException("Counter has reached 2")
+            }
+        }) { err ->
+            err.printStackTrace()
+        }
+
     client.on<StatsEvent>()
         .subscribe { event ->
-            println("Node '${event.node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
+            println("[event 2] Node '${event.node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
         }
 
     client.on<EmittedEvent<*>>()
@@ -84,19 +100,19 @@ fun main() {
 
 fun registerNode(client: LavalinkClient) {
     listOf(
-        client.addNode(
+        /*client.addNode(
             "Testnode",
             URI.create("ws://localhost:2333"),
             "youshallnotpass",
             RegionGroup.EUROPE
-        ),
+        ),*/
 
-        /*client.addNode(
+        client.addNode(
             "Mac-mini",
             URI.create("ws://mac-mini.local.duncte123.lgbt:2333/bepis"),
             "youshallnotpass",
             RegionGroup.US
-        )*/
+        )
     )
         .forEach { node ->
             node.on<TrackStartEvent>()

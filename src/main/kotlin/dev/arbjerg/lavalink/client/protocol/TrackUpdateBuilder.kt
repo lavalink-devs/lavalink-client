@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.protocol.v4.Omissible
 import dev.arbjerg.lavalink.protocol.v4.PlayerUpdateTrack
 import dev.arbjerg.lavalink.protocol.v4.toOmissible
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 /**
  * Allows you to update the playing track with only the fields that you wish to update.
@@ -42,9 +43,9 @@ class TrackUpdateBuilder {
         )
     }
 
-    fun setUserData(userData: Any) = apply {
+    fun setUserData(userData: Any?) = apply {
         internalUpdate = internalUpdate.copy(
-            userData = (toJsonElement(userData) as JsonObject).toOmissible()
+            userData = (toJsonElement(userData).jsonObject).toOmissible()
         )
     }
 

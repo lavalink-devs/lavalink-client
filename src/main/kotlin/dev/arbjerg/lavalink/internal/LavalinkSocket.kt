@@ -12,6 +12,7 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.slf4j.LoggerFactory
+import reactor.core.publisher.Sinks
 import java.io.Closeable
 import java.io.EOFException
 import java.net.ConnectException
@@ -113,7 +114,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         try {
             node.sink.tryEmitNext(event.toClientEvent(node))
         } catch (e: Exception) {
-            node.sink.tryEmitError(e)
+            node.sink.emitError(e, Sinks.EmitFailureHandler.FAIL_FAST)
         }
     }
 

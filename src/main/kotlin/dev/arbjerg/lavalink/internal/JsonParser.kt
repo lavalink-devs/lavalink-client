@@ -13,7 +13,11 @@ private val objectMapper = ObjectMapper()
 fun JsonElement.toJackson(): JsonNode = objectMapper.readTree(this.toString())
 fun JsonNode.toKotlin(): JsonObject = toJsonElement(this) as JsonObject
 
-fun toJsonElement(obj: Any): JsonElement {
+fun toJsonElement(obj: Any?): JsonElement {
+    if (obj == null) {
+        return JsonObject(mapOf())
+    }
+
     val jsonString = objectMapper.writeValueAsString(obj)
 
     return json.parseToJsonElement(jsonString)

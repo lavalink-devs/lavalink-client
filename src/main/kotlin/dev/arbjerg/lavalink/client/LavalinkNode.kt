@@ -82,10 +82,22 @@ class LavalinkNode(
     }
 
     // For the java people
+    /**
+     * Listen to events from the node. Please note that uncaught exceptions will cause the listener to stop emitting events.
+     *
+     * @param type the [ClientEvent] to listen for
+     *
+     * @return a [Flux] of [ClientEvent]s
+     */
     fun <T : ClientEvent<*>> on(type: Class<T>): Flux<T> {
         return flux.ofType(type)
     }
 
+    /**
+     * Listen to events from the node. Please note that uncaught exceptions will cause the listener to stop emitting events.
+     *
+     * @return a [Flux] of [ClientEvent]s
+     */
     inline fun <reified T : ClientEvent<*>> on() = on(T::class.java)
 
     /**
