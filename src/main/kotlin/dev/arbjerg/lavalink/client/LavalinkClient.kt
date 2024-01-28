@@ -23,7 +23,8 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     private var clientOpen = true
 
     // Immutable public list
-    val nodes: List<LavalinkNode> = internalNodes
+    val nodes: List<LavalinkNode>
+        get() = internalNodes.toList()
 
     // Events forwarded from all nodes.
     private val sink: Sinks.Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
@@ -67,6 +68,28 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         listenForNodeEvent(node)
 
         return node
+    }
+
+    fun removeNode(name: String): Boolean {
+        val node = nodes.firstOrNull { it.name == name }
+
+        if (node == null) {
+            throw IllegalStateException("Node with name '$name' does not exist")
+        }
+
+        return removeNode(node)
+    }
+
+    fun removeNode(node: LavalinkNode): Boolean {
+        if (node !in internalNodes) {
+            return false
+        }
+
+        node.close()
+
+        internalNodes.remove(node)
+
+        return true
     }
 
     /**
