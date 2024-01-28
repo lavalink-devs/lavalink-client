@@ -17,6 +17,7 @@ import java.io.Closeable
 import java.io.EOFException
 import java.net.ConnectException
 import java.net.SocketException
+import java.net.SocketTimeoutException
 
 class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Closeable {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
@@ -132,6 +133,12 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         when(t) {
             is EOFException -> {
                 logger.debug("Got disconnected from ${node.name}, trying to reconnect", t)
+                node.available = false
+                open = false
+            }
+
+            is SocketTimeoutException -> {
+                logger.debug("Got disconnected from ${node.name} (timeout), trying to reconnect", t)
                 node.available = false
                 open = false
             }
