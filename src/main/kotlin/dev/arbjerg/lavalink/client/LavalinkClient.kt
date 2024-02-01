@@ -32,8 +32,8 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         get() = linkMap.values.toList()
 
     // Events forwarded from all nodes.
-    private val sink: Sinks.Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
-    val flux: Flux<ClientEvent<*>> = sink.asFlux()
+    private val sink: Sinks.Many<ClientEvent> = Sinks.many().multicast().onBackpressureBuffer()
+    val flux: Flux<ClientEvent> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()
 
     /**
@@ -153,7 +153,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      *
      * @return a [Flux] of [ClientEvent]s
      */
-    fun <T : ClientEvent<*>> on(type: Class<T>): Flux<T> {
+    fun <T : ClientEvent> on(type: Class<T>): Flux<T> {
         return flux.ofType(type)
     }
 
@@ -162,7 +162,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      *
      * @return a [Flux] of [ClientEvent]s
      */
-    inline fun <reified T : ClientEvent<*>> on() = on(T::class.java)
+    inline fun <reified T : ClientEvent> on() = on(T::class.java)
 
     /**
      * Close the client and disconnect all nodes.
@@ -183,7 +183,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     }
 
     private fun listenForNodeEvent(node: LavalinkNode) {
-        node.on<ClientEvent<Message>>()
+        node.on<ClientEvent>()
             .subscribe {
                 try {
                     sink.tryEmitNext(it)

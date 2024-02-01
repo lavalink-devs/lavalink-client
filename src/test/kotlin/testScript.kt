@@ -49,7 +49,7 @@ fun main() {
             println("[event 2] Node '${event.node.name}' has stats, current players: ${event.playingPlayers}/${event.players}")
         }
 
-    client.on<EmittedEvent<*>>()
+    client.on<EmittedEvent>()
         .subscribe { event ->
             if (event is TrackStartEvent) {
                 println("Is a track start event!")
