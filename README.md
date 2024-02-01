@@ -15,7 +15,7 @@ Feature overview:
 - Lightweight
 - Compiled for java 17
 
-Current version (remove the `v` prefix): ![Latest version][VERSION]
+Current version (remove the `v` prefix): [![Latest version][VERSION]](https://search.maven.org/artifact/dev.arbjerg/lavalink-client)
 
 Or copy/download it [here](https://maven.arbjerg.dev/#/releases/dev/arbjerg/lavalink-client)
 
