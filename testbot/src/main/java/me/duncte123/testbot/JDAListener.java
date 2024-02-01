@@ -78,7 +78,7 @@ public class JDAListener extends ListenerAdapter {
                 break;
             case "now-playing": {
                 final var link = this.client.getLink(event.getGuild().getIdLong());
-                final var player = link.getOrCreateCachedPlayer();
+                final var player = link.getOrAssumePlayer();
                 final var track = player.getTrack();
 
                 if (track == null) {

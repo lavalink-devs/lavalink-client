@@ -72,7 +72,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
                 // Create a local player on the node if we don't have one.
                 // There probably is an edge-case where this will happen.
-                node.getOrCreateCachedPlayer(idLong).state = update.state
+                node.getOrAssumePlayer(idLong).state = update.state
                 node.lavalink.getLinkIfCached(idLong)?.state = if (update.state.connected) {
                     LinkState.CONNECTED
                 } else {

@@ -148,7 +148,7 @@ class LavalinkNode(
      *
      * @return The local player. This player may not exist on the [LavalinkNode] yet.
      */
-    fun getOrCreateCachedPlayer(guildId: Long): LavalinkPlayer {
+    fun getOrAssumePlayer(guildId: Long): LavalinkPlayer {
         val cachedPlayer = playerCache[guildId]
 
         if (cachedPlayer == null) {
@@ -412,7 +412,7 @@ class LavalinkNode(
      *
      * @return The cached player, or null if not yet cached.
      *
-     * @see [getOrCreateCachedPlayer]
+     * @see [getOrAssumePlayer]
      */
     fun getCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache[guildId]
 

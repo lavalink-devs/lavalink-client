@@ -24,7 +24,7 @@ class Link(
     /**
      * Gets the player for this link. If the player is not cached, it will be retrieved or created on the server.
      *
-     * If you just want a local player instead, you can use [getOrCreateCachedPlayer]
+     * If you just want a local player instead, you can use [getOrAssumePlayer]
      */
     fun getPlayer() = node.getPlayer(guildId)
 
@@ -33,7 +33,7 @@ class Link(
      *
      * To ensure a player also exist on the node, you can use [getPlayer]
      */
-    fun getOrCreateCachedPlayer() = node.getOrCreateCachedPlayer(guildId)
+    fun getOrAssumePlayer() = node.getOrAssumePlayer(guildId)
 
     /**
      * Destroys the player for this link. This will also remove the link from the client.
