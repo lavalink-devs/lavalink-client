@@ -70,7 +70,9 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 val update = event as Message.PlayerUpdateEvent
                 val idLong = update.guildId.toLong()
 
-                node.getCachedPlayer(idLong)?.state = update.state
+                // Create a local player on the node if we don't have one.
+                // There probably is an edge-case where this will happen.
+                node.getOrCreateCachedPlayer(idLong).state = update.state
                 node.lavalink.getLinkIfCached(idLong)?.state = if (update.state.connected) {
                     LinkState.CONNECTED
                 } else {

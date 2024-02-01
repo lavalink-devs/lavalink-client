@@ -39,7 +39,8 @@ public class JDAListener extends ListenerAdapter {
                 Commands.slash("join", "Join the voice channel you are in."),
                 Commands.slash("leave", "Leaves the vc"),
                 Commands.slash("stop", "Stops the current track"),
-                Commands.slash("pause", "Pause or unpause the plauer"),
+                Commands.slash("pause", "Pause or unpause the player"),
+                Commands.slash("now-playing", "Shows what is currently playing"),
                 Commands.slash("play", "Play a song")
                     .addOption(
                         OptionType.STRING,
@@ -75,6 +76,27 @@ public class JDAListener extends ListenerAdapter {
                 event.getJDA().getDirectAudioController().disconnect(event.getGuild());
                 event.reply("Leaving your channel!").queue();
                 break;
+            case "now-playing": {
+                final var link = this.client.getLink(event.getGuild().getIdLong());
+                final var player = link.getOrCreateCachedPlayer();
+                final var track = player.getTrack();
+
+                if (track == null) {
+                    event.reply("Nothing playing currently!").queue();
+                    break;
+                }
+
+                final var trackInfo = track.getInfo();
+
+                event.reply(
+                    "Currently playing: %s\nDuration: %s/%s".formatted(
+                        trackInfo.getTitle(),
+                        player.getPosition(),
+                        trackInfo.getLength()
+                    )
+                ).queue();
+                break;
+            }
             case "pause":
                 this.client.getLink(event.getGuild().getIdLong())
                     .getPlayer()
