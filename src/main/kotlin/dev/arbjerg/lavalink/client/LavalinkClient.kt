@@ -178,6 +178,10 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         close()
     }
 
+    internal fun removeDestroyedLink(guildId: Long) {
+        linkMap.remove(guildId)
+    }
+
     private fun listenForNodeEvent(node: LavalinkNode) {
         node.on<ClientEvent<Message>>()
             .subscribe {

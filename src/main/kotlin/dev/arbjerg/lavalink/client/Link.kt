@@ -27,7 +27,7 @@ class Link(
     fun getPlayer() = node.getPlayer(guildId)
 
     /**
-     * Destroys the player for this link.
+     * Destroys the player for this link. This will also remove the link from the client.
      */
     fun destroyPlayer() = node.destroyPlayer(guildId)
 
@@ -52,7 +52,7 @@ class Link(
             node.removeCachedPlayer(guildId)
             newNode.createOrUpdatePlayer(guildId)
                 .applyBuilder(player.stateToBuilder())
-                .block()
+                .subscribe()
         }
 
         node = newNode
