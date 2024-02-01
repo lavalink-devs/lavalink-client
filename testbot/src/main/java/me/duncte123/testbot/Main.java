@@ -46,8 +46,8 @@ public class Main {
             ),*/
 
             client.addNode(
-                "Mac-mini",
-                URI.create("ws://mac-mini.local.duncte123.lgbt:2333"),
+                "Pi-local",
+                URI.create("ws://pi.local.duncte123.lgbt:2333"),
                 "youshallnotpass",
                 RegionGroup.US
             )
@@ -79,10 +79,11 @@ public class Main {
             final LavalinkNode node = event.getNode();
 
             LOG.info(
-                "Node '{}' has stats, current players: {}/{}",
+                "Node '{}' has stats, current players: {}/{} (link count {})",
                 node.getName(),
                 event.getPlayingPlayers(),
-                event.getPlayers()
+                event.getPlayers(),
+                client.getLinks().size()
             );
         });
 

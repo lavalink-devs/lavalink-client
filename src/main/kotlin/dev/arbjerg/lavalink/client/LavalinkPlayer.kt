@@ -5,6 +5,16 @@ import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlin.math.min
 
+internal fun newPlayer(node: LavalinkNode, guildId: String) = LavalinkPlayer(node, Player(
+    guildId = guildId,
+    track = null,
+    volume = 100,
+    paused = false,
+    state = PlayerState(0, 0, false, -1),
+    voice = VoiceState("", "", ""),
+    filters = Filters()
+))
+
 /**
  * Represents a player that is tied to a guild.
  */

@@ -114,6 +114,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         if (!linkMap.containsKey(guildId)) {
             val bestNode = loadBalancer.selectNode(region)
             linkMap[guildId] = Link(guildId, bestNode)
+            bestNode.playerCache[guildId] = newPlayer(bestNode, guildId.toString())
         }
 
         return linkMap[guildId]!!

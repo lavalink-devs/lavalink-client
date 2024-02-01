@@ -28,6 +28,7 @@ import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
 import java.io.IOException
 import java.net.URI
+import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Consumer
 import java.util.function.UnaryOperator
 
@@ -66,7 +67,7 @@ class LavalinkNode(
     /**
      * A local player cache, allows us to not call the rest client every time we need a player.
      */
-    internal val playerCache = mutableMapOf<Long, LavalinkPlayer>()
+    internal val playerCache = ConcurrentHashMap<Long, LavalinkPlayer>()
 
     override fun dispose() {
         close()
@@ -127,7 +128,7 @@ class LavalinkNode(
     fun getPlayer(guildId: Long): Mono<LavalinkPlayer> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
-        if (guildId in playerCache) {
+        if (playerCache.containsKey(guildId)) {
             return playerCache[guildId].toMono()
         }
 
@@ -168,12 +169,12 @@ class LavalinkNode(
         return rest.destroyPlayer(guildId)
             .doOnSuccess {
                 removeCachedPlayer(guildId)
+                lavalink.removeDestroyedLink(guildId)
             }
     }
 
     internal fun removeCachedPlayer(guildId: Long) {
         playerCache.remove(guildId)
-        lavalink.removeDestroyedLink(guildId)
     }
 
     /**
@@ -385,13 +386,7 @@ class LavalinkNode(
         }
     }
 
-    internal fun getCachedPlayer(guildId: Long): LavalinkPlayer? {
-        if (guildId in playerCache) {
-            return playerCache[guildId]
-        }
-
-        return null
-    }
+    internal fun getCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache[guildId]
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
