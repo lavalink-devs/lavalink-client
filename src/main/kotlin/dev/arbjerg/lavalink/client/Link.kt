@@ -22,18 +22,15 @@ class Link(
         internal set
 
     /**
-     * Gets the player for this link. If the player is not cached, it will be retrieved or created on the server.
-     *
-     * If you just want a local player instead, you can use [getOrAssumePlayer]
+     * Gets the player associated with this link. Returns null if it's not cached.
      */
-    fun getPlayer() = node.getPlayer(guildId)
+    val cachedPlayer: LavalinkPlayer?
+        get() = node.getCachedPlayer(guildId)
 
     /**
-     * Gets the cached player for this link. If the player is not cached it will be created locally.
-     *
-     * To ensure a player also exist on the node, you can use [getPlayer]
+     * Gets the player for this link. If the player is not cached, it will be retrieved or created on the server.
      */
-    fun getOrAssumePlayer() = node.getOrAssumePlayer(guildId)
+    fun getPlayer() = node.getPlayer(guildId)
 
     /**
      * Destroys the player for this link. This will also remove the link from the client.

@@ -141,27 +141,6 @@ class LavalinkNode(
             }
     }
 
-    /**
-     * Gets a player from the local cache. If the player is not in the local cache, it will be created.
-     *
-     * @param guildId The guild id of the player.
-     *
-     * @return The local player. This player may not exist on the [LavalinkNode] yet.
-     */
-    fun getOrAssumePlayer(guildId: Long): LavalinkPlayer {
-        val cachedPlayer = playerCache[guildId]
-
-        if (cachedPlayer == null) {
-            val newPlayer = newPlayer(this, guildId.toString())
-
-            playerCache[guildId] = newPlayer
-
-            return newPlayer
-        }
-
-        return cachedPlayer
-    }
-
     fun updatePlayer(guildId: Long, updateConsumer: Consumer<PlayerUpdateBuilder>): Mono<LavalinkPlayer> {
         val update = createOrUpdatePlayer(guildId)
 
@@ -411,10 +390,29 @@ class LavalinkNode(
      * Get a [LavalinkPlayer] from the player cache.
      *
      * @return The cached player, or null if not yet cached.
-     *
-     * @see [getOrAssumePlayer]
      */
     fun getCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache[guildId]
+
+    /**
+     * Gets a player from the local cache. If the player is not in the local cache, it will be created.
+     *
+     * @param guildId The guild id of the player.
+     *
+     * @return The local player. This player may not exist on the [LavalinkNode] yet.
+     */
+    internal fun getOrAssumePlayer(guildId: Long): LavalinkPlayer {
+        val cachedPlayer = playerCache[guildId]
+
+        if (cachedPlayer == null) {
+            val newPlayer = newPlayer(this, guildId.toString())
+
+            playerCache[guildId] = newPlayer
+
+            return newPlayer
+        }
+
+        return cachedPlayer
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

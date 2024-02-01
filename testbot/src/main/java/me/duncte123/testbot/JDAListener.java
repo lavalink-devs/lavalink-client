@@ -78,7 +78,13 @@ public class JDAListener extends ListenerAdapter {
                 break;
             case "now-playing": {
                 final var link = this.client.getLink(event.getGuild().getIdLong());
-                final var player = link.getOrAssumePlayer();
+                final var player = link.getCachedPlayer();
+
+                if (player == null) {
+                    event.reply("Not connected or no player available!").queue();
+                    break;
+                }
+
                 final var track = player.getTrack();
 
                 if (track == null) {
