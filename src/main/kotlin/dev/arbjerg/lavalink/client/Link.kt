@@ -35,7 +35,16 @@ class Link(
     /**
      * Destroys the player for this link. This will also remove the link from the client.
      */
-    fun destroyPlayer() = node.destroyPlayer(guildId)
+    @Deprecated(
+        message = "Doesn't just destroy the player anymore, use destroy() instead.",
+        replaceWith = ReplaceWith("destroy()")
+    )
+    fun destroyPlayer() = node.destroyPlayerAndLink(guildId)
+
+    /**
+     * Destroys this link, disconnecting the bot in the process.
+     */
+    fun destroy() = node.destroyPlayerAndLink(guildId)
 
     fun updatePlayer(updateConsumer: Consumer<PlayerUpdateBuilder>) = node.updatePlayer(guildId, updateConsumer)
 

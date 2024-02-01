@@ -34,7 +34,7 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
 
         if (channel == null && playerState.connected) {
             link.state = LinkState.DISCONNECTED
-            link.destroyPlayer()
+            link.destroy()
         } else {
             link.state = LinkState.CONNECTED
             Mono.empty()

@@ -97,7 +97,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                         if (event.code == 4004 || event.code == 4006 || event.code == 4009 || event.code == 4014) {
                             logger.debug("Node '{}' received close code {} for guild {}", node.name, event.code, event.guildId)
                             // TODO: auto-reconnect?
-                            node.destroyPlayer(event.guildId.toLong()).subscribe()
+                            node.destroyPlayerAndLink(event.guildId.toLong()).subscribe()
                         }
                     }
                     else -> {}

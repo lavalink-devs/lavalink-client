@@ -158,12 +158,18 @@ class LavalinkNode(
      */
     fun createOrUpdatePlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
 
+    @Deprecated(
+        message = "Doesn't just destroy the player anymore, use destroyPlayerAndLink() instead.",
+        replaceWith = ReplaceWith("destroyPlayerAndLink(guildId)")
+    )
+    fun destroyPlayer(guildId: Long) = destroyPlayerAndLink(guildId)
+
     /**
-     * Destroy a guild's player. This will also remove the associated link from the client.
+     * Destroy a guild's player and remove it from the cache. This will also remove the associated link from the client.
      *
-     * @param guildId The guild id of the player to destroy.
+     * @param guildId The guild id of the player AND link to destroy.
      */
-    fun destroyPlayer(guildId: Long): Mono<Unit> {
+    fun destroyPlayerAndLink(guildId: Long): Mono<Unit> {
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.destroyPlayer(guildId)
