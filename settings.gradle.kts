@@ -20,6 +20,7 @@ fun VersionCatalogBuilder.versionRefs() {
     version("dokka", "1.9.10")
     version("grgit", "5.2.0")
     version("maven-publish", "0.25.3")
+    version("lavalink", "6560834b31d70ee1c89907d925df7bc2b0613480-SNAPSHOT")
 
     version("logger", "2.0.7")
 }
@@ -27,7 +28,7 @@ fun VersionCatalogBuilder.versionRefs() {
 fun VersionCatalogBuilder.common() {
     library("kotlin", "org.jetbrains.kotlin", "kotlin-stdlib").versionRef("kotlin")
     library("jackson", "com.fasterxml.jackson.core", "jackson-core").version("2.16.0")
-    library("lavalink-protocol", "dev.arbjerg.lavalink", "protocol").version("4.0.0")
+    library("lavalink-protocol", "dev.arbjerg.lavalink", "protocol").versionRef("lavalink")
     library("okhttp", "com.squareup.okhttp3", "okhttp").version("4.10.0")
     library("reactor-core", "io.projectreactor", "reactor-core").version("3.5.6")
     library("reactor-kotlin", "io.projectreactor.kotlin", "reactor-kotlin-extensions").version("1.2.2")
