@@ -59,12 +59,18 @@ public class JDAListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        Guild guild = event.getGuild();
+
+        if (guild == null) {
+            return;
+        }
+
         switch (event.getFullCommandName()) {
             case "join":
                 joinHelper(event);
                 break;
             case "stop":
-                this.client.getLink(event.getGuild().getIdLong())
+                this.client.getLink(guild.getIdLong())
                     .updatePlayer(
                         (update) -> update.setTrack(null).setPaused(false)
                     )
@@ -73,11 +79,11 @@ public class JDAListener extends ListenerAdapter {
                     });
                 break;
             case "leave":
-                event.getJDA().getDirectAudioController().disconnect(event.getGuild());
+                event.getJDA().getDirectAudioController().disconnect(guild);
                 event.reply("Leaving your channel!").queue();
                 break;
             case "now-playing": {
-                final var link = this.client.getLink(event.getGuild().getIdLong());
+                final var link = this.client.getLink(guild.getIdLong());
                 final var player = link.getCachedPlayer();
 
                 if (player == null) {
@@ -95,16 +101,17 @@ public class JDAListener extends ListenerAdapter {
                 final var trackInfo = track.getInfo();
 
                 event.reply(
-                    "Currently playing: %s\nDuration: %s/%s".formatted(
+                    "Currently playing: %s\nDuration: %s/%s\nRequester: <@%s>".formatted(
                         trackInfo.getTitle(),
                         player.getPosition(),
-                        trackInfo.getLength()
+                        trackInfo.getLength(),
+                        track.getUserData(MyUserData.class).requester()
                     )
                 ).queue();
                 break;
             }
             case "pause":
-                this.client.getLink(event.getGuild().getIdLong())
+                this.client.getLink(guild.getIdLong())
                     .getPlayer()
                     .flatMap((player) -> player.setPaused(!player.getPaused()))
                     .subscribe((player) -> {
@@ -112,7 +119,6 @@ public class JDAListener extends ListenerAdapter {
                     });
                 break;
             case "karaoke on": {
-                final Guild guild = event.getGuild();
                 final long guildId = guild.getIdLong();
                 final Link link = this.client.getLink(guildId);
 
@@ -129,7 +135,6 @@ public class JDAListener extends ListenerAdapter {
                 break;
             }
             case "karaoke off": {
-                final Guild guild = event.getGuild();
                 final long guildId = guild.getIdLong();
                 final Link link = this.client.getLink(guildId);
 
@@ -144,8 +149,6 @@ public class JDAListener extends ListenerAdapter {
                 break;
             }
             case "play": {
-                final Guild guild = event.getGuild();
-
                 // We are already connected, go ahead and play
                 if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
                     event.deferReply(false).queue();
@@ -163,7 +166,7 @@ public class JDAListener extends ListenerAdapter {
                 break;
             }
             case "custom-request": {
-                final Link link = this.client.getLink(event.getGuild().getIdLong());
+                final Link link = this.client.getLink(guild.getIdLong());
 
                 link.getNode().customRequest(
                     (builder) -> builder.get().path("/version").header("Accept", "text/plain")

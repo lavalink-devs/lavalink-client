@@ -20,7 +20,7 @@ fun VersionCatalogBuilder.versionRefs() {
     version("dokka", "1.9.10")
     version("grgit", "5.2.0")
     version("maven-publish", "0.25.3")
-    version("lavalink", "4.0.1")
+    version("lavalink", "4.0.3")
 
     version("logger", "2.0.7")
 }
