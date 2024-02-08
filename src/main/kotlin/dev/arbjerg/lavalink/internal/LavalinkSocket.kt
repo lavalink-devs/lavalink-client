@@ -41,13 +41,6 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         node.available = true
         open = true
         reconnectsAttempted = 0
-
-        node.playerCache.values.forEach { player ->
-            // Re-create the player on the node.
-            player.stateToBuilder()
-                .setNoReplace(false)
-                .subscribe()
-        }
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -60,6 +53,13 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 val sessionId = (event as Message.ReadyEvent).sessionId
                 node.sessionId = sessionId
                 logger.info("${node.name} is ready with session id $sessionId")
+
+                node.playerCache.values.forEach { player ->
+                    // Re-create the player on the node.
+                    player.stateToBuilder()
+                        .setNoReplace(false)
+                        .subscribe()
+                }
             }
 
             Message.Op.Stats -> {

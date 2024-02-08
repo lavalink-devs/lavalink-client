@@ -43,7 +43,7 @@ public class Main {
                 URI.create("ws://localhost:2333"),
                 "youshallnotpass",
                 RegionGroup.EUROPE
-            ),*/
+            )*/
 
             client.addNode(
                 "Pi-local",
