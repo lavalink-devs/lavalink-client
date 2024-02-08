@@ -8,6 +8,7 @@ import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.client.protocol.toLavalinkLoadResult
 import dev.arbjerg.lavalink.internal.LavalinkRestClient
 import dev.arbjerg.lavalink.internal.LavalinkSocket
+import dev.arbjerg.lavalink.internal.error.RestException
 import dev.arbjerg.lavalink.internal.fromRawJson
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
@@ -120,6 +121,7 @@ class LavalinkNode(
 
     /**
      * Gets the player from the guild id. If the player is not cached, it will be retrieved from the server.
+     * If the player does not exist on the node, it will be created.
      *
      * @param guildId The guild id of the player.
      *
@@ -134,8 +136,14 @@ class LavalinkNode(
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
-            // TODO: check for 404 status code, if not 404, don't create
-            .onErrorResume { createOrUpdatePlayer(guildId) }
+            // Create the player if it doesn't exist on the node.
+            .onErrorResume {
+                if (it is RestException && it.code == 404) {
+                    createOrUpdatePlayer(guildId)
+                } else {
+                    it.toMono()
+                }
+            }
             .doOnSuccess {
                 // Update the player internally upon retrieving it.
                 playerCache[it.guildId] = it
