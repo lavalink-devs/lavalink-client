@@ -142,8 +142,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             }
 
             is ConnectException -> {
-                logger.error("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds")
-                logger.trace("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds", t)
+                logger.warnOrTrace("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds", t)
             }
 
             is SocketException -> {
@@ -153,8 +152,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                     return
                 }
 
-                logger.error("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds")
-                logger.trace("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds", t)
+                logger.warnOrTrace("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds", t)
                 node.available = false
                 open = false
             }
