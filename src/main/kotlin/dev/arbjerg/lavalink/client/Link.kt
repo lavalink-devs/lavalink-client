@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import java.time.Duration
 import java.util.function.Consumer
 
 /**
@@ -67,6 +68,8 @@ class Link(
             node.removeCachedPlayer(guildId)
             newNode.createOrUpdatePlayer(guildId)
                 .applyBuilder(player.stateToBuilder())
+                // Delay by 500ms to hopefully prevent a race-condition from triggering
+                .delayElement(Duration.ofMillis(500))
                 .subscribe()
         }
 

@@ -134,6 +134,7 @@ class LavalinkNode(
 
         return rest.getPlayer(guildId)
             .map { it.toLavalinkPlayer(this) }
+            // TODO: check for 404 status code, if not 404, don't create
             .onErrorResume { createOrUpdatePlayer(guildId) }
             .doOnSuccess {
                 // Update the player internally upon retrieving it.
@@ -398,6 +399,10 @@ class LavalinkNode(
      * @return The cached player, or null if not yet cached.
      */
     fun getCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache[guildId]
+
+    internal fun transferOrphansToSelf() {
+        lavalink.transferOrphansTo(this)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

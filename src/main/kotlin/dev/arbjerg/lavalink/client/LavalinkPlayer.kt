@@ -1,5 +1,6 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.protocol.v4.*
@@ -42,6 +43,15 @@ class LavalinkPlayer(private val node: LavalinkNode, protocolPlayer: Player) : I
                 paused -> state.position
                 else -> min(state.position + (System.currentTimeMillis() - state.time), checkedTrack.info.length)
             }
+        }
+
+    val voiceRegion: VoiceRegion?
+        get() {
+            if (voiceState.endpoint.isBlank()) {
+                return null
+            }
+
+            return VoiceRegion.fromEndpoint(voiceState.endpoint)
         }
 
     override fun setTrack(track: Track?) = PlayerUpdateBuilder(node, guildId)

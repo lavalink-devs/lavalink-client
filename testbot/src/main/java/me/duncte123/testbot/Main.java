@@ -38,12 +38,12 @@ public class Main {
 
     private static void registerLavalinkNodes(LavalinkClient client) {
         List.of(
-            /*client.addNode(
+            client.addNode(
                 "Testnode",
                 URI.create("ws://localhost:2333"),
                 "youshallnotpass",
                 RegionGroup.EUROPE
-            )*/
+            ),
 
             client.addNode(
                 "Pi-local",

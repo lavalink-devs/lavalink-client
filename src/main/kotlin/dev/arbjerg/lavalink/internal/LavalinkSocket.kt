@@ -60,6 +60,9 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                         .setNoReplace(false)
                         .subscribe()
                 }
+
+                // Move players from older, unavailable nodes to ourselves.
+                node.transferOrphansToSelf()
             }
 
             Message.Op.Stats -> {
@@ -126,19 +129,13 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        node.lavalink.onNodeDisconnected(node)
-
         when(t) {
             is EOFException -> {
                 logger.debug("Got disconnected from ${node.name}, trying to reconnect", t)
-                node.available = false
-                open = false
             }
 
             is SocketTimeoutException -> {
                 logger.debug("Got disconnected from ${node.name} (timeout), trying to reconnect", t)
-                node.available = false
-                open = false
             }
 
             is ConnectException -> {
@@ -153,14 +150,17 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 }
 
                 logger.warnOrTrace("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds", t)
-                node.available = false
-                open = false
             }
 
             else -> {
                 logger.error("Unknown error on ${node.name}", t)
             }
         }
+
+        node.available = false
+        open = false
+
+        node.lavalink.onNodeDisconnected(node)
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {

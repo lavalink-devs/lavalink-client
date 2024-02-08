@@ -125,6 +125,32 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      */
     fun getLinkIfCached(guildId: Long): Link? = linkMap[guildId]
 
+    /**
+     * Finds all players on unavailable nodes and transfers them to [node].
+     */
+    internal fun transferOrphansTo(node: LavalinkNode) {
+        // This *should* never happen, but just in case...
+        if (!node.available) {
+            return
+        }
+
+        val orphans = findOrphanedPlayers()
+
+        orphans.mapNotNull { linkMap[it.guildId] }
+            .forEach { link ->
+                link.transferNode(node)
+            }
+    }
+
+    /**
+     * Finds all players that are on unavailable nodes.
+     */
+    private fun findOrphanedPlayers(): List<LavalinkPlayer> {
+        val unavailableNodes = nodes.filter { !it.available }
+
+        return unavailableNodes.flatMap { it.playerCache.values }
+    }
+
     internal fun onNodeDisconnected(node: LavalinkNode) {
         // Don't do anything if we are shutting down.
         if (!clientOpen) {
@@ -138,9 +164,21 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
             return
         }
 
+        // If we have no nodes available, don't attempt to load-balance.
+        if (nodes.all { !it.available }) {
+            linkMap.filter { (_, link) -> link.node == node }
+                .forEach { (_, link) ->
+                    link.state = LinkState.DISCONNECTED
+                }
+            return
+        }
+
         linkMap.forEach { (_, link) ->
-            if (link.node == node)  {
-                link.transferNode(loadBalancer.selectNode(region = null))
+            if (link.node == node) {
+                val voiceRegion = link.cachedPlayer?.voiceRegion
+
+                link.state = LinkState.CONNECTING
+                link.transferNode(loadBalancer.selectNode(region = voiceRegion))
             }
         }
     }
