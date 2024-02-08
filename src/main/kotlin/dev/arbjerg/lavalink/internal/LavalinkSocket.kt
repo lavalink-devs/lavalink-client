@@ -70,9 +70,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 val update = event as Message.PlayerUpdateEvent
                 val idLong = update.guildId.toLong()
 
-                // Create a local player on the node if we don't have one.
-                // There probably is an edge-case where this will happen.
-                node.getOrAssumePlayer(idLong).state = update.state
+                node.getCachedPlayer(idLong)?.state = update.state
                 node.lavalink.getLinkIfCached(idLong)?.state = if (update.state.connected) {
                     LinkState.CONNECTED
                 } else {
@@ -144,7 +142,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             }
 
             is ConnectException -> {
-                logger.error("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds", t)
+                logger.error("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds")
+                logger.trace("Failed to connect to WS of ${node.name} (${node.baseUri}), retrying in ${reconnectInterval / 1000} seconds", t)
             }
 
             is SocketException -> {
@@ -154,7 +153,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                     return
                 }
 
-                logger.error("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds", t)
+                logger.error("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds")
+                logger.trace("Socket error on ${node.name}, reconnecting in ${reconnectInterval / 1000} seconds", t)
                 node.available = false
                 open = false
             }
