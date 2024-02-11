@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultLoadBalancer
 import dev.arbjerg.lavalink.internal.ReconnectTask
+import dev.arbjerg.lavalink.internal.TIMEOUT_MS
 import dev.arbjerg.lavalink.protocol.v4.Message
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
@@ -62,12 +63,12 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      * @param regionFilter (not currently used) Allows you to limit your node to a specific discord voice region
      */
     @JvmOverloads
-    fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null): LavalinkNode {
+    fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null, httpTimeout: Long = TIMEOUT_MS): LavalinkNode {
         if (nodes.any { it.name == name }) {
             throw IllegalStateException("Node with name '$name' already exists")
         }
 
-        val node = LavalinkNode(name, address, password, regionFilter, this)
+        val node = LavalinkNode(name, address, password, regionFilter, httpTimeout, this)
         internalNodes.add(node)
 
         listenForNodeEvent(node)

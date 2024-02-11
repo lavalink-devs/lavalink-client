@@ -30,6 +30,7 @@ import java.io.Closeable
 import java.io.IOException
 import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.function.UnaryOperator
 
@@ -41,6 +42,7 @@ class LavalinkNode(
     serverUri: URI,
     val password: String,
     val regionFilter: IRegionFilter?,
+    private val httpTimeout: Long,
     val lavalink: LavalinkClient
 ) : Disposable, Closeable {
     // "safe" uri with all paths removed
@@ -49,7 +51,7 @@ class LavalinkNode(
     var sessionId: String? = null
         internal set
 
-    internal val httpClient = OkHttpClient()
+    internal val httpClient = OkHttpClient().newBuilder().callTimeout(httpTimeout, TimeUnit.MILLISECONDS).build()
 
     internal val sink: Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<ClientEvent<*>> = sink.asFlux()
