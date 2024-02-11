@@ -61,6 +61,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      * @param address The ip and port of your node
      * @param password The password of your node
      * @param regionFilter (not currently used) Allows you to limit your node to a specific discord voice region
+     * @param httpTimeout Sets the total call timeout in milliseconds. (Default: 10000ms)
      */
     @JvmOverloads
     fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null, httpTimeout: Long = TIMEOUT_MS): LavalinkNode {
