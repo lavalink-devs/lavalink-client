@@ -110,8 +110,21 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      * @param guildId The id of the guild
      * @param region (not currently used) The target voice region of when to select a node
      */
+    @Deprecated(
+        message = "Method name unclear",
+        replaceWith = ReplaceWith("getOrCreateLink(guildId, region)")
+    )
     @JvmOverloads
-    fun getLink(guildId: Long, region: VoiceRegion? = null): Link {
+    fun getLink(guildId: Long, region: VoiceRegion? = null) = getOrCreateLink(guildId, region)
+
+    /**
+     * Get or crate a link between a guild and a node.
+     *
+     * @param guildId The id of the guild
+     * @param region (not currently used) The target voice region of when to select a node
+     */
+    @JvmOverloads
+    fun getOrCreateLink(guildId: Long, region: VoiceRegion? = null): Link {
         if (!linkMap.containsKey(guildId)) {
             val bestNode = loadBalancer.selectNode(region)
             linkMap[guildId] = Link(guildId, bestNode)

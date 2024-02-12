@@ -412,6 +412,8 @@ class LavalinkNode(
         lavalink.transferOrphansTo(this)
     }
 
+
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -434,5 +436,9 @@ class LavalinkNode(
         result = 31 * result + sessionId.hashCode()
         result = 31 * result + available.hashCode()
         return result
+    }
+
+    override fun toString(): String {
+        return "LavalinkNode(name=$name, address=$baseUri, sessionId=$sessionId)"
     }
 }
