@@ -70,7 +70,7 @@ public class JDAListener extends ListenerAdapter {
                 joinHelper(event);
                 break;
             case "stop":
-                this.client.getLink(guild.getIdLong())
+                this.client.getOrCreateLink(guild.getIdLong())
                     .updatePlayer(
                         (update) -> update.setTrack(null).setPaused(false)
                     )
@@ -83,7 +83,7 @@ public class JDAListener extends ListenerAdapter {
                 event.reply("Leaving your channel!").queue();
                 break;
             case "now-playing": {
-                final var link = this.client.getLink(guild.getIdLong());
+                final var link = this.client.getOrCreateLink(guild.getIdLong());
                 final var player = link.getCachedPlayer();
 
                 if (player == null) {
@@ -111,7 +111,7 @@ public class JDAListener extends ListenerAdapter {
                 break;
             }
             case "pause":
-                this.client.getLink(guild.getIdLong())
+                this.client.getOrCreateLink(guild.getIdLong())
                     .getPlayer()
                     .flatMap((player) -> player.setPaused(!player.getPaused()))
                     .subscribe((player) -> {
@@ -120,7 +120,7 @@ public class JDAListener extends ListenerAdapter {
                 break;
             case "karaoke on": {
                 final long guildId = guild.getIdLong();
-                final Link link = this.client.getLink(guildId);
+                final Link link = this.client.getOrCreateLink(guildId);
 
                 link.createOrUpdatePlayer()
                     .setFilters(
@@ -136,7 +136,7 @@ public class JDAListener extends ListenerAdapter {
             }
             case "karaoke off": {
                 final long guildId = guild.getIdLong();
-                final Link link = this.client.getLink(guildId);
+                final Link link = this.client.getOrCreateLink(guildId);
 
                 link.createOrUpdatePlayer()
                     .setFilters(
@@ -159,14 +159,14 @@ public class JDAListener extends ListenerAdapter {
 
                 final String identifier = event.getOption("identifier").getAsString();
                 final long guildId = guild.getIdLong();
-                final Link link = this.client.getLink(guildId);
+                final Link link = this.client.getOrCreateLink(guildId);
 
                 link.loadItem(identifier).subscribe(new AudioLoader(link, event));
 
                 break;
             }
             case "custom-request": {
-                final Link link = this.client.getLink(guild.getIdLong());
+                final Link link = this.client.getOrCreateLink(guild.getIdLong());
 
                 link.getNode().customRequest(
                     (builder) -> builder.get().path("/version").header("Accept", "text/plain")

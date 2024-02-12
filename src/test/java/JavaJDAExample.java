@@ -142,7 +142,7 @@ public class JavaJDAExample extends ListenerAdapter {
                 joinHelper(event);
                 break;
             case "stop":
-                this.client.getLink(event.getGuild().getIdLong())
+                this.client.getOrCreateLink(event.getGuild().getIdLong())
                     .updatePlayer(
                         (update) -> update.setTrack(null).setPaused(false)
                     )
@@ -155,7 +155,7 @@ public class JavaJDAExample extends ListenerAdapter {
                 event.reply("Leaving your channel!").queue();
                 break;
             case "pause":
-                this.client.getLink(event.getGuild().getIdLong())
+                this.client.getOrCreateLink(event.getGuild().getIdLong())
                         .getPlayer()
                         .flatMap((player) -> player.setPaused(!player.getPaused()))
                         .subscribe((player) -> {
@@ -175,7 +175,7 @@ public class JavaJDAExample extends ListenerAdapter {
 
                 final String identifier = event.getOption("identifier").getAsString();
                 final long guildId = guild.getIdLong();
-                final Link link = this.client.getLink(guildId);
+                final Link link = this.client.getOrCreateLink(guildId);
 
                 link.loadItem(identifier).subscribe(new FunctionalLoadResultHandler(
                     // Track loaded
@@ -239,7 +239,7 @@ public class JavaJDAExample extends ListenerAdapter {
                 break;
             }
             case "custom-request": {
-                final Link link = this.client.getLink(event.getGuild().getIdLong());
+                final Link link = this.client.getOrCreateLink(event.getGuild().getIdLong());
 
                 link.getNode().customRequest(
                         (builder) -> builder.get().path("/version").header("Accept", "text/plain")
@@ -255,7 +255,7 @@ public class JavaJDAExample extends ListenerAdapter {
                 break;
             }
             case "custom-json-request": {
-                final Link link = this.client.getLink(event.getGuild().getIdLong());
+                final Link link = this.client.getOrCreateLink(event.getGuild().getIdLong());
                 link.getNode().customJsonRequest(com.github.topi314.lavasearch.protocol.SearchResult.Companion.serializer(),
                         (builder) -> builder.path("/v4/loadsearch?query=ytsearch%3Anever%20gonna%20give%20you%20up").get()
                 ).doOnSuccess((loadResult -> {

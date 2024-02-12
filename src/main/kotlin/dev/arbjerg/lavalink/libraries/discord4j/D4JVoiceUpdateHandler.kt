@@ -49,7 +49,7 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         )
 
         val region = VoiceRegion.fromEndpoint(update.endpoint!!)
-        val link = lavalink.getLink(update.guildId.asLong(), region)
+        val link = lavalink.getOrCreateLink(update.guildId.asLong(), region)
 
         link.onVoiceServerUpdate(state)
         Mono.empty<Unit>()

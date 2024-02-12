@@ -139,7 +139,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
     when (event.fullCommandName) {
         "custom-request" -> {
             val guildId = event.guild!!.idLong
-            val link = lavalink.getLink(guildId)
+            val link = lavalink.getOrCreateLink(guildId)
 
             link.node.customRequest {
                 it.get()
@@ -157,7 +157,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
 
         "custon-json-request" -> {
             val guildId = event.guild!!.idLong
-            val link = lavalink.getLink(guildId)
+            val link = lavalink.getOrCreateLink(guildId)
 
             link.node.customJsonRequest<TopiSearchResult>{
                 it.get().path("/v4/loadtracks?identifier=ytsearch%3Anever%20gonna%20give%20you%20up")
@@ -189,7 +189,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
             event.reply("Leaving your channel!").queue()
 
             val guildId = event.guild!!.idLong
-            val link = lavalink.getLink(guildId)
+            val link = lavalink.getOrCreateLink(guildId)
 
             println(link.node.playerCache)
         }
@@ -203,7 +203,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: SlashCommandInteraction
 
             val identifier = event.getOption("identifier")!!.asString
             val guildId = event.guild!!.idLong
-            val link = lavalink.getLink(guildId)
+            val link = lavalink.getOrCreateLink(guildId)
 
             link.loadItem(identifier).subscribe loadItem@ { item ->
                 when (item) {

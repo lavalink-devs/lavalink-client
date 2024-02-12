@@ -104,7 +104,7 @@ private fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEve
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asString)
                 .get()
-            val link = lavalink.getLink(event.interaction.guildId.get().asLong())
+            val link = lavalink.getOrCreateLink(event.interaction.guildId.get().asLong())
             link.getPlayer().block()!!.setIdentifier(input)
                 .subscribe()
             event.reply("Playing!!").subscribe()

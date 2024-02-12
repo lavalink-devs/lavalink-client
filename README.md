@@ -163,7 +163,7 @@ public void onDiscordVoiceServerUpdate(VoiceServerUpdateEvent event) {
     VoiceRegion region = VoiceRegion.fromEndpoint(event.getEndpoint());
 
     // You can omit the region parameter if you dont need region balancing.
-    Link link = lavalink.getLink(event.getGuildId(), region);
+    Link link = lavalink.getOrCreateLink(event.getGuildId(), region);
 
     // Finally, tell lavalink to connect.
     link.onVoiceServerUpdate(lavalinkVoiceState);
