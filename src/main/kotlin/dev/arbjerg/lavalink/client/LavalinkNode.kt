@@ -1,15 +1,12 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.http.HttpBuilder
-import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.client.protocol.LavalinkLoadResult
 import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.client.protocol.toLavalinkLoadResult
-import dev.arbjerg.lavalink.internal.LavalinkRestClient
-import dev.arbjerg.lavalink.internal.LavalinkSocket
+import dev.arbjerg.lavalink.internal.*
 import dev.arbjerg.lavalink.internal.error.RestException
-import dev.arbjerg.lavalink.internal.fromRawJson
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
@@ -28,7 +25,6 @@ import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
 import java.io.IOException
-import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -38,20 +34,20 @@ import java.util.function.UnaryOperator
  * The Node is a physical instance of the lavalink server software.
  */
 class LavalinkNode(
-    val name: String,
-    serverUri: URI,
-    val password: String,
-    val regionFilter: IRegionFilter?,
-    private val httpTimeout: Long,
+    private val nodeOptions: LavalinkNodeOptions,
     val lavalink: LavalinkClient
 ) : Disposable, Closeable {
     // "safe" uri with all paths removed
-    val baseUri = "${serverUri.scheme}://${serverUri.host}:${serverUri.port}"
+    val baseUri = "${nodeOptions.serverUri.scheme}://${nodeOptions.serverUri.host}:${nodeOptions.serverUri.port}"
+
+    val name = nodeOptions.name
+    val regionFilter = nodeOptions.regionFilter
+    val password = nodeOptions.password
 
     var sessionId: String? = null
         internal set
 
-    internal val httpClient = OkHttpClient().newBuilder().callTimeout(httpTimeout, TimeUnit.MILLISECONDS).build()
+    internal val httpClient = OkHttpClient().newBuilder().callTimeout(nodeOptions.httpTimeout, TimeUnit.MILLISECONDS).build()
 
     internal val sink: Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<ClientEvent<*>> = sink.asFlux()
@@ -420,19 +416,13 @@ class LavalinkNode(
 
         other as LavalinkNode
 
-        if (name != other.name) return false
-        if (password != other.password) return false
-        if (regionFilter != other.regionFilter) return false
-        if (baseUri != other.baseUri) return false
+        if (nodeOptions != other.nodeOptions) return false
         if (sessionId != other.sessionId) return false
         return available == other.available
     }
 
     override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + password.hashCode()
-        result = 31 * result + regionFilter.hashCode()
-        result = 31 * result + baseUri.hashCode()
+        var result = nodeOptions.hashCode()
         result = 31 * result + sessionId.hashCode()
         result = 31 * result + available.hashCode()
         return result

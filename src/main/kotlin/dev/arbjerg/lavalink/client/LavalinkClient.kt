@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
 import java.io.Closeable
 import java.net.URI
+import java.sql.Time
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
@@ -61,15 +62,23 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      * @param address The ip and port of your node
      * @param password The password of your node
      * @param regionFilter (not currently used) Allows you to limit your node to a specific discord voice region
-     * @param httpTimeout Sets the total call timeout in milliseconds. (Default: 10000ms)
      */
     @JvmOverloads
-    fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null, httpTimeout: Long = TIMEOUT_MS): LavalinkNode {
-        if (nodes.any { it.name == name }) {
-            throw IllegalStateException("Node with name '$name' already exists")
+    fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null): LavalinkNode {
+        return addNode(LavalinkNodeOptions.Builder().name(name).serverUri(address).password(password).regionFilter(regionFilter).build())
+    }
+
+    /**
+     * Add a node to the client.
+     *
+     * @param nodeOptions a populated NodeOptionsObject
+     */
+    fun addNode(nodeOptions: LavalinkNodeOptions): LavalinkNode {
+        if (nodes.any { it.name == nodeOptions.name }) {
+            throw IllegalStateException("Node with name '${nodeOptions.name}' already exists")
         }
 
-        val node = LavalinkNode(name, address, password, regionFilter, httpTimeout, this)
+        val node = LavalinkNode(nodeOptions, this)
         internalNodes.add(node)
 
         listenForNodeEvent(node)
