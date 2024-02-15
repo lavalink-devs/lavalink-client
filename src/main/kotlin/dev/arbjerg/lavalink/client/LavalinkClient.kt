@@ -125,7 +125,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     @JvmOverloads
     fun getOrCreateLink(guildId: Long, region: VoiceRegion? = null): Link {
         if (!linkMap.containsKey(guildId)) {
-            val bestNode = loadBalancer.selectNode(region)
+            val bestNode = loadBalancer.selectNode(region, guildId)
             linkMap[guildId] = Link(guildId, bestNode)
         }
 
@@ -191,7 +191,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
                 val voiceRegion = link.cachedPlayer?.voiceRegion
 
                 link.state = LinkState.CONNECTING
-                link.transferNode(loadBalancer.selectNode(region = voiceRegion))
+                link.transferNode(loadBalancer.selectNode(region = voiceRegion, link.guildId))
             }
         }
     }

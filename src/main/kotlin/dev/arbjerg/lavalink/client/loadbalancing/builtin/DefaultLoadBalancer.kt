@@ -17,7 +17,7 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
         penaltyProviders.remove(penaltyProvider)
     }
 
-    override fun selectNode(region: VoiceRegion?): LavalinkNode {
+    override fun selectNode(region: VoiceRegion?, guildId: Long?): LavalinkNode {
         val nodes = client.nodes
 
         // Don't bother calculating penalties if we only have one node.
