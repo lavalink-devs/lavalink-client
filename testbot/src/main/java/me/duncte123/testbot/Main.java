@@ -5,6 +5,7 @@ import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ import java.util.List;
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
+    private static final int SESSION_INVALID = 4006;
+
     public static void main(String[] args) throws InterruptedException {
         final var token = System.getenv("BOT_TOKEN");
         final LavalinkClient client = new LavalinkClient(Helpers.getUserIdFromToken(token));
@@ -25,15 +28,35 @@ public class Main {
         registerLavalinkListeners(client);
         registerLavalinkNodes(client);
 
-        JDABuilder.createDefault(token)
+        final var jda = JDABuilder.createDefault(token)
             .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
             .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
             .enableCache(CacheFlag.VOICE_STATE)
             .addEventListeners(new JDAListener(client))
             .build()
             .awaitReady();
-    }
 
+        // Got a lot of 4006 closecodes? Try this "fix"
+        client.on(WebSocketClosedEvent.class).subscribe((event) -> {
+            if (event.getCode() == SESSION_INVALID) {
+                final var guildId = event.getGuildId();
+                final var guild = jda.getGuildById(guildId);
+
+                if (guild == null) {
+                    return;
+                }
+
+                final var connectedChannel = guild.getSelfMember().getVoiceState().getChannel();
+
+                // somehow
+                if (connectedChannel == null) {
+                    return;
+                }
+
+                jda.getDirectAudioController().reconnect(connectedChannel);
+            }
+        });
+    }
 
 
     private static void registerLavalinkNodes(LavalinkClient client) {
