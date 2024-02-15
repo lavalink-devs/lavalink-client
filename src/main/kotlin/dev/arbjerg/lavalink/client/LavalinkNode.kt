@@ -34,7 +34,7 @@ import java.util.function.UnaryOperator
  * The Node is a physical instance of the lavalink server software.
  */
 class LavalinkNode(
-    private val nodeOptions: LavalinkNodeOptions,
+    private val nodeOptions: NodeOptions,
     val lavalink: LavalinkClient
 ) : Disposable, Closeable {
     // "safe" uri with all paths removed

@@ -4,31 +4,53 @@ import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.internal.TIMEOUT_MS
 import java.net.URI
 
-data class LavalinkNodeOptions(val name: String,
-                               val serverUri: URI,
-                               val password: String,
-                               val regionFilter: IRegionFilter?,
-                               val httpTimeout: Long) {
+data class NodeOptions private constructor(val name: String,
+                       val serverUri: URI,
+                       val password: String,
+                       val regionFilter: IRegionFilter?,
+                       val httpTimeout: Long) {
     data class Builder(
-        var name: String? = null,
+        private var name: String? = null,
         private var serverUri: URI? = null,
         private var password: String? = null,
         private var regionFilter: IRegionFilter? = null,
         private var httpTimeout: Long = TIMEOUT_MS,
     ) {
         fun name(name: String) = apply { this.name = name }
+
+        /**
+         * Sets the server URI of the Lavalink Node.
+         * @param serverUriString - String representation of server uri
+         */
         fun serverUri(serverUriString: String) = apply { this.serverUri = URI(serverUriString) }
+        /**
+         * Sets the server URI of the Lavalink Node.
+         * @param serverUri - Server uri
+         */
         fun serverUri(serverUri: URI) = apply { this.serverUri = serverUri }
+        /**
+         * Sets the password to access the node.
+         * @param password - Server password
+         */
         fun password(password: String) = apply { this.password = password }
+
+        /**
+         * Sets a region filter on the node for regional load balancing (Default: none)
+         */
         fun regionFilter(regionFilter: IRegionFilter?) = apply { this.regionFilter = regionFilter }
+
+        /**
+         * Sets the http total call timeout. (Default: 10000ms)
+         * @param httpTimeout - timeout in ms
+         */
         fun httpTimeout(httpTimeout: Long) = apply { this.httpTimeout = httpTimeout }
 
-        fun build(): LavalinkNodeOptions {
+        fun build(): NodeOptions {
             requireNotNull(name) { "name is required" }
             requireNotNull(serverUri) { "serverUri is required" }
             requireNotNull(password) { "password is required" }
 
-            return LavalinkNodeOptions(
+            return NodeOptions(
                 name!!,
                 serverUri!!,
                 password!!,
