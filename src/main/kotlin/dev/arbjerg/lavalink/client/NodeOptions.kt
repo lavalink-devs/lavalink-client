@@ -16,34 +16,34 @@ data class NodeOptions private constructor(val name: String,
         private var regionFilter: IRegionFilter? = null,
         private var httpTimeout: Long = TIMEOUT_MS,
     ) {
-        fun name(name: String) = apply { this.name = name }
+        fun setName(name: String) = apply { this.name = name }
 
         /**
          * Sets the server URI of the Lavalink Node.
          * @param serverUriString - String representation of server uri
          */
-        fun serverUri(serverUriString: String) = apply { this.serverUri = URI(serverUriString) }
+        fun setServerUri(serverUriString: String) = apply { this.serverUri = URI(serverUriString) }
         /**
          * Sets the server URI of the Lavalink Node.
          * @param serverUri - Server uri
          */
-        fun serverUri(serverUri: URI) = apply { this.serverUri = serverUri }
+        fun setServerUri(serverUri: URI) = apply { this.serverUri = serverUri }
         /**
          * Sets the password to access the node.
          * @param password - Server password
          */
-        fun password(password: String) = apply { this.password = password }
+        fun setPassword(password: String) = apply { this.password = password }
 
         /**
          * Sets a region filter on the node for regional load balancing (Default: none)
          */
-        fun regionFilter(regionFilter: IRegionFilter?) = apply { this.regionFilter = regionFilter }
+        fun setRegionFilter(regionFilter: IRegionFilter?) = apply { this.regionFilter = regionFilter }
 
         /**
          * Sets the http total call timeout. (Default: 10000ms)
          * @param httpTimeout - timeout in ms
          */
-        fun httpTimeout(httpTimeout: Long) = apply { this.httpTimeout = httpTimeout }
+        fun setHttpTimeout(httpTimeout: Long) = apply { this.httpTimeout = httpTimeout }
 
         fun build(): NodeOptions {
             requireNotNull(name) { "name is required" }

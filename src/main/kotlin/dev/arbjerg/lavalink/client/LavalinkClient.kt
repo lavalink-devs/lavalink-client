@@ -66,7 +66,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         ReplaceWith("addNode(NodeOptions.Builder()...build())")
     )
     fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null): LavalinkNode {
-        return addNode(NodeOptions.Builder().name(name).serverUri(address).password(password).regionFilter(regionFilter).build())
+        return addNode(NodeOptions.Builder().setName(name).setServerUri(address).setPassword(password).setRegionFilter(regionFilter).build())
     }
 
     /**
