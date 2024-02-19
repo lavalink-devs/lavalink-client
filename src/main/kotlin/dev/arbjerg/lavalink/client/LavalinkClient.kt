@@ -62,12 +62,24 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      * @param regionFilter (not currently used) Allows you to limit your node to a specific discord voice region
      */
     @JvmOverloads
+    @Deprecated("Use NodeOptions instead",
+        ReplaceWith("addNode(NodeOptions.Builder()...build())")
+    )
     fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null): LavalinkNode {
-        if (nodes.any { it.name == name }) {
-            throw IllegalStateException("Node with name '$name' already exists")
+        return addNode(NodeOptions.Builder().setName(name).setServerUri(address).setPassword(password).setRegionFilter(regionFilter).build())
+    }
+
+    /**
+     * Add a node to the client.
+     *
+     * @param nodeOptions a populated NodeOptionsObject
+     */
+    fun addNode(nodeOptions: NodeOptions): LavalinkNode {
+        if (nodes.any { it.name == nodeOptions.name }) {
+            throw IllegalStateException("Node with name '${nodeOptions.name}' already exists")
         }
 
-        val node = LavalinkNode(name, address, password, regionFilter, this)
+        val node = LavalinkNode(nodeOptions, this)
         internalNodes.add(node)
 
         listenForNodeEvent(node)
