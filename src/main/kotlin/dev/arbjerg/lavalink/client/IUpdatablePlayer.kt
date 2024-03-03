@@ -24,36 +24,7 @@ interface IUpdatablePlayer {
      *
      * @return The updated builder, useful for chaining
      */
-    @Deprecated(
-        message = "Just call .build on the builder",
-        replaceWith = ReplaceWith("setTrack(update.build())")
-    )
-    fun updateTrack(update: TrackUpdateBuilder): PlayerUpdateBuilder {
-        return updateTrack(update.build())
-    }
-
-    /**
-     * Allows you to set the track via the [TrackUpdateBuilder].
-     * To stop the player, you can use [stopTrack] or [setTrack] with a null track.
-     *
-     * @param update the update params created via the [TrackUpdateBuilder].
-     *
-     * @return The updated builder, useful for chaining
-     */
     fun updateTrack(update: PlayerUpdateTrack): PlayerUpdateBuilder
-
-    /**
-     * @deprecated Use [setTrack] instead.
-     *
-     * @return The updated builder, useful for chaining
-     */
-    @Deprecated(
-        message = "Use setTrack instead",
-        replaceWith = ReplaceWith("setTrack(track)")
-    )
-    fun applyTrack(track: Track?): PlayerUpdateBuilder {
-        return setTrack(track)
-    }
 
     /**
      * Shortcut for setting the encoded track to {@code null}. This will also clear the user data.
@@ -61,40 +32,6 @@ interface IUpdatablePlayer {
      * @return The updated builder, useful for chaining
      */
     fun stopTrack(): PlayerUpdateBuilder
-
-    /**
-     * Sets the encoded track to be played.
-     * This will override the identifier and track user data if they were previously set.
-     *
-     * @param encodedTrack The encoded track to be played. Set it to {@code null} to make the player stop playing.
-     *
-     * @return The updated builder, useful for chaining
-     *
-     * @deprecated Use [updateTrack] with the [TrackUpdateBuilder] instead.
-     */
-    fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder
-
-    /**
-     * Omits the encoded track field from being sent to the node during updates.
-     *
-     * @return The updated builder, useful for chaining
-     *
-     * @deprecated Use [updateTrack] with the [TrackUpdateBuilder] instead.
-     */
-    fun omitEncodedTrack(): PlayerUpdateBuilder
-
-    /**
-     * Set the identifier on the player.
-     * This will override the encoded track and user data if they were previously set.
-     *
-     *
-     * @param identifier the identifier to be played
-     *
-     * @return The updated builder, useful for chaining
-     *
-     * @deprecated Use [updateTrack] with the [TrackUpdateBuilder] instead.
-     */
-    fun setIdentifier(identifier: String?): PlayerUpdateBuilder
 
     /**
      * Update the position of the player.

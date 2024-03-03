@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
-import java.net.URI
 
 fun main() {
     val token = System.getenv("BOT_TOKEN")
@@ -101,17 +100,21 @@ fun main() {
 fun registerNode(client: LavalinkClient) {
     listOf(
         /*client.addNode(
-            "Testnode",
-            URI.create("ws://localhost:2333"),
-            "youshallnotpass",
-            RegionGroup.EUROPE
+            NodeOptions.Builder()
+                .setName("Testnode")
+                .setServerUri("ws://localhost:2333")
+                .setPassword("youshallnotpass")
+                .setRegionFilter(RegionGroup.EUROPE)
+                .build()
         ),*/
 
         client.addNode(
-            "Mac-mini",
-            URI.create("ws://mac-mini.local.duncte123.lgbt:2333/bepis"),
-            "youshallnotpass",
-            RegionGroup.US
+            NodeOptions.Builder()
+                .setName("Mac-mini")
+                .setServerUri("ws://mac-mini.local.duncte123.lgbt:2333/bepis")
+                .setPassword("youshallnotpass")
+                .setRegionFilter(RegionGroup.US)
+                .build()
         )
     )
         .forEach { node ->

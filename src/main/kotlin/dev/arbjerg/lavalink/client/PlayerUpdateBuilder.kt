@@ -39,31 +39,6 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         return this
     }
 
-    override fun setEncodedTrack(encodedTrack: String?): PlayerUpdateBuilder {
-        this.trackUpdate = PlayerUpdateTrack(
-            encoded = Omissible.of(encodedTrack),
-        ).toOmissible()
-        return this
-    }
-
-    // TODO: keep this?
-    override fun omitEncodedTrack(): PlayerUpdateBuilder {
-        val curTrackUpdate = this.trackUpdate
-
-        if (curTrackUpdate.isPresent()) {
-            this.trackUpdate = curTrackUpdate.value.copy(encoded = Omissible.omitted()).toOmissible()
-        }
-
-        return this
-    }
-
-    override fun setIdentifier(identifier: String?): PlayerUpdateBuilder {
-        this.trackUpdate = PlayerUpdateTrack(
-            identifier = identifier.toOmissible(),
-        ).toOmissible()
-        return this
-    }
-
     override fun setPosition(position: Long?): PlayerUpdateBuilder {
         this.position = position.toOmissible()
         return this
@@ -131,12 +106,6 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
         filters = filters,
         voice = state
     )
-
-    @Deprecated(
-        message = "This method causes improper usage of the reactor system",
-        replaceWith = ReplaceWith("this")
-    )
-    fun asMono(): Mono<LavalinkPlayer>  = this
 
     override fun subscribe(actual: CoreSubscriber<in LavalinkPlayer>) {
         node.rest.updatePlayer(build(), guildId, noReplace)
