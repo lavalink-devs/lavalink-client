@@ -138,7 +138,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
     @JvmOverloads
     fun getOrCreateLink(guildId: Long, region: VoiceRegion? = null): Link {
         if (!linkMap.containsKey(guildId)) {
-            val bestNode = loadBalancer.selectNode(region)
+            val bestNode = loadBalancer.selectNode(region, guildId)
             linkMap[guildId] = Link(guildId, bestNode)
         }
 
@@ -205,7 +205,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
 
                 link.state = LinkState.CONNECTING
                 // The delay is used to prevent a race condition in Discord, causing close code 4006
-                link.transferNode(loadBalancer.selectNode(region = voiceRegion), delay = Duration.ofMillis(1000))
+                link.transferNode(loadBalancer.selectNode(region = voiceRegion, link.guildId), delay = Duration.ofMillis(1000))
             }
         }
     }
