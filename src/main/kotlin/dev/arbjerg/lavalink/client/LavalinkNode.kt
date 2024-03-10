@@ -49,8 +49,8 @@ class LavalinkNode(
 
     internal val httpClient = OkHttpClient.Builder().callTimeout(nodeOptions.httpTimeout, TimeUnit.MILLISECONDS).build()
 
-    internal val sink: Many<ClientEvent<*>> = Sinks.many().multicast().onBackpressureBuffer()
-    val flux: Flux<ClientEvent<*>> = sink.asFlux()
+    internal val sink: Many<ClientEvent> = Sinks.many().multicast().onBackpressureBuffer()
+    val flux: Flux<ClientEvent> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()
 
     internal val rest = LavalinkRestClient(this)
@@ -89,7 +89,7 @@ class LavalinkNode(
      *
      * @return a [Flux] of [ClientEvent]s
      */
-    fun <T : ClientEvent<*>> on(type: Class<T>): Flux<T> {
+    fun <T : ClientEvent> on(type: Class<T>): Flux<T> {
         return flux.ofType(type)
     }
 
@@ -98,7 +98,7 @@ class LavalinkNode(
      *
      * @return a [Flux] of [ClientEvent]s
      */
-    inline fun <reified T : ClientEvent<*>> on() = on(T::class.java)
+    inline fun <reified T : ClientEvent> on() = on(T::class.java)
 
     /**
      * Retrieves a list of all players from the lavalink node.
