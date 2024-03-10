@@ -34,15 +34,6 @@ class Link(
     fun getPlayer() = node.getPlayer(guildId)
 
     /**
-     * Destroys the player for this link. This will also remove the link from the client.
-     */
-    @Deprecated(
-        message = "Doesn't just destroy the player anymore, use destroy() instead.",
-        replaceWith = ReplaceWith("destroy()")
-    )
-    fun destroyPlayer() = node.destroyPlayerAndLink(guildId)
-
-    /**
      * Destroys this link, disconnecting the bot in the process.
      */
     fun destroy() = node.destroyPlayerAndLink(guildId)

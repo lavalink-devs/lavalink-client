@@ -1,6 +1,5 @@
-import dev.arbjerg.lavalink.client.LavalinkClient
-import dev.arbjerg.lavalink.client.TrackStartEvent
-import dev.arbjerg.lavalink.client.getUserIdFromToken
+import dev.arbjerg.lavalink.client.*
+import dev.arbjerg.lavalink.client.protocol.TrackUpdateBuilder
 import dev.arbjerg.lavalink.libraries.discord4j.installVoiceHandler
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
@@ -11,7 +10,6 @@ import discord4j.discordjson.json.ApplicationCommandOptionData
 import discord4j.discordjson.json.ApplicationCommandRequest
 import discord4j.gateway.intent.IntentSet
 import reactor.core.publisher.Mono
-import java.net.URI
 
 fun main() {
     val token = System.getenv("BOT_TOKEN")
@@ -63,9 +61,11 @@ fun main() {
 
 fun registerNodeD4j(client: LavalinkClient) {
     val node = client.addNode(
-        "Testnode",
-        URI.create("ws://localhost:2333"),
-        "youshallnotpass"
+        NodeOptions.Builder()
+            .setName("Testnode")
+            .setServerUri("ws://localhost:2333")
+            .setPassword("youshallnotpass")
+            .build()
     )
     node.on<TrackStartEvent>()
         .next()
@@ -105,7 +105,12 @@ private fun handleSlash(lavalink: LavalinkClient, event: ChatInputInteractionEve
                 .map(ApplicationCommandInteractionOptionValue::asString)
                 .get()
             val link = lavalink.getOrCreateLink(event.interaction.guildId.get().asLong())
-            link.getPlayer().block()!!.setIdentifier(input)
+            link.createOrUpdatePlayer()
+                .updateTrack(
+                    TrackUpdateBuilder()
+                        .setIdentifier(input)
+                        .build()
+                )
                 .subscribe()
             event.reply("Playing!!").subscribe()
         }

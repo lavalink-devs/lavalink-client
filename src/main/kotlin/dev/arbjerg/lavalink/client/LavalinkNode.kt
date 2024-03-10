@@ -165,12 +165,6 @@ class LavalinkNode(
      */
     fun createOrUpdatePlayer(guildId: Long) = PlayerUpdateBuilder(this, guildId)
 
-    @Deprecated(
-        message = "Doesn't just destroy the player anymore, use destroyPlayerAndLink() instead.",
-        replaceWith = ReplaceWith("destroyPlayerAndLink(guildId)")
-    )
-    fun destroyPlayer(guildId: Long) = destroyPlayerAndLink(guildId)
-
     /**
      * Destroy a guild's player and remove it from the cache. This will also remove the associated link from the client.
      *

@@ -1,7 +1,6 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
-import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultLoadBalancer
 import dev.arbjerg.lavalink.internal.ReconnectTask
@@ -10,7 +9,6 @@ import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
 import java.io.Closeable
-import java.net.URI
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -50,24 +48,6 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
 
     init {
         reconnectService.scheduleWithFixedDelay(ReconnectTask(this), 0, 500, TimeUnit.MILLISECONDS)
-    }
-
-    // TODO: configure resuming
-
-    /**
-     * Add a node to the client.
-     *
-     * @param name The name of your node
-     * @param address The ip and port of your node
-     * @param password The password of your node
-     * @param regionFilter (not currently used) Allows you to limit your node to a specific discord voice region
-     */
-    @JvmOverloads
-    @Deprecated("Use NodeOptions instead",
-        ReplaceWith("addNode(NodeOptions.Builder()...build())")
-    )
-    fun addNode(name: String, address: URI, password: String, regionFilter: IRegionFilter? = null): LavalinkNode {
-        return addNode(NodeOptions.Builder().setName(name).setServerUri(address).setPassword(password).setRegionFilter(regionFilter).build())
     }
 
     /**
@@ -115,19 +95,6 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
 
         return true
     }
-
-    /**
-     * Get or crate a link between a guild and a node.
-     *
-     * @param guildId The id of the guild
-     * @param region (not currently used) The target voice region of when to select a node
-     */
-    @Deprecated(
-        message = "Method name unclear",
-        replaceWith = ReplaceWith("getOrCreateLink(guildId, region)")
-    )
-    @JvmOverloads
-    fun getLink(guildId: Long, region: VoiceRegion? = null) = getOrCreateLink(guildId, region)
 
     /**
      * Get or crate a link between a guild and a node.

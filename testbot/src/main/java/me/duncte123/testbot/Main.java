@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.List;
 
 public class Main {
@@ -62,17 +61,20 @@ public class Main {
     private static void registerLavalinkNodes(LavalinkClient client) {
         List.of(
             client.addNode(
-                "Testnode",
-                URI.create("ws://localhost:2333"),
-                "youshallnotpass",
-                RegionGroup.EUROPE
+                new NodeOptions.Builder()
+                    .setName("Testnode")
+                    .setServerUri("ws://localhost:2333")
+                    .setPassword("youshallnotpass")
+                    .build()
             ),
 
             client.addNode(
-                "Pi-local",
-                URI.create("ws://pi.local.duncte123.lgbt:2333"),
-                "youshallnotpass",
-                RegionGroup.US
+                new NodeOptions.Builder()
+                    .setName("Pi-local")
+                    .setServerUri("ws://pi.local.duncte123.lgbt:2333/bepis")
+                    .setPassword("youshallnotpass")
+                    .setRegionFilter(RegionGroup.US)
+                    .build()
             )
         ).forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((event) -> {
