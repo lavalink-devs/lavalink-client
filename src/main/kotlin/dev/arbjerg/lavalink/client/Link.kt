@@ -52,15 +52,14 @@ class Link(
      */
     fun loadItem(identifier: String) = node.loadItem(identifier)
 
-    internal fun transferNode(newNode: LavalinkNode) {
+    internal fun transferNode(newNode: LavalinkNode, delay: Duration = Duration.ZERO) {
         val player = node.getCachedPlayer(guildId)
 
         if (player != null) {
             node.removeCachedPlayer(guildId)
             newNode.createOrUpdatePlayer(guildId)
                 .applyBuilder(player.stateToBuilder())
-                // Delay by 500ms to hopefully prevent a race-condition from triggering
-                .delayElement(Duration.ofMillis(500))
+                .delaySubscription(delay)
                 .subscribe()
         }
 
