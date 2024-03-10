@@ -56,11 +56,12 @@ public class JavaJDAExample extends ListenerAdapter {
                 RegionGroup.EUROPE
             ),*/
 
-            client.addNode(
-                "Mac-mini",
-                URI.create("ws://mac-mini.local.duncte123.lgbt:2333/bepis"),
-                "youshallnotpass",
-                RegionGroup.US
+            client.addNode(new NodeOptions.Builder().setName("Mac-mini")
+                .setServerUri(URI.create("ws://mac-mini.local.duncte123.lgbt:2333/bepis"))
+                .setPassword("youshallnotpass")
+                .setRegionFilter(RegionGroup.US)
+                .setHttpTimeout(5000L)
+                .build()
             )
         ).forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((event) -> {

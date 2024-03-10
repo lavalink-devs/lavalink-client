@@ -17,14 +17,14 @@ internal fun Message.toClientEvent(node: LavalinkNode) = when (this) {
     is Message.StatsEvent -> StatsEvent(node, frameStats, players, playingPlayers, uptime, memory, cpu)
 }
 
-sealed class ClientEvent<T : Message>(open val node: LavalinkNode)
+sealed class ClientEvent(open val node: LavalinkNode)
 
 // Normal events
 data class ReadyEvent(override val node: LavalinkNode, val resumed: Boolean, val sessionId: String)
-    : ClientEvent<Message.ReadyEvent>(node)
+    : ClientEvent(node)
 
 data class PlayerUpdateEvent(override val node: LavalinkNode, val guildId: Long, val state: PlayerState)
-    : ClientEvent<Message.PlayerUpdateEvent>(node)
+    : ClientEvent(node)
 
 data class StatsEvent(
     override val node: LavalinkNode,
@@ -34,23 +34,23 @@ data class StatsEvent(
     val uptime: Long,
     val memory: Memory,
     val cpu: Cpu
-) : ClientEvent<Message.StatsEvent>(node)
+) : ClientEvent(node)
 
 // Player events
-sealed class EmittedEvent<T : Message.EmittedEvent>(override val node: LavalinkNode, open val guildId: Long)
-    : ClientEvent<T>(node)
+sealed class EmittedEvent(override val node: LavalinkNode, open val guildId: Long)
+    : ClientEvent(node)
 
 data class TrackStartEvent(override val node: LavalinkNode, override val guildId: Long, val track: Track)
-    : EmittedEvent<Message.EmittedEvent.TrackStartEvent>(node, guildId)
+    : EmittedEvent(node, guildId)
 
 data class TrackEndEvent(override val node: LavalinkNode, override val guildId: Long, val track: Track, val endReason: AudioTrackEndReason)
-    : EmittedEvent<Message.EmittedEvent.TrackEndEvent>(node, guildId)
+    : EmittedEvent(node, guildId)
 
 data class TrackExceptionEvent(override val node: LavalinkNode, override val guildId: Long, val track: Track, val exception: TrackException)
-    : EmittedEvent<Message.EmittedEvent.TrackExceptionEvent>(node, guildId)
+    : EmittedEvent(node, guildId)
 
 data class TrackStuckEvent(override val node: LavalinkNode, override val guildId: Long, val track: Track, val thresholdMs: Long)
-    : EmittedEvent<Message.EmittedEvent.TrackStuckEvent>(node, guildId)
+    : EmittedEvent(node, guildId)
 
 data class WebSocketClosedEvent(override val node: LavalinkNode, override val guildId: Long, val code: Int, val reason: String, val byRemote: Boolean)
-    : EmittedEvent<Message.EmittedEvent.WebSocketClosedEvent>(node, guildId)
+    : EmittedEvent(node, guildId)
