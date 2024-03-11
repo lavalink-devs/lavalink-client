@@ -1,9 +1,7 @@
-package dev.arbjerg.lavalink.client
+package dev.arbjerg.lavalink.client.protocol
 
+import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.protocol.v4.*
-import dev.arbjerg.lavalink.client.protocol.Track
-import dev.arbjerg.lavalink.client.protocol.TrackException
-import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.protocol.v4.Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason
 
 internal fun Message.toClientEvent(node: LavalinkNode) = when (this) {

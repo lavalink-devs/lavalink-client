@@ -4,7 +4,7 @@ import dev.arbjerg.lavalink.VERSION as CLIENT_VERSION
 import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.LinkState
 import dev.arbjerg.lavalink.client.protocol.toCustom
-import dev.arbjerg.lavalink.client.toClientEvent
+import dev.arbjerg.lavalink.client.protocol.toClientEvent
 import dev.arbjerg.lavalink.protocol.v4.Message
 import dev.arbjerg.lavalink.protocol.v4.json
 import okhttp3.Request

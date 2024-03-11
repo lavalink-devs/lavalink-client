@@ -77,7 +77,7 @@ public class JavaJDAExample extends ListenerAdapter {
     }
 
     private void registerLavalinkListeners() {
-        this.client.on(dev.arbjerg.lavalink.client.ReadyEvent.class).subscribe((event) -> {
+        this.client.on(dev.arbjerg.lavalink.client.protocol.ReadyEvent.class).subscribe((event) -> {
             final LavalinkNode node = event.getNode();
 
             System.out.printf(

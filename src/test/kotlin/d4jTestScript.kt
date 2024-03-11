@@ -1,4 +1,5 @@
 import dev.arbjerg.lavalink.client.*
+import dev.arbjerg.lavalink.client.protocol.TrackStartEvent
 import dev.arbjerg.lavalink.client.protocol.TrackUpdateBuilder
 import dev.arbjerg.lavalink.libraries.discord4j.installVoiceHandler
 import discord4j.core.DiscordClientBuilder
