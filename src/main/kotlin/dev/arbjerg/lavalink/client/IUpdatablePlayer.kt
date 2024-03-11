@@ -9,6 +9,7 @@ import dev.arbjerg.lavalink.client.protocol.TrackUpdateBuilder
 interface IUpdatablePlayer {
     /**
      * Shortcut for setting the encoded track. This will also send any user-data supplied.
+     * Please keep in mind that this will set the position field to the current position of the track.
      *
      * @param track The track to apply to this builder
      *

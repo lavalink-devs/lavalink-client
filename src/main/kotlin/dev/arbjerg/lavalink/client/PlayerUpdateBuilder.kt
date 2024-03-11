@@ -23,6 +23,8 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
             userData = track?.userData?.toKotlin().toOmissible()
         ).toOmissible()
 
+        this.position = track?.info?.position.toOmissible()
+
         return this
     }
 
