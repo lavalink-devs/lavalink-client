@@ -104,12 +104,9 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
      */
     @JvmOverloads
     fun getOrCreateLink(guildId: Long, region: VoiceRegion? = null): Link {
-        if (!linkMap.containsKey(guildId)) {
-            val bestNode = loadBalancer.selectNode(region, guildId)
-            linkMap[guildId] = Link(guildId, bestNode)
+        return linkMap.getOrPut(guildId) {
+            Link(guildId, loadBalancer.selectNode(region, guildId))
         }
-
-        return linkMap[guildId]!!
     }
 
     /**
