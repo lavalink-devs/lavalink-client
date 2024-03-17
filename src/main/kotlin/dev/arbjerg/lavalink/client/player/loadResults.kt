@@ -1,4 +1,4 @@
-package dev.arbjerg.lavalink.client.protocol
+package dev.arbjerg.lavalink.client.player
 
 import dev.arbjerg.lavalink.internal.toJackson
 import dev.arbjerg.lavalink.protocol.v4.Exception as ProtocolException

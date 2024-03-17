@@ -2,7 +2,7 @@ package me.duncte123.testbot;
 
 import dev.arbjerg.lavalink.client.AbstractAudioLoadResultHandler;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.protocol.*;
+import dev.arbjerg.lavalink.client.player.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 

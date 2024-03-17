@@ -2,9 +2,9 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.event.ClientEvent
 import dev.arbjerg.lavalink.client.http.HttpBuilder
-import dev.arbjerg.lavalink.client.protocol.*
-import dev.arbjerg.lavalink.client.protocol.Track
-import dev.arbjerg.lavalink.client.protocol.toCustom
+import dev.arbjerg.lavalink.client.player.*
+import dev.arbjerg.lavalink.client.player.Track
+import dev.arbjerg.lavalink.client.player.toCustom
 import dev.arbjerg.lavalink.internal.*
 import dev.arbjerg.lavalink.internal.error.RestException
 import dev.arbjerg.lavalink.internal.loadbalancing.Penalties

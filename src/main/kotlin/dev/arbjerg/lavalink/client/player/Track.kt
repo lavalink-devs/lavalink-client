@@ -1,10 +1,9 @@
-package dev.arbjerg.lavalink.client.protocol
+package dev.arbjerg.lavalink.client.player
 
 import com.fasterxml.jackson.databind.JsonNode
 import dev.arbjerg.lavalink.internal.fromJsonElement
 import dev.arbjerg.lavalink.internal.toJackson
 import dev.arbjerg.lavalink.internal.toJsonElement
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import dev.arbjerg.lavalink.protocol.v4.Track as ProtocolTrack
 

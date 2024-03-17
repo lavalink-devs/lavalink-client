@@ -2,7 +2,7 @@ package me.duncte123.testbot;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.protocol.FilterBuilder;
+import dev.arbjerg.lavalink.client.player.FilterBuilder;
 import dev.arbjerg.lavalink.protocol.v4.Karaoke;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;

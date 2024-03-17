@@ -1,5 +1,7 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.player.LavalinkPlayer
+import dev.arbjerg.lavalink.client.player.PlayerUpdateBuilder
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import java.time.Duration
 import java.util.function.Consumer

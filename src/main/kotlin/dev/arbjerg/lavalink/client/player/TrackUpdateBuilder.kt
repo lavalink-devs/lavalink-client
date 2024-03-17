@@ -1,10 +1,9 @@
-package dev.arbjerg.lavalink.client.protocol
+package dev.arbjerg.lavalink.client.player
 
 import dev.arbjerg.lavalink.internal.toJsonElement
 import dev.arbjerg.lavalink.protocol.v4.Omissible
 import dev.arbjerg.lavalink.protocol.v4.PlayerUpdateTrack
 import dev.arbjerg.lavalink.protocol.v4.toOmissible
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 
 /**

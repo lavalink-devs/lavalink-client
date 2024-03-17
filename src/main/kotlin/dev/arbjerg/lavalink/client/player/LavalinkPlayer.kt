@@ -1,8 +1,7 @@
-package dev.arbjerg.lavalink.client
+package dev.arbjerg.lavalink.client.player
 
+import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
-import dev.arbjerg.lavalink.client.protocol.Track
-import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlin.math.min
 

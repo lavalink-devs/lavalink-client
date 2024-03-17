@@ -1,10 +1,8 @@
-package dev.arbjerg.lavalink.client
+package dev.arbjerg.lavalink.client.player
 
-import dev.arbjerg.lavalink.client.protocol.Track
 import dev.arbjerg.lavalink.protocol.v4.Filters
 import dev.arbjerg.lavalink.protocol.v4.PlayerUpdateTrack
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
-import dev.arbjerg.lavalink.client.protocol.TrackUpdateBuilder
 
 interface IUpdatablePlayer {
     /**
@@ -84,7 +82,7 @@ interface IUpdatablePlayer {
      * Please use [setVolume] to update the player's volume instead. Setting the volume via filters is
      * float based (1.0f is 100% volume) and takes the time of your buffer size to apply.
      *
-     * @param filters The new filters to apply to the player. You can use the [dev.arbjerg.lavalink.client.protocol.FilterBuilder] to easily create this object.
+     * @param filters The new filters to apply to the player. You can use the [dev.arbjerg.lavalink.client.player.FilterBuilder] to easily create this object.
      *
      * @return The updated builder, useful for chaining
      */

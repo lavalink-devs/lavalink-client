@@ -1,6 +1,6 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.client.protocol.*
+import dev.arbjerg.lavalink.client.player.*
 import java.util.function.Consumer
 
 abstract class AbstractAudioLoadResultHandler : Consumer<LavalinkLoadResult> {

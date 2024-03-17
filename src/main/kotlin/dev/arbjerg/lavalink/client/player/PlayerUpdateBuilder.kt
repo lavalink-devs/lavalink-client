@@ -1,13 +1,14 @@
-package dev.arbjerg.lavalink.client
+package dev.arbjerg.lavalink.client.player
 
-import dev.arbjerg.lavalink.client.protocol.Track
+import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.internal.toKotlin
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
 import reactor.core.CoreSubscriber
 import reactor.core.publisher.Mono
 
-class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : Mono<LavalinkPlayer>(), IUpdatablePlayer {
+class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, private val guildId: Long) : Mono<LavalinkPlayer>(),
+    IUpdatablePlayer {
     private var trackUpdate: Omissible<PlayerUpdateTrack> = Omissible.omitted()
     private var position: Omissible<Long> = Omissible.omitted()
     private var endTime: Omissible<Long?> = Omissible.omitted()

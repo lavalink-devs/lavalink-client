@@ -1,9 +1,9 @@
 package dev.arbjerg.lavalink.client
 
-import dev.arbjerg.lavalink.client.protocol.LoadFailed
-import dev.arbjerg.lavalink.client.protocol.PlaylistLoaded
-import dev.arbjerg.lavalink.client.protocol.SearchResult
-import dev.arbjerg.lavalink.client.protocol.TrackLoaded
+import dev.arbjerg.lavalink.client.player.LoadFailed
+import dev.arbjerg.lavalink.client.player.PlaylistLoaded
+import dev.arbjerg.lavalink.client.player.SearchResult
+import dev.arbjerg.lavalink.client.player.TrackLoaded
 import java.util.function.Consumer
 
 /**
