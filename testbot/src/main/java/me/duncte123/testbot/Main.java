@@ -1,9 +1,9 @@
 package me.duncte123.testbot;
 
 import dev.arbjerg.lavalink.client.*;
+import dev.arbjerg.lavalink.client.event.*;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
-import dev.arbjerg.lavalink.client.protocol.*;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;

@@ -3,7 +3,7 @@ package dev.arbjerg.lavalink.client
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultLoadBalancer
-import dev.arbjerg.lavalink.client.protocol.ClientEvent
+import dev.arbjerg.lavalink.client.event.ClientEvent
 import dev.arbjerg.lavalink.internal.ReconnectTask
 import reactor.core.Disposable
 import reactor.core.publisher.Flux

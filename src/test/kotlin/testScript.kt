@@ -1,5 +1,9 @@
 import com.github.topi314.lavasearch.protocol.SearchResult as TopiSearchResult
 import dev.arbjerg.lavalink.client.*
+import dev.arbjerg.lavalink.client.event.EmittedEvent
+import dev.arbjerg.lavalink.client.event.ReadyEvent
+import dev.arbjerg.lavalink.client.event.StatsEvent
+import dev.arbjerg.lavalink.client.event.TrackStartEvent
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider
 import dev.arbjerg.lavalink.client.protocol.*

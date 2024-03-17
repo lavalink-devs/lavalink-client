@@ -1,4 +1,7 @@
 import dev.arbjerg.lavalink.client.*;
+import dev.arbjerg.lavalink.client.event.EmittedEvent;
+import dev.arbjerg.lavalink.client.event.StatsEvent;
+import dev.arbjerg.lavalink.client.event.TrackStartEvent;
 import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.client.protocol.*;
@@ -77,7 +80,7 @@ public class JavaJDAExample extends ListenerAdapter {
     }
 
     private void registerLavalinkListeners() {
-        this.client.on(dev.arbjerg.lavalink.client.protocol.ReadyEvent.class).subscribe((event) -> {
+        this.client.on(dev.arbjerg.lavalink.client.event.ReadyEvent.class).subscribe((event) -> {
             final LavalinkNode node = event.getNode();
 
             System.out.printf(

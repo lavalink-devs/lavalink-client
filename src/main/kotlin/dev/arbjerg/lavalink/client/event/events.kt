@@ -1,6 +1,9 @@
-package dev.arbjerg.lavalink.client.protocol
+package dev.arbjerg.lavalink.client.event
 
 import dev.arbjerg.lavalink.client.LavalinkNode
+import dev.arbjerg.lavalink.client.protocol.Track
+import dev.arbjerg.lavalink.client.protocol.TrackException
+import dev.arbjerg.lavalink.client.protocol.toCustom
 import dev.arbjerg.lavalink.protocol.v4.*
 import dev.arbjerg.lavalink.protocol.v4.Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason
 
