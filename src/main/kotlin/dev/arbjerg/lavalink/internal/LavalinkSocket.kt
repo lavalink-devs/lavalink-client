@@ -104,7 +104,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                     else -> {}
                 }
 
-                node.penalties.handleTrackEvent(event)
+                node.nodeHealth.handleTrackEvent(event)
             }
 
             else -> {

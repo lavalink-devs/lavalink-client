@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
+import dev.arbjerg.lavalink.client.loadbalancing.builtin.INodeHealthProvider
 import dev.arbjerg.lavalink.internal.TIMEOUT_MS
 import java.net.URI
 
@@ -8,12 +9,14 @@ data class NodeOptions private constructor(val name: String,
                        val serverUri: URI,
                        val password: String,
                        val regionFilter: IRegionFilter?,
+                       val nodeHealthProvider: INodeHealthProvider?,
                        val httpTimeout: Long) {
     data class Builder(
         private var name: String? = null,
         private var serverUri: URI? = null,
         private var password: String? = null,
         private var regionFilter: IRegionFilter? = null,
+        private var nodeHealthProvider: INodeHealthProvider? = null,
         private var httpTimeout: Long = TIMEOUT_MS,
     ) {
         fun setName(name: String) = apply { this.name = name }
@@ -40,6 +43,11 @@ data class NodeOptions private constructor(val name: String,
         fun setRegionFilter(regionFilter: IRegionFilter?) = apply { this.regionFilter = regionFilter }
 
         /**
+         * Sets a custom node health provider for the node. Used in loadbalancing/traffic routing (Default: none)
+         */
+        fun setNodeHealthProvider(nodeHealthProvider: INodeHealthProvider?) = apply { this.nodeHealthProvider = nodeHealthProvider }
+
+        /**
          * Sets the http total call timeout. (Default: 10000ms)
          * @param httpTimeout - timeout in ms
          */
@@ -55,6 +63,7 @@ data class NodeOptions private constructor(val name: String,
                 serverUri!!,
                 password!!,
                 regionFilter,
+                nodeHealthProvider,
                 httpTimeout)
         }
     }

@@ -7,7 +7,8 @@ import dev.arbjerg.lavalink.client.player.Track
 import dev.arbjerg.lavalink.client.player.toCustom
 import dev.arbjerg.lavalink.internal.*
 import dev.arbjerg.lavalink.internal.error.RestException
-import dev.arbjerg.lavalink.internal.loadbalancing.Penalties
+import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultNodeHealthProvider
+import dev.arbjerg.lavalink.client.loadbalancing.builtin.INodeHealthProvider
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
 import kotlinx.serialization.DeserializationStrategy
@@ -57,7 +58,7 @@ class LavalinkNode(
     val ws = LavalinkSocket(this)
 
     // Stuff for load balancing
-    val penalties = Penalties(this)
+    var nodeHealth: INodeHealthProvider = nodeOptions.nodeHealthProvider ?: DefaultNodeHealthProvider(this)
     var stats: Stats? = null
         internal set
     var available: Boolean = false

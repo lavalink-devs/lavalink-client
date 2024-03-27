@@ -33,7 +33,7 @@ class DefaultLoadBalancer(private val client: LavalinkClient) : ILoadBalancer {
 
         // TODO: Probably should enforce that no nodes go above the max
         return nodes.filter { it.available }.minByOrNull { node ->
-            node.penalties.calculateTotal() + penaltyProviders.sumOf { it.getPenalty(node, region) }
+            node.nodeHealth.calculateTotalHealthPenalty() + penaltyProviders.sumOf { it.getPenalty(node, region) }
         } ?: throw IllegalStateException("No available nodes!")
     }
 }
