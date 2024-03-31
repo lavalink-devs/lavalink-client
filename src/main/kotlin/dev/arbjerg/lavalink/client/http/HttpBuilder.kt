@@ -13,17 +13,17 @@ class HttpBuilder(private val internalBuilder: Request.Builder) : Request.Builde
     /**
      * Set the path for this request
      *
-     * @param path the path for the request to make, this will be prefixed with the base url of the node (E.G. `http://localhost:2333/v4`)
+     * @param path the path for the request to make, this will be prefixed with the base url of the node (E.G. `http://localhost:2333`)
      *
      * @return The current builder instance, useful for chaining calls
      */
     fun path(path: String): HttpBuilder {
-        this.path = path
+        this.path = if (path.startsWith("/")) path else "/$path"
         return this
     }
 
     /**
-     * Prefixes the path with the base url of the node (E.G. `http://localhost:2333/v4`)
+     * Prefixes the path with the base url of the node (E.G. `http://localhost:2333`)
      *
      * @param baseUrl The base url of the node.
      *
