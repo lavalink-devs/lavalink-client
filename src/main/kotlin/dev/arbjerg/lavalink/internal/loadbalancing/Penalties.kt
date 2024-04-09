@@ -61,7 +61,7 @@ data class Penalties(val node: LavalinkNode) {
         // The way we calculate penalties is heavily based on the original Lavalink client.
 
         // This will serve as a rule of thumb. 1 playing player = 1 penalty point
-        val playerPenalty = stats.playingPlayers
+        val playerPenalty = node.playerCache.count { it.value.track != null && !it.value.paused }
 
         val cpuPenalty = (1.05.pow(100 * stats.cpu.systemLoad) * 10 - 10).toInt()
 
