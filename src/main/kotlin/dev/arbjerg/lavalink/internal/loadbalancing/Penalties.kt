@@ -3,6 +3,7 @@ package dev.arbjerg.lavalink.internal.loadbalancing
 import dev.arbjerg.lavalink.client.LavalinkNode
 import dev.arbjerg.lavalink.client.loadbalancing.MAX_ERROR
 import dev.arbjerg.lavalink.protocol.v4.Message
+import kotlin.math.max
 import kotlin.math.pow
 
 // Clearing them on a timer sucks, here's some ideas from freya:
@@ -61,7 +62,8 @@ data class Penalties(val node: LavalinkNode) {
         // The way we calculate penalties is heavily based on the original Lavalink client.
 
         // This will serve as a rule of thumb. 1 playing player = 1 penalty point
-        val playerPenalty = node.playerCache.count { it.value.track != null && !it.value.paused }
+        val cachedPlayingPlayers = node.playerCache.count { it.value.track != null && !it.value.paused }
+        val playerPenalty = max(cachedPlayingPlayers, stats.playingPlayers)
 
         val cpuPenalty = (1.05.pow(100 * stats.cpu.systemLoad) * 10 - 10).toInt()
 
