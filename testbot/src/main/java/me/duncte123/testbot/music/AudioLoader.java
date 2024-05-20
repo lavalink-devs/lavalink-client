@@ -1,20 +1,21 @@
-package me.duncte123.testbot;
+package me.duncte123.testbot.music;
 
 import dev.arbjerg.lavalink.client.AbstractAudioLoadResultHandler;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.*;
+import me.duncte123.testbot.MyUserData;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class AudioLoader extends AbstractAudioLoadResultHandler {
-    private final Link link;
     private final SlashCommandInteractionEvent event;
+    private final GuildMusicManager mngr;
 
-    public AudioLoader(Link link, SlashCommandInteractionEvent event) {
-        this.link = link;
+    public AudioLoader(SlashCommandInteractionEvent event, GuildMusicManager mngr) {
         this.event = event;
+        this.mngr = mngr;
     }
 
     @Override
@@ -25,24 +26,21 @@ public class AudioLoader extends AbstractAudioLoadResultHandler {
 
         track.setUserData(userData);
 
-        link.createOrUpdatePlayer()
-            .setTrack(track)
-            .setVolume(35)
-            .subscribe((player) -> {
-                final Track playingTrack = player.getTrack();
-                final var trackTitle = playingTrack.getInfo().getTitle();
-                final MyUserData customData = playingTrack.getUserData(MyUserData.class);
+        this.mngr.scheduler.enqueue(track);
 
-                event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
-            });
+        final var trackTitle = track.getInfo().getTitle();
+
+        event.getHook().sendMessage("Added to queue: " + trackTitle + "\nRequested by: <@" + userData.requester() + '>').queue();
     }
 
     @Override
     public void onPlaylistLoaded(@NotNull PlaylistLoaded result) {
         final int trackCount = result.getTracks().size();
         event.getHook()
-            .sendMessage("This playlist has " + trackCount + " tracks!")
+            .sendMessage("Added " + trackCount + " tracks to the queue from " + result.getInfo().getName() + "!")
             .queue();
+
+        this.mngr.scheduler.enqueuePlaylist(result.getTracks());
     }
 
     @Override
@@ -56,12 +54,9 @@ public class AudioLoader extends AbstractAudioLoadResultHandler {
 
         final Track firstTrack = tracks.get(0);
 
-        // This is a different way of updating the player! Choose your preference!
-        // This method will also create a player if there is not one in the server yet
-        link.updatePlayer((update) -> update.setTrack(firstTrack).setVolume(35))
-            .subscribe((ignored) -> {
-                event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
-            });
+        event.getHook().sendMessage("Adding to queue: " + firstTrack.getInfo().getTitle()).queue();
+
+        this.mngr.scheduler.enqueue(firstTrack);
     }
 
     @Override

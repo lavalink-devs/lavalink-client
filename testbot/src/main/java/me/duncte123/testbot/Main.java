@@ -12,11 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     private static final int SESSION_INVALID = 4006;
+
+    private static JDAListener listener;
 
     public static void main(String[] args) throws InterruptedException {
         final var token = System.getenv("BOT_TOKEN");
@@ -27,11 +30,13 @@ public class Main {
         registerLavalinkListeners(client);
         registerLavalinkNodes(client);
 
+        listener = new JDAListener(client);
+
         final var jda = JDABuilder.createDefault(token)
             .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
             .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
             .enableCache(CacheFlag.VOICE_STATE)
-            .addEventListeners(new JDAListener(client))
+            .addEventListeners(listener)
             .build()
             .awaitReady();
 
@@ -80,7 +85,7 @@ public class Main {
             node.on(TrackStartEvent.class).subscribe((event) -> {
                 final LavalinkNode node1 = event.getNode();
 
-                LOG.info(
+                LOG.trace(
                     "{}: track started: {}",
                     node1.getName(),
                     event.getTrack().getInfo()
@@ -109,6 +114,18 @@ public class Main {
                 event.getPlayingPlayers(),
                 event.getPlayers(),
                 client.getLinks().size()
+            );
+        });
+
+        client.on(TrackStartEvent.class).subscribe((event) -> {
+            Optional.ofNullable(listener.musicManagers.get(event.getGuildId())).ifPresent(
+                (mng) -> mng.scheduler.onTrackStart(event.getTrack())
+            );
+        });
+
+        client.on(TrackEndEvent.class).subscribe((event) -> {
+            Optional.ofNullable(listener.musicManagers.get(event.getGuildId())).ifPresent(
+                (mng) -> mng.scheduler.onTrackEnd(event.getTrack(), event.getEndReason())
             );
         });
 

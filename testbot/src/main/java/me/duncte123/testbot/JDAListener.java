@@ -7,6 +7,8 @@ import dev.arbjerg.lavalink.protocol.v4.Karaoke;
 import me.duncte123.lyrics.model.Lyrics;
 import me.duncte123.lyrics.model.TextLyrics;
 import me.duncte123.lyrics.model.TimedLyrics;
+import me.duncte123.testbot.music.AudioLoader;
+import me.duncte123.testbot.music.GuildMusicManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -22,11 +24,15 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class JDAListener extends ListenerAdapter {
     private static final long DUNCTE = 191231307290771456L;
 
     private static final Logger LOG = LoggerFactory.getLogger(JDAListener.class);
 
+    public final Map<Long, GuildMusicManager> musicManagers = new HashMap<>();
     private final LavalinkClient client;
     private final EvalEngine evalEngine;
 
@@ -117,13 +123,8 @@ public class JDAListener extends ListenerAdapter {
                 joinHelper(event);
                 break;
             case "stop":
-                this.client.getOrCreateLink(guild.getIdLong())
-                    .updatePlayer(
-                        (update) -> update.setTrack(null).setPaused(false)
-                    )
-                    .subscribe((__) -> {
-                        event.reply("Stopped the current track").queue();
-                    });
+                event.reply("Stopped the current track and clearing the queue").queue();
+                this.getOrCreateMusicManager(event.getGuild().getIdLong()).stop();
                 break;
             case "leave":
                 event.getJDA().getDirectAudioController().disconnect(guild);
@@ -207,11 +208,13 @@ public class JDAListener extends ListenerAdapter {
                 final String identifier = event.getOption("identifier").getAsString();
                 final long guildId = guild.getIdLong();
                 final Link link = this.client.getOrCreateLink(guildId);
+                final var mngr = this.getOrCreateMusicManager(guildId);
 
-                link.loadItem(identifier).subscribe(new AudioLoader(link, event));
+                link.loadItem(identifier).subscribe(new AudioLoader(event, mngr));
 
                 break;
             }
+            // Required plugin: https://github.com/DuncteBot/java-timed-lyrics
             case "lyrics": {
                 final Link link = this.client.getOrCreateLink(guild.getIdLong());
                 final var node = link.getNode();
@@ -296,6 +299,19 @@ public class JDAListener extends ListenerAdapter {
         }
     }
 
+    private GuildMusicManager getOrCreateMusicManager(long guildId) {
+        synchronized(this) {
+            var mng = this.musicManagers.get(guildId);
+
+            if (mng == null) {
+                mng = new GuildMusicManager(guildId, this.client);
+                this.musicManagers.put(guildId, mng);
+            }
+
+            return mng;
+        }
+    }
+
     // Makes sure that the bot is in a voice channel!
     private void joinHelper(SlashCommandInteractionEvent event) {
         final Member member = event.getMember();
@@ -304,6 +320,8 @@ public class JDAListener extends ListenerAdapter {
         if (memberVoiceState.inAudioChannel()) {
             event.getJDA().getDirectAudioController().connect(memberVoiceState.getChannel());
         }
+
+        this.getOrCreateMusicManager(member.getGuild().getIdLong());
 
         event.reply("Joining your channel!").queue();
     }
