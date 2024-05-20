@@ -286,6 +286,7 @@ public class JDAListener extends ListenerAdapter {
                         hook.sendMessage("Rest action error: " + err).queue();
                     }
                 );
+                break;
             }
 
             default: {
