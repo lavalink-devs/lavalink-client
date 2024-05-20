@@ -4,6 +4,10 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.FilterBuilder;
 import dev.arbjerg.lavalink.protocol.v4.Karaoke;
+import me.duncte123.lyrics.model.Lyrics;
+import me.duncte123.lyrics.model.TextLyrics;
+import me.duncte123.lyrics.model.TimedLyrics;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,12 +17,9 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class JDAListener extends ListenerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(JDAListener.class);
@@ -31,11 +32,11 @@ public class JDAListener extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        LOG.info(event.getJDA().getSelfUser().getAsTag() + " is ready!");
+        LOG.info("{} is ready!", event.getJDA().getSelfUser().getAsTag());
 
         event.getJDA().updateCommands()
             .addCommands(
-                Commands.slash("custom-request", "Testing custom requests"),
+                Commands.slash("lyrics", "Testing custom requests"),
                 Commands.slash("join", "Join the voice channel you are in."),
                 Commands.slash("leave", "Leaves the vc"),
                 Commands.slash("stop", "Stops the current track"),
@@ -165,19 +166,48 @@ public class JDAListener extends ListenerAdapter {
 
                 break;
             }
-            case "custom-request": {
+            case "lyrics": {
                 final Link link = this.client.getOrCreateLink(guild.getIdLong());
+                final var node = link.getNode();
+                final var sessionId = node.getSessionId();
+                final var guildId = guild.getId();
 
-                link.getNode().customRequest(
-                    (builder) -> builder.get().path("/version").header("Accept", "text/plain")
+                node.customJsonRequest(
+                    Lyrics.class,
+                    (builder) -> builder.get().path(
+                        "/v4/sessions/%s/players/%s/lyrics".formatted(sessionId, guildId)
+                    )
                 ).subscribe((response) -> {
-                    try (ResponseBody body = response.body()) {
-                        final String bodyText = body.string();
+                    switch (response) {
+                        case TextLyrics lyrics -> {
+                            event.replyEmbeds(
+                                new EmbedBuilder()
+                                    .setDescription(lyrics.text())
+                                    .build()
+                            ).queue();
+                        }
+                        case TimedLyrics lyrics -> {
+                            final var position = link.getCachedPlayer().getState().getPosition();
+                            final var builder = new StringBuilder();
 
-                        event.reply("Response from version endpoint (with custom request): " + bodyText).queue();
-                    } catch (IOException e) {
-                        event.reply("Something went wrong! " + e.getMessage()).queue();
+                            lyrics.lines().forEach((line) -> {
+                                if (line.range().start() <= position && position <= line.range().end()) {
+                                    builder.append("__**%s**__\n".formatted(line.line()));
+                                } else {
+                                    builder.append(line.line()).append("\n");
+                                }
+                            });
+
+                            event.replyEmbeds(
+                                new EmbedBuilder()
+                                    .setDescription(builder.toString())
+                                    .build()
+                            ).queue();
+                        }
+                        default -> event.reply("Unknown lyrics: " + response.getClass()).queue();
                     }
+                }, (err) -> {
+                    event.reply(err.getMessage()).queue();
                 });
                 break;
             }

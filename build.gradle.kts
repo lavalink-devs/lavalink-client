@@ -69,6 +69,7 @@ dependencies {
     testImplementation(libs.jda)
     testImplementation(libs.d4j)
     testImplementation(libs.logger.impl)
+    testImplementation(libs.lyrics)
     testImplementation(libs.lavasearch)
 }
 

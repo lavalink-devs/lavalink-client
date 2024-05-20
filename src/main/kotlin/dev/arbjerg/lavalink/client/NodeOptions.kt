@@ -19,10 +19,18 @@ data class NodeOptions private constructor(val name: String,
         fun setName(name: String) = apply { this.name = name }
 
         /**
-         * Sets the server URI of the Lavalink Node.
+         * Sets the server URI of the Lavalink Node. If no port is present in the URI, it will be set to 2333.
          * @param serverUriString - String representation of server uri
          */
-        fun setServerUri(serverUriString: String) = apply { this.serverUri = URI(serverUriString) }
+        fun setServerUri(serverUriString: String) = apply {
+            var parsedUri = URI(serverUriString)
+
+            if (parsedUri.port == -1) {
+                parsedUri = URI("$serverUriString:2333")
+            }
+
+            this.serverUri = parsedUri
+        }
         /**
          * Sets the server URI of the Lavalink Node.
          * @param serverUri - Server uri

@@ -62,20 +62,20 @@ public class Main {
         List.of(
             client.addNode(
                 new NodeOptions.Builder()
-                    .setName("Testnode")
-                    .setServerUri("ws://localhost:2333")
+                    .setName("optiplex")
+                    .setServerUri("ws://optiplex.local.duncte123.lgbt")
                     .setPassword("youshallnotpass")
-                    .build()
-            ),
-
-            client.addNode(
-                new NodeOptions.Builder()
-                    .setName("Pi-local")
-                    .setServerUri("ws://pi.local.duncte123.lgbt:2333/bepis")
-                    .setPassword("youshallnotpass")
-                    .setRegionFilter(RegionGroup.US)
                     .build()
             )
+
+//            client.addNode(
+//                new NodeOptions.Builder()
+//                    .setName("pi")
+//                    .setServerUri("ws://pi.local.duncte123.lgbt:2333/bepis")
+//                    .setPassword("youshallnotpass")
+//                    .setRegionFilter(RegionGroup.US)
+//                    .build()
+//            )
         ).forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((event) -> {
                 final LavalinkNode node1 = event.getNode();
