@@ -148,7 +148,10 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
             return
         }
 
-        if (nodes.size == 1) {
+        // In case a node was removed and we have a single node left.
+        // we should always check if the node is the same
+        // NEVER assume that the disconnected node is still in the nodes list.
+        if (nodes.size == 1 && nodes.first() == node) {
             linkMap.forEach { (_, link) ->
                 link.state = LinkState.DISCONNECTED
             }

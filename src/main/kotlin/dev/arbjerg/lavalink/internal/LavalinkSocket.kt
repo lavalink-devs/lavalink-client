@@ -129,6 +129,15 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        handleFailureTrhowable(t)
+
+        node.available = false
+        open = false
+
+        node.lavalink.onNodeDisconnected(node)
+    }
+
+    private fun handleFailureTrhowable(t: Throwable) {
         when(t) {
             is EOFException -> {
                 logger.debug("Got disconnected from ${node.name}, trying to reconnect", t)
@@ -156,11 +165,6 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 logger.error("Unknown error on ${node.name}", t)
             }
         }
-
-        node.available = false
-        open = false
-
-        node.lavalink.onNodeDisconnected(node)
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {

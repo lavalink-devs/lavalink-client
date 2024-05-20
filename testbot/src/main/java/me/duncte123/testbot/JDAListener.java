@@ -37,6 +37,14 @@ public class JDAListener extends ListenerAdapter {
         event.getJDA().updateCommands()
             .addCommands(
                 Commands.slash("lyrics", "Testing custom requests"),
+                Commands.slash("node", "What node am I on?"),
+                Commands.slash("del-node", "test")
+                    .addOption(
+                        OptionType.STRING,
+                        "node-name",
+                        "Name of the node",
+                        true
+                    ),
                 Commands.slash("join", "Join the voice channel you are in."),
                 Commands.slash("leave", "Leaves the vc"),
                 Commands.slash("stop", "Stops the current track"),
@@ -67,6 +75,23 @@ public class JDAListener extends ListenerAdapter {
         }
 
         switch (event.getFullCommandName()) {
+            case "node": {
+                final var link = this.client.getLinkIfCached(guild.getIdLong());
+
+                if (link == null) {
+                    event.reply("No link for this guild").queue();
+                    break;
+                }
+
+                event.reply("Connected to: " + link.getNode().getName()).queue();
+
+                break;
+            }
+            case "del-node": {
+                this.client.removeNode(event.getOption("node-name").getAsString());
+                event.reply("Ok").queue();
+                break;
+            }
             case "join":
                 joinHelper(event);
                 break;
