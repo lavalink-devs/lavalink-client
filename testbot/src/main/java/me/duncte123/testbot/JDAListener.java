@@ -17,17 +17,22 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JDAListener extends ListenerAdapter {
+    private static final long DUNCTE = 191231307290771456L;
+
     private static final Logger LOG = LoggerFactory.getLogger(JDAListener.class);
 
     private final LavalinkClient client;
+    private final EvalEngine evalEngine;
 
     public JDAListener(LavalinkClient client) {
         this.client = client;
+        this.evalEngine = new EvalEngine(client);
     }
 
     @Override
@@ -38,11 +43,11 @@ public class JDAListener extends ListenerAdapter {
             .addCommands(
                 Commands.slash("lyrics", "Testing custom requests"),
                 Commands.slash("node", "What node am I on?"),
-                Commands.slash("del-node", "test")
+                Commands.slash("eval", "test out some code")
                     .addOption(
                         OptionType.STRING,
-                        "node-name",
-                        "Name of the node",
+                        "script",
+                        "Script to eval",
                         true
                     ),
                 Commands.slash("join", "Join the voice channel you are in."),
@@ -87,9 +92,25 @@ public class JDAListener extends ListenerAdapter {
 
                 break;
             }
-            case "del-node": {
-                this.client.removeNode(event.getOption("node-name").getAsString());
-                event.reply("Ok").queue();
+            case "eval": {
+                final var user = event.getUser();
+
+                if (user.getIdLong() != DUNCTE) {
+                    event.replyFormat("I'm sorry %s, I'm afraid I can't let you do that", user.getAsMention()).queue();
+                    return;
+                }
+
+                event.deferReply().queue();
+
+                Thread.ofVirtual().start(() -> {
+                    try {
+                        final var script = event.getOption("script").getAsString();
+                        final var result = this.evalEngine.eval(event, script);
+                        this.parseEvalResult(event, result);
+                    } catch (final Exception e) {
+                        LOG.error("Failed to eval", e);
+                    }
+                });
                 break;
             }
             case "join":
@@ -239,6 +260,38 @@ public class JDAListener extends ListenerAdapter {
             default:
                 event.reply("Unknown command???").queue();
                 break;
+        }
+    }
+
+    private void parseEvalResult(SlashCommandInteractionEvent event, Object result) {
+        final var hook = event.getHook();
+
+        if (result == null) {
+            hook.sendMessage("No result").queue();
+            return;
+        }
+
+        switch (result) {
+            case Throwable thr: {
+                hook.sendMessage("ERROR: " + thr).queue();
+                break;
+            }
+
+            case RestAction<?> ra: {
+                ra.queue(
+                    (res) -> {
+                        hook.sendMessage("Rest action success: " + res).queue();
+                    },
+                    (err) -> {
+                        hook.sendMessage("Rest action error: " + err).queue();
+                    }
+                );
+            }
+
+            default: {
+                hook.sendMessage("result: " + result).queue();
+                break;
+            }
         }
     }
 
