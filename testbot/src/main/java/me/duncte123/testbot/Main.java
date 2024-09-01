@@ -65,14 +65,21 @@ public class Main {
 
     private static void registerLavalinkNodes(LavalinkClient client) {
         List.of(
-            client.addNode(
-                new NodeOptions.Builder()
-                    .setName("optiplex")
-                    .setServerUri("ws://optiplex.local.duncte123.lgbt")
-                    .setPassword("youshallnotpass")
-                    .build()
-            ),
-
+//            client.addNode(
+//                new NodeOptions.Builder()
+//                    .setName("localhost")
+//                    .setServerUri("ws://localhost")
+//                    .setPassword("youshallnotpass")
+//                    .build()
+//            )
+//            client.addNode(
+//                new NodeOptions.Builder()
+//                    .setName("optiplex")
+//                    .setServerUri("ws://optiplex.local.duncte123.lgbt")
+//                    .setPassword("youshallnotpass")
+//                    .build()
+//            ),
+//
             client.addNode(
                 new NodeOptions.Builder()
                     .setName("pi")

@@ -39,7 +39,7 @@ fun VersionCatalogBuilder.common() {
 }
 
 fun VersionCatalogBuilder.discordLibs() {
-    library("jda", "net.dv8tion", "JDA").version("5.0.0-beta.11")
+    library("jda", "net.dv8tion", "JDA").version("5.1.0")
     library("d4j", "com.discord4j", "discord4j-core").version("3.2.3")
 }
 

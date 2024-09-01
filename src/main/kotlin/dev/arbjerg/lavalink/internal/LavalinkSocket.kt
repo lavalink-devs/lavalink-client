@@ -38,7 +38,6 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         logger.info("${node.name} has been connected!")
-        node.available = true
         open = true
         reconnectsAttempted = 0
     }
@@ -52,6 +51,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             Message.Op.Ready -> {
                 val sessionId = (event as Message.ReadyEvent).sessionId
                 node.sessionId = sessionId
+                node.available = true
                 logger.info("${node.name} is ready with session id $sessionId")
 
                 node.playerCache.values.forEach { player ->

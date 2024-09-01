@@ -68,6 +68,13 @@ public class JDAListener extends ListenerAdapter {
                         "The identifier of the song you want to play",
                         true
                     ),
+                Commands.slash("play-file", "Play a song from a file")
+                    .addOption(
+                        OptionType.ATTACHMENT,
+                        "file",
+                        "the file to play",
+                        true
+                    ),
                 Commands.slash("karaoke", "Turn karaoke on or off")
                     .addSubcommands(
                         new SubcommandData("on", "Turn karaoke on"),
@@ -211,6 +218,24 @@ public class JDAListener extends ListenerAdapter {
                 final var mngr = this.getOrCreateMusicManager(guildId);
 
                 link.loadItem(identifier).subscribe(new AudioLoader(event, mngr));
+
+                break;
+            }
+            case "play-file": {
+                // We are already connected, go ahead and play
+                if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
+                    event.deferReply(false).queue();
+                } else {
+                    // Connect to VC first
+                    joinHelper(event);
+                }
+
+                final var file = event.getOption("file").getAsAttachment();
+                final long guildId = guild.getIdLong();
+                final Link link = this.client.getOrCreateLink(guildId);
+                final var mngr = this.getOrCreateMusicManager(guildId);
+
+                link.loadItem(file.getUrl()).subscribe(new AudioLoader(event, mngr));
 
                 break;
             }
