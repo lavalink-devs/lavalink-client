@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client.player
 
 import dev.arbjerg.lavalink.client.LavalinkNode
+import dev.arbjerg.lavalink.client.exception.VoiceStateException
 import dev.arbjerg.lavalink.internal.toKotlin
 import dev.arbjerg.lavalink.internal.toLavalinkPlayer
 import dev.arbjerg.lavalink.protocol.v4.*
@@ -77,6 +78,10 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
     }
 
     override fun setVoiceState(state: VoiceState): PlayerUpdateBuilder {
+        if (state.sessionId.isEmpty() || state.endpoint.isEmpty() || state.token.isEmpty()) {
+            throw VoiceStateException("Voice state is missing sessionId, endpoint, or token: $state")
+        }
+
         this.state = state.toOmissible()
         return this
     }
