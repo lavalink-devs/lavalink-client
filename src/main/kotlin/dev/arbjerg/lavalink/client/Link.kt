@@ -3,6 +3,7 @@ package dev.arbjerg.lavalink.client
 import dev.arbjerg.lavalink.client.player.LavalinkPlayer
 import dev.arbjerg.lavalink.client.player.PlayerUpdateBuilder
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.function.Consumer
 
@@ -15,6 +16,8 @@ class Link(
     val guildId: Long,
     node: LavalinkNode
 ) {
+    private var logger = LoggerFactory.getLogger(Link::class.java)
+
     var node = node
         private set
 
@@ -58,11 +61,15 @@ class Link(
         val player = node.getCachedPlayer(guildId)
 
         if (player != null) {
-            node.removeCachedPlayer(guildId)
             newNode.createOrUpdatePlayer(guildId)
                 .applyBuilder(player.stateToBuilder())
                 .delaySubscription(delay)
-                .subscribe()
+                .subscribe({
+                    node.removeCachedPlayer(guildId)
+                }) {
+                    state = LinkState.DISCONNECTED
+                    logger.error("Failed to transfer player to new node: ${newNode.name}", it)
+                }
         }
 
         node = newNode
@@ -73,7 +80,10 @@ class Link(
             state = LinkState.CONNECTING
             node.createOrUpdatePlayer(guildId)
                 .setVoiceState(newVoiceState)
-                .subscribe()
+                .subscribe(null) {
+                    state = LinkState.DISCONNECTED
+                    logger.error("Failed to update voice state to $newVoiceState", it)
+                }
         }
     }
 
