@@ -33,4 +33,8 @@ class MetricService {
 
         return metricMap
     }
+
+    internal fun resetMetrics() {
+        timeMap.clear()
+    }
 }

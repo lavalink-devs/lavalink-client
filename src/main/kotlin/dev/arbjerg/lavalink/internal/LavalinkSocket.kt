@@ -49,12 +49,26 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
         when (event.op) {
             Message.Op.Ready -> {
-                val sessionId = (event as Message.ReadyEvent).sessionId
+                val (_, resumed, sessionId) = event as Message.ReadyEvent
+
+                // in case this was a reboot of the node, and we are not resuming
+                // reset the metrics to prevent the loadbalancer not liking this node
+                if (!resumed) {
+                    node.penalties.resetMetrics()
+                }
+
                 node.sessionId = sessionId
                 node.available = true
                 logger.info("${node.name} is ready with session id $sessionId")
 
                 node.playerCache.values.forEach { player ->
+                    // Ignore empty voice states, not sure what causes this
+                    val (token, endpoint, stateSessionId) = player.voiceState
+
+                    if (token.isBlank() || endpoint.isBlank() || stateSessionId.isBlank()) {
+                        return@forEach
+                    }
+
                     // Re-create the player on the node.
                     player.stateToBuilder()
                         .setNoReplace(false)

@@ -16,6 +16,10 @@ import kotlin.math.pow
 data class Penalties(val node: LavalinkNode) {
     private val metricService = MetricService()
 
+    internal fun resetMetrics() {
+        metricService.resetMetrics()
+    }
+
     fun handleTrackEvent(event: Message.EmittedEvent) {
         when (event) {
             is Message.EmittedEvent.TrackStartEvent -> {
