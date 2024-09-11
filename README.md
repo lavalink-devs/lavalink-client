@@ -69,7 +69,7 @@ JDABuilder.createDefault(botToken)
     .build();
 ```
 
-then connect to vc by using the [direct audio controller](https://ci.dv8tion.net/job/JDA5/javadoc/net/dv8tion/jda/api/JDA.html#getDirectAudioController()) like this:
+then connect to vc by using the [direct audio controller](https://docs.jda.wiki/net/dv8tion/jda/api/JDA.html#getDirectAudioController()) like this:
 ```java
 jda.getDirectAudioController().connect(voiceChannel);
 ```
