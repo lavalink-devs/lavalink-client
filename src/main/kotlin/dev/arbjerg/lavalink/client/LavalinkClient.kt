@@ -6,6 +6,7 @@ import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultLoadBalancer
 import dev.arbjerg.lavalink.client.event.ClientEvent
 import dev.arbjerg.lavalink.client.player.LavalinkPlayer
 import dev.arbjerg.lavalink.internal.ReconnectTask
+import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
@@ -128,6 +129,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         val orphans = findOrphanedPlayers()
 
         orphans.mapNotNull { linkMap[it.guildId] }
+            .filter { !it.cachedPlayer?.voiceState.isEmpty() } // TODO: do some logging to mark them as skipped?
             .forEach { link ->
                 link.transferNode(node)
             }
@@ -224,5 +226,13 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
                     sink.emitError(e, Sinks.EmitFailureHandler.FAIL_FAST)
                 }
             }
+    }
+
+    private fun VoiceState?.isEmpty(): Boolean {
+        if (this == null) {
+            return true
+        }
+
+        return this.token.isBlank() || this.endpoint.isBlank() || this.sessionId.isBlank();
     }
 }
