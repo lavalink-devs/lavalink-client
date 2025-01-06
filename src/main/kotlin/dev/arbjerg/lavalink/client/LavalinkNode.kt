@@ -44,7 +44,7 @@ class LavalinkNode(
     val regionFilter = nodeOptions.regionFilter
     val password = nodeOptions.password
 
-    var sessionId: String? = null
+    var sessionId: String? = nodeOptions.sessionId
         internal set
 
     internal val httpClient = OkHttpClient.Builder().callTimeout(nodeOptions.httpTimeout, TimeUnit.MILLISECONDS).build()

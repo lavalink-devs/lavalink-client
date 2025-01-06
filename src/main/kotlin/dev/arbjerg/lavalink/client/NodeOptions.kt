@@ -8,13 +8,15 @@ data class NodeOptions private constructor(val name: String,
                        val serverUri: URI,
                        val password: String,
                        val regionFilter: IRegionFilter?,
-                       val httpTimeout: Long) {
+                       val httpTimeout: Long,
+                       val sessionId: String?) {
     data class Builder(
         private var name: String? = null,
         private var serverUri: URI? = null,
         private var password: String? = null,
         private var regionFilter: IRegionFilter? = null,
         private var httpTimeout: Long = TIMEOUT_MS,
+        private var sessionId: String? = null
     ) {
         fun setName(name: String) = apply { this.name = name }
 
@@ -53,6 +55,14 @@ data class NodeOptions private constructor(val name: String,
          */
         fun setHttpTimeout(httpTimeout: Long) = apply { this.httpTimeout = httpTimeout }
 
+        /**
+         * Sets the session ID that the client will use when first connecting to Lavalink. If the given session is still
+         *   running on the Lavalink server, the session will be resumed.
+         *
+         * Defaults to null, which means no attempt to resume will be made.
+         */
+        fun setSessionId(sessionId: String?) = apply { this.sessionId = sessionId }
+
         fun build(): NodeOptions {
             requireNotNull(name) { "name is required" }
             requireNotNull(serverUri) { "serverUri is required" }
@@ -63,7 +73,8 @@ data class NodeOptions private constructor(val name: String,
                 serverUri!!,
                 password!!,
                 regionFilter,
-                httpTimeout)
+                httpTimeout,
+                sessionId)
         }
     }
 }
