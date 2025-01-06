@@ -69,6 +69,13 @@ class LavalinkRestClient(val node: LavalinkNode) {
         }.toMono()
     }
 
+    fun patchSession(session: Session): Mono<Session> {
+        return newRequest {
+            path("/v4/sessions/${node.sessionId}")
+            patch(json.encodeToString(session).toRequestBody("application/json".toMediaType()))
+        }.toMono()
+    }
+
     /**
      * Make a request to the lavalink node. This is internal to keep it looking nice in kotlin. Java compatibility is in the node class.
      */
