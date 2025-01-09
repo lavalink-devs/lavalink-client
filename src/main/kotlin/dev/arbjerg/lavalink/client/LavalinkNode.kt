@@ -236,7 +236,7 @@ class LavalinkNode(
     }
 
     /**
-     * Enables resuming. This causes Lavalink to continue playing for a certain duration of time, during which
+     * Enables resuming. This causes Lavalink to continue playing for [duration], during which
      *  we can reconnect without losing our session data. */
     fun enableResuming(timeout: Duration): Mono<Session> {
         return rest.patchSession(Session(resuming = true, timeout.seconds))
