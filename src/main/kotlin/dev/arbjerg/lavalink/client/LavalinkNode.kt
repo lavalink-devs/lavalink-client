@@ -25,6 +25,7 @@ import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
 import java.io.Closeable
 import java.io.IOException
+import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -44,7 +45,7 @@ class LavalinkNode(
     val regionFilter = nodeOptions.regionFilter
     val password = nodeOptions.password
 
-    var sessionId: String? = null
+    var sessionId: String? = nodeOptions.sessionId
         internal set
 
     internal val httpClient = OkHttpClient.Builder().callTimeout(nodeOptions.httpTimeout, TimeUnit.MILLISECONDS).build()
@@ -232,6 +233,22 @@ class LavalinkNode(
         if (!available) return Mono.error(IllegalStateException("Node is not available"))
 
         return rest.getNodeInfo()
+    }
+
+    /**
+     * Enables resuming. This causes Lavalink to continue playing for [duration], during which
+     *  we can reconnect without losing our session data. */
+    fun enableResuming(timeout: Duration): Mono<Session> {
+        return rest.patchSession(Session(resuming = true, timeout.seconds))
+    }
+
+    /**
+     * Disables resuming, causing Lavalink to immediately drop all players upon this client disconnecting from it.
+     *
+     * This is the default behavior, reversing calls to [enableResuming].
+     */
+    fun disableResuming(): Mono<Session> {
+        return rest.patchSession(Session(resuming = false, timeoutSeconds = 0))
     }
 
     /**
