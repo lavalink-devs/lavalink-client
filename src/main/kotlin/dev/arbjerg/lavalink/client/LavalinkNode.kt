@@ -44,6 +44,7 @@ class LavalinkNode(
     val name = nodeOptions.name
     val regionFilter = nodeOptions.regionFilter
     val password = nodeOptions.password
+    internal var cachedSession: Session? = null
 
     var sessionId: String? = nodeOptions.sessionId
         internal set
@@ -239,7 +240,9 @@ class LavalinkNode(
      * Enables resuming. This causes Lavalink to continue playing for [duration], during which
      *  we can reconnect without losing our session data. */
     fun enableResuming(timeout: Duration): Mono<Session> {
-        return rest.patchSession(Session(resuming = true, timeout.seconds))
+        return rest.patchSession(Session(resuming = true, timeout.seconds)).doOnSuccess {
+            cachedSession = it
+        }
     }
 
     /**
@@ -248,7 +251,9 @@ class LavalinkNode(
      * This is the default behavior, reversing calls to [enableResuming].
      */
     fun disableResuming(): Mono<Session> {
-        return rest.patchSession(Session(resuming = false, timeoutSeconds = 0))
+        return rest.patchSession(Session(resuming = false, timeoutSeconds = 0)).doOnSuccess {
+            cachedSession = it
+        }
     }
 
     /**
