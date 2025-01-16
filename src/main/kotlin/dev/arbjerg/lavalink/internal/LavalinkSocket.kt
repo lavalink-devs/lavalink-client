@@ -40,6 +40,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         logger.info("${node.name} has been connected!")
         open = true
         reconnectsAttempted = 0
+        node.lavalink.onNodeConnected(node)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {

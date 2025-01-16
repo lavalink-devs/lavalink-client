@@ -9,6 +9,7 @@ import dev.arbjerg.lavalink.internal.ReconnectTask
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import java.io.Closeable
 import java.time.Duration
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.time.toJavaDuration
 
 /**
  * @param userId ID of the bot for authenticating with Discord
@@ -169,6 +171,21 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
             return
         }
 
+        val session = node.cachedSession
+        val canResume = session != null && session.resuming && session.timeoutSeconds > 0
+        if (canResume) {
+            node.resumeTimer = Mono.delay(Duration.ofSeconds(session!!.timeoutSeconds))
+                .subscribe() { transferNodes(node) }
+        } else {
+            transferNodes(node)
+        }
+    }
+
+    internal fun onNodeConnected(node: LavalinkNode) {
+        node.resumeTimer?.dispose()
+    }
+
+    private fun transferNodes(node: LavalinkNode) {
         linkMap.forEach { (_, link) ->
             if (link.node == node) {
                 val voiceRegion = link.cachedPlayer?.voiceRegion
