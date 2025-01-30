@@ -83,6 +83,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                     node.rest.getSession().subscribe { node.cachedSession = null }
                 }
 
+                node.synchronizeAfterResume()
+
                 // Move players from older, unavailable nodes to ourselves.
                 node.transferOrphansToSelf()
             }
