@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.event.ClientEvent
+import dev.arbjerg.lavalink.client.event.ResumeSynchronizationEvent
 import dev.arbjerg.lavalink.client.http.HttpBuilder
 import dev.arbjerg.lavalink.client.player.*
 import dev.arbjerg.lavalink.client.player.Track
@@ -17,12 +18,14 @@ import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import org.slf4j.LoggerFactory
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
+import reactor.util.retry.Retry
 import java.io.Closeable
 import java.io.IOException
 import java.time.Duration
@@ -38,6 +41,7 @@ class LavalinkNode(
     private val nodeOptions: NodeOptions,
     val lavalink: LavalinkClient
 ) : Disposable, Closeable {
+    private val logger = LoggerFactory.getLogger(LavalinkNode::class.java)
     // "safe" uri with all paths removed
     val baseUri = "${nodeOptions.serverUri.scheme}://${nodeOptions.serverUri.host}:${nodeOptions.serverUri.port}"
 
@@ -238,7 +242,7 @@ class LavalinkNode(
     }
 
     /**
-     * Enables resuming. This causes Lavalink to continue playing for [duration], during which
+     * Enables resuming. This causes Lavalink to continue playing for [timeout] amount of time, during which
      *  we can reconnect without losing our session data. */
     fun enableResuming(timeout: Duration): Mono<Session> {
         return rest.patchSession(Session(resuming = true, timeout.seconds)).doOnSuccess {
@@ -428,7 +432,9 @@ class LavalinkNode(
     }
 
     internal fun synchronizeAfterResume() {
-        getPlayers().subscribe { players ->
+        getPlayers()
+            .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1)))
+            .map { players ->
             val remoteGuildIds = players.map { it.guildId }
 
             players.forEach { player ->
@@ -450,6 +456,13 @@ class LavalinkNode(
                 val link = lavalink.getLinkIfCached(guildId) ?: return@forEach
                 if (link.node == this) link.state = LinkState.DISCONNECTED
             }
+
+            ResumeSynchronizationEvent(this, failureReason = null)
+        }.doOnError {
+            logger.error("Failure while attempting synchronization with $this", it)
+            sink.tryEmitNext(ResumeSynchronizationEvent(this, failureReason = it))
+        }.subscribe {
+            sink.tryEmitNext(it)
         }
     }
 
