@@ -29,6 +29,7 @@ import reactor.util.retry.Retry
 import java.io.Closeable
 import java.io.IOException
 import java.time.Duration
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -426,6 +427,11 @@ class LavalinkNode(
      * @return The cached player, or null if not yet cached.
      */
     fun getCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache[guildId]
+
+    /**
+     * @return an unmodifiable view of all cached players for this node.
+     */
+    fun getCachedPlayers(): Map<Long, LavalinkPlayer> = Collections.unmodifiableMap(playerCache)
 
     internal fun transferOrphansToSelf() {
         lavalink.transferOrphansTo(this)
