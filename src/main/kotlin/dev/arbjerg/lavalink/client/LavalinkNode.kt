@@ -59,7 +59,6 @@ class LavalinkNode(
     internal val sink: Many<ClientEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<ClientEvent> = sink.asFlux()
     private val reference: Disposable = flux.subscribe()
-    internal var resumeTimer: Disposable? = null
 
     internal val rest = LavalinkRestClient(this)
     val ws = LavalinkSocket(this)
