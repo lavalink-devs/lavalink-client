@@ -150,9 +150,6 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         if (mayReconnect) {
             logger.info("${node.name} disconnected, reconnecting in ${reconnectInterval / 1000} seconds")
         }
-
-        node.available = false
-        open = false
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -200,6 +197,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         node.available = false
+        open = false
         node.lavalink.onNodeDisconnected(node)
 
         if (code == 1000) {
