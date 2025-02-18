@@ -18,6 +18,7 @@ import java.io.EOFException
 import java.net.ConnectException
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.util.concurrent.atomic.AtomicBoolean
 
 class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Closeable {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
@@ -27,11 +28,14 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     var mayReconnect = true
     var lastReconnectAttempt = 0L
     @Volatile
-    private var connectionsAttempted = 0
+    private var reconnectsAttempted = 0
     val reconnectInterval: Int
-        get() = connectionsAttempted * 2000 - 2000
+        get() = reconnectsAttempted * 2000 - 2000
     var open: Boolean = false
         private set
+    @Volatile
+    private var hasEverConnected = false
+    private val isAttemptingResume = AtomicBoolean(node.sessionId != null)
 
     init {
         connect()
@@ -40,7 +44,9 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
     override fun onOpen(webSocket: WebSocket, response: Response) {
         logger.info("${node.name} has been connected!")
         open = true
-        connectionsAttempted = 0
+        reconnectsAttempted = 0
+        hasEverConnected = true
+        isAttemptingResume.set(false)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -190,8 +196,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             }
         }
 
-        if (connectionsAttempted == 1 && lastReconnectAttempt > 0) {
-            node.lavalink.onNodeFirstReconnectFailed(node)
+        if (hasEverConnected && isAttemptingResume.getAndSet(false)) {
+            node.lavalink.onResumeReconnectFailed(node)
         }
     }
 
@@ -221,6 +227,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
     fun attemptReconnect() {
         lastReconnectAttempt = System.currentTimeMillis()
+        reconnectsAttempted++
         connect()
     }
 
@@ -236,14 +243,13 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             .addHeader("Client-Name", "Lavalink-Client/${CLIENT_VERSION}")
             .addHeader("User-Id", node.lavalink.userId.toString())
             .apply {
-                if (node.sessionId != null && connectionsAttempted == 0) {
+                if (node.sessionId != null && isAttemptingResume.get()) {
                     addHeader("Session-Id", node.sessionId!!)
                 }
             }
             .build()
 
         mayReconnect = true
-        connectionsAttempted++
         socket = node.httpClient.newWebSocket(request, this)
     }
 
@@ -253,5 +259,9 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         node.available = false
         socket?.close(1000, "Client shutdown")
         socket?.cancel()
+    }
+
+    internal fun onResumableConnectionDisconnected() {
+        isAttemptingResume.set(true)
     }
 }

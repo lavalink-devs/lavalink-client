@@ -9,7 +9,6 @@ import dev.arbjerg.lavalink.internal.ReconnectTask
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import java.io.Closeable
 import java.time.Duration
@@ -172,13 +171,15 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
 
         val session = node.cachedSession
         val canResume = session != null && session.resuming && session.timeoutSeconds > 0
-        if (!canResume) {
-            // If canResume is true, onNodeFirstReconnectFailed(node) may do the transfer
+        if (canResume) {
+            // This causes onResumeReconnectFailed(node) to be called if the next reconnect fails
+            node.ws.onResumableConnectionDisconnected()
+        } else {
             transferNodes(node)
         }
     }
 
-    internal fun onNodeFirstReconnectFailed(node: LavalinkNode) {
+    internal fun onResumeReconnectFailed(node: LavalinkNode) {
         transferNodes(node)
     }
 
