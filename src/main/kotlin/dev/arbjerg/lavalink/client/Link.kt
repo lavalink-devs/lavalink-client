@@ -58,18 +58,19 @@ class Link(
     fun loadItem(identifier: String) = node.loadItem(identifier)
 
     internal fun transferNode(newNode: LavalinkNode, delay: Duration = Duration.ZERO) {
-        val player = node.getCachedPlayer(guildId)
+        val player = node.getAndRemoveCachedPlayer(guildId)
 
         if (player != null) {
+            state = LinkState.CONNECTING
             newNode.createOrUpdatePlayer(guildId)
                 .applyBuilder(player.stateToBuilder())
                 .delaySubscription(delay)
-                .subscribe({
-                    node.removeCachedPlayer(guildId)
-                }) {
+                .doOnError {
                     state = LinkState.DISCONNECTED
                     logger.error("Failed to transfer player to new node: ${newNode.name}", it)
-                }
+                }.subscribe()
+        } else {
+            state = LinkState.DISCONNECTED
         }
 
         node = newNode

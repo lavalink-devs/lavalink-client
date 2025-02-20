@@ -427,6 +427,8 @@ class LavalinkNode(
      */
     fun getCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache[guildId]
 
+    internal fun getAndRemoveCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache.remove(guildId)
+
     /**
      * @return an unmodifiable view of all cached players for this node.
      */
