@@ -34,11 +34,11 @@ jobs:
             - uses: actions/upload-pages-artifact@v3
               with:
                   path: 'build/dokka/html'
-#            - uses: cloudflare/pages-action@v1
-#              with:
-#                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-#                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-#                  projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
-#                  directory: build/dokka/html
-#                  branch: ${{ github.ref_name }}
-#                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+            - uses: cloudflare/pages-action@v1
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
+                  directory: build/dokka/html
+                  branch: ${{ github.ref_name }}
+                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
