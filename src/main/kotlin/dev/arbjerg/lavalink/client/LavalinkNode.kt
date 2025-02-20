@@ -417,11 +417,16 @@ class LavalinkNode(
      */
     fun getCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache[guildId]
 
+    internal fun getAndRemoveCachedPlayer(guildId: Long): LavalinkPlayer? = playerCache.remove(guildId)
+
+    /**
+     * @return an unmodifiable view of all cached players for this node.
+     */
+    fun getCachedPlayers(): Map<Long, LavalinkPlayer> = Collections.unmodifiableMap(playerCache)
+
     internal fun transferOrphansToSelf() {
         lavalink.transferOrphansTo(this)
     }
-
-
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
