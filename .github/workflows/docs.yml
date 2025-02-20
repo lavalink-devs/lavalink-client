@@ -31,11 +31,9 @@ jobs:
             - uses: actions/upload-pages-artifact@v3
               with:
                   path: 'build/dokka/html'
-            - uses: cloudflare/pages-action@v1
+            - uses: cloudflare/wrangler-action@v3
               with:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
-                  directory: build/dokka/html
+                  command: pages deploy "build/dokka/html" --project-name="${{ vars.CLOUDFLARE_PROJECT_NAME }}"
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-                  wranglerVersion: '3'
