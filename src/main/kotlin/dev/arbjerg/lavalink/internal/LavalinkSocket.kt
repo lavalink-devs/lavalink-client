@@ -197,7 +197,11 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         }
 
         if (hasEverConnected && isAttemptingResume.getAndSet(false)) {
-            node.lavalink.onResumeReconnectFailed(node)
+            try {
+                node.lavalink.onResumeReconnectFailed(node)
+            } catch (e: Exception) {
+                logger.error("Exception after giving up on resuming", e)
+            }
         }
     }
 
