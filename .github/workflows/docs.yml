@@ -16,7 +16,7 @@ jobs:
             contents: read
             deployments: write
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   fetch-depth: 0
             - uses: actions/setup-java@v4
@@ -28,14 +28,14 @@ jobs:
                 run: ./gradlew --no-daemon dokkaHtml dokkaJavadoc
             - name: Copy javadoc subfolder
               run: mv build/dokka/javadoc build/dokka/html/ && cp dokka/includes/404.html build/dokka/html/
-            - uses: actions/upload-pages-artifact@v1
+            - uses: actions/upload-pages-artifact@v3
               with:
                   path: 'build/dokka/html'
-            - uses: cloudflare/pages-action@v1
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
-                  directory: build/dokka/html
-                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-                  wranglerVersion: '3'
+#            - uses: cloudflare/pages-action@v1
+#              with:
+#                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+#                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+#                  projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
+#                  directory: build/dokka/html
+#                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+#                  wranglerVersion: '3'
