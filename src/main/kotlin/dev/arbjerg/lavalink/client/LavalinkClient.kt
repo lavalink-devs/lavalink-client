@@ -1,9 +1,9 @@
 package dev.arbjerg.lavalink.client
 
+import dev.arbjerg.lavalink.client.event.ClientEvent
 import dev.arbjerg.lavalink.client.loadbalancing.ILoadBalancer
 import dev.arbjerg.lavalink.client.loadbalancing.VoiceRegion
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.DefaultLoadBalancer
-import dev.arbjerg.lavalink.client.event.ClientEvent
 import dev.arbjerg.lavalink.client.player.LavalinkPlayer
 import dev.arbjerg.lavalink.internal.ReconnectTask
 import dev.arbjerg.lavalink.protocol.v4.VoiceState
@@ -110,6 +110,19 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
             Link(guildId, loadBalancer.selectNode(region, guildId))
         }
     }
+    /**
+     * Get or crate a [Link] between a guild and a node.
+     *
+     * The requested [LavalinkNode] is only assigned if a new [Link] is created
+     *
+     * @param guildId The id of the guild
+     * @param node the node to initially assign the [Link] to if a new one is created
+     */
+    internal fun getOrCreateLink(guildId: Long, node: LavalinkNode): Link {
+        return linkMap.getOrPut(guildId) {
+            Link(guildId, node)
+        }
+    }
 
     /**
      * Returns a [Link] if it exists in the cache.
@@ -169,6 +182,21 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
             return
         }
 
+        val session = node.cachedSession
+        val canResume = session != null && session.resuming && session.timeoutSeconds > 0
+        if (canResume) {
+            // This causes onResumeReconnectFailed(node) to be called if the next reconnect fails
+            node.ws.onResumableConnectionDisconnected()
+        } else {
+            transferNodes(node)
+        }
+    }
+
+    internal fun onResumeReconnectFailed(node: LavalinkNode) {
+        transferNodes(node)
+    }
+
+    private fun transferNodes(node: LavalinkNode) {
         linkMap.forEach { (_, link) ->
             if (link.node == node) {
                 val voiceRegion = link.cachedPlayer?.voiceRegion

@@ -76,6 +76,15 @@ class LavalinkRestClient(val node: LavalinkNode) {
         }.toMono()
     }
 
+    fun getSession(): Mono<Session> {
+        return newRequest {
+            path("/v4/sessions/${node.sessionId}")
+            // Using patch with an empty object is a dirty hack because GET is not supported for this resource
+            // 7 years younger me should have known better ~Freya
+            patch("{}".toRequestBody("application/json".toMediaType()))
+        }.toMono()
+    }
+
     /**
      * Make a request to the lavalink node. This is internal to keep it looking nice in kotlin. Java compatibility is in the node class.
      */

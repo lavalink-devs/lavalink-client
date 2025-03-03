@@ -7,7 +7,7 @@ import dev.arbjerg.lavalink.client.player.toCustom
 import dev.arbjerg.lavalink.protocol.v4.*
 import dev.arbjerg.lavalink.protocol.v4.Message.EmittedEvent.TrackEndEvent.AudioTrackEndReason
 
-internal fun Message.toClientEvent(node: LavalinkNode) = when (this) {
+internal fun Message.toClientEvent(node: LavalinkNode): ClientEvent = when (this) {
     is Message.ReadyEvent -> ReadyEvent(node, resumed, sessionId)
     is Message.EmittedEvent.TrackEndEvent -> TrackEndEvent(node, guildId.toLong(), track.toCustom(), reason)
     is Message.EmittedEvent.TrackExceptionEvent -> TrackExceptionEvent(node, guildId.toLong(), track.toCustom(), exception.toCustom())
@@ -18,11 +18,18 @@ internal fun Message.toClientEvent(node: LavalinkNode) = when (this) {
     is Message.StatsEvent -> StatsEvent(node, frameStats, players, playingPlayers, uptime, memory, cpu)
 }
 
-sealed class ClientEvent(open val node: LavalinkNode)
+abstract class ClientEvent(open val node: LavalinkNode)
 
 // Normal events
 data class ReadyEvent(override val node: LavalinkNode, val resumed: Boolean, val sessionId: String)
     : ClientEvent(node)
+
+/**
+ * Represents a successful or failed synchronization after a [ReadyEvent] with [ReadyEvent.resumed] set to true.
+ *
+ * Whether it is successful depends on whether [failureReason] is null.
+ */
+data class ResumeSynchronizationEvent(override val node: LavalinkNode, val failureReason: Throwable?) : ClientEvent(node)
 
 data class PlayerUpdateEvent(override val node: LavalinkNode, val guildId: Long, val state: PlayerState)
     : ClientEvent(node)
