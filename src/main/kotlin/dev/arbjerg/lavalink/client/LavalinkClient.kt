@@ -110,6 +110,19 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
             Link(guildId, loadBalancer.selectNode(region, guildId))
         }
     }
+    /**
+     * Get or crate a [Link] between a guild and a node.
+     *
+     * The requested [LavalinkNode] is only assigned if a new [Link] is created
+     *
+     * @param guildId The id of the guild
+     * @param node the node to initially assign the [Link] to if a new one is created
+     */
+    internal fun getOrCreateLink(guildId: Long, node: LavalinkNode): Link {
+        return linkMap.getOrPut(guildId) {
+            Link(guildId, node)
+        }
+    }
 
     /**
      * Returns a [Link] if it exists in the cache.

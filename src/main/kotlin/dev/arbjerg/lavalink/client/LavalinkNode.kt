@@ -447,7 +447,7 @@ class LavalinkNode(
             players.forEach { player ->
                 playerCache[player.guildId] = player
 
-                val link = lavalink.getLinkIfCached(player.guildId) ?: return@forEach
+                val link = lavalink.getOrCreateLink(player.guildId, node = this)
                 if (link.node != this) return@forEach
 
                 link.state = if (player.state.connected) {
