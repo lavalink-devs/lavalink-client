@@ -18,6 +18,7 @@ import java.io.EOFException
 import java.net.ConnectException
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.util.concurrent.atomic.AtomicBoolean
 
 class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Closeable {
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
@@ -26,11 +27,15 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
     var mayReconnect = true
     var lastReconnectAttempt = 0L
+    @Volatile
     private var reconnectsAttempted = 0
     val reconnectInterval: Int
         get() = reconnectsAttempted * 2000 - 2000
     var open: Boolean = false
         private set
+    @Volatile
+    private var hasEverConnected = false
+    private val isAttemptingResume = AtomicBoolean(node.sessionId != null)
 
     init {
         connect()
@@ -40,6 +45,8 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         logger.info("${node.name} has been connected!")
         open = true
         reconnectsAttempted = 0
+        hasEverConnected = true
+        isAttemptingResume.set(false)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -73,6 +80,17 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                     player.stateToBuilder()
                         .setNoReplace(false)
                         .subscribe()
+                }
+
+                if (!resumed) {
+                    node.cachedSession = null
+                }
+                if (node.cachedSession == null) {
+                    node.rest.getSession().subscribe { node.cachedSession = it }
+                }
+
+                if (resumed) {
+                    node.synchronizeAfterResume()
                 }
 
                 // Move players from older, unavailable nodes to ourselves.
@@ -138,13 +156,10 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         if (mayReconnect) {
             logger.info("${node.name} disconnected, reconnecting in ${reconnectInterval / 1000} seconds")
         }
-
-        node.available = false
-        open = false
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        handleFailureTrhowable(t)
+        handleFailureThrowable(t)
 
         node.available = false
         open = false
@@ -152,7 +167,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         node.lavalink.onNodeDisconnected(node)
     }
 
-    private fun handleFailureTrhowable(t: Throwable) {
+    private fun handleFailureThrowable(t: Throwable) {
         when(t) {
             is EOFException -> {
                 logger.debug("Got disconnected from ${node.name}, trying to reconnect", t)
@@ -180,10 +195,19 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 logger.error("Unknown error on ${node.name}", t)
             }
         }
+
+        if (hasEverConnected && isAttemptingResume.getAndSet(false)) {
+            try {
+                node.lavalink.onResumeReconnectFailed(node)
+            } catch (e: Exception) {
+                logger.error("Exception after giving up on resuming", e)
+            }
+        }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         node.available = false
+        open = false
         node.lavalink.onNodeDisconnected(node)
 
         if (code == 1000) {
@@ -203,7 +227,6 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
                 reason
             )
         }
-
     }
 
     fun attemptReconnect() {
@@ -224,7 +247,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
             .addHeader("Client-Name", "Lavalink-Client/${CLIENT_VERSION}")
             .addHeader("User-Id", node.lavalink.userId.toString())
             .apply {
-                if (node.sessionId != null) {
+                if (node.sessionId != null && isAttemptingResume.get()) {
                     addHeader("Session-Id", node.sessionId!!)
                 }
             }
@@ -240,5 +263,9 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         node.available = false
         socket?.close(1000, "Client shutdown")
         socket?.cancel()
+    }
+
+    internal fun onResumableConnectionDisconnected() {
+        isAttemptingResume.set(true)
     }
 }

@@ -1,6 +1,7 @@
 package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.event.ClientEvent
+import dev.arbjerg.lavalink.client.event.ResumeSynchronizationEvent
 import dev.arbjerg.lavalink.client.http.HttpBuilder
 import dev.arbjerg.lavalink.client.player.*
 import dev.arbjerg.lavalink.client.player.Track
@@ -17,12 +18,14 @@ import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import org.slf4j.LoggerFactory
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import reactor.core.publisher.Sinks.Many
 import reactor.kotlin.core.publisher.toMono
+import reactor.util.retry.Retry
 import java.io.Closeable
 import java.io.IOException
 import java.time.Duration
@@ -39,12 +42,14 @@ class LavalinkNode(
     private val nodeOptions: NodeOptions,
     val lavalink: LavalinkClient
 ) : Disposable, Closeable {
+    private val logger = LoggerFactory.getLogger(LavalinkNode::class.java)
     // "safe" uri with all paths removed
     val baseUri = "${nodeOptions.serverUri.scheme}://${nodeOptions.serverUri.host}:${nodeOptions.serverUri.port}"
 
     val name = nodeOptions.name
     val regionFilter = nodeOptions.regionFilter
     val password = nodeOptions.password
+    internal var cachedSession: Session? = null
 
     var sessionId: String? = nodeOptions.sessionId
         internal set
@@ -237,10 +242,12 @@ class LavalinkNode(
     }
 
     /**
-     * Enables resuming. This causes Lavalink to continue playing for [duration], during which
+     * Enables resuming. This causes Lavalink to continue playing for [timeout] amount of time, during which
      *  we can reconnect without losing our session data. */
     fun enableResuming(timeout: Duration): Mono<Session> {
-        return rest.patchSession(Session(resuming = true, timeout.seconds))
+        return rest.patchSession(Session(resuming = true, timeout.seconds)).doOnSuccess {
+            cachedSession = it
+        }
     }
 
     /**
@@ -249,7 +256,9 @@ class LavalinkNode(
      * This is the default behavior, reversing calls to [enableResuming].
      */
     fun disableResuming(): Mono<Session> {
-        return rest.patchSession(Session(resuming = false, timeoutSeconds = 0))
+        return rest.patchSession(Session(resuming = false, timeoutSeconds = 0)).doOnSuccess {
+            cachedSession = it
+        }
     }
 
     /**
@@ -427,6 +436,41 @@ class LavalinkNode(
 
     internal fun transferOrphansToSelf() {
         lavalink.transferOrphansTo(this)
+    }
+
+    internal fun synchronizeAfterResume() {
+        getPlayers()
+            .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1)))
+            .map { players ->
+            val remoteGuildIds = players.map { it.guildId }
+
+            players.forEach { player ->
+                playerCache[player.guildId] = player
+
+                val link = lavalink.getOrCreateLink(player.guildId, node = this)
+                if (link.node != this) return@forEach
+
+                link.state = if (player.state.connected) {
+                    LinkState.CONNECTED
+                } else {
+                    LinkState.DISCONNECTED
+                }
+            }
+
+            val missingIds = playerCache.keys().toList() - remoteGuildIds.toSet()
+            missingIds.forEach { guildId ->
+                playerCache.remove(guildId)
+                val link = lavalink.getLinkIfCached(guildId) ?: return@forEach
+                if (link.node == this) link.state = LinkState.DISCONNECTED
+            }
+
+            ResumeSynchronizationEvent(this, failureReason = null)
+        }.doOnError {
+            logger.error("Failure while attempting synchronization with $this", it)
+            sink.tryEmitNext(ResumeSynchronizationEvent(this, failureReason = it))
+        }.subscribe {
+            sink.tryEmitNext(it)
+        }
     }
 
     override fun equals(other: Any?): Boolean {
