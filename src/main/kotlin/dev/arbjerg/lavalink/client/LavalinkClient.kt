@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * @param userId ID of the bot for authenticating with Discord
+ * @param clientName Name of the client, used for connecting to the Lavalink node(s)
  */
 class LavalinkClient(val userId: Long, var clientName: String?) : Closeable, Disposable {
     private val internalNodes = CopyOnWriteArrayList<LavalinkNode>()
@@ -47,6 +48,11 @@ class LavalinkClient(val userId: Long, var clientName: String?) : Closeable, Dis
     private val reconnectService = Executors.newSingleThreadScheduledExecutor {
         Thread(it, "lavalink-reconnect-thread").apply { isDaemon = true }
     }
+
+    /**
+     * @param userId ID of the bot for authenticating with Discord
+     */
+    constructor(userId: Long) : this(userId, null)
 
     init {
         reconnectService.scheduleWithFixedDelay(ReconnectTask(this), 0, 500, TimeUnit.MILLISECONDS)

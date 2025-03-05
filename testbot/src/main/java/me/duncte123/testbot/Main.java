@@ -23,7 +23,7 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         final var token = System.getenv("BOT_TOKEN");
-        final LavalinkClient client = new LavalinkClient(Helpers.getUserIdFromToken(token));
+        final LavalinkClient client = new LavalinkClient(Helpers.getUserIdFromToken(token), "TestBot");
 
         client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
 
