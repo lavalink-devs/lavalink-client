@@ -56,7 +56,7 @@ class LavalinkNode(
     private val reference: Disposable = flux.subscribe()
 
     internal val rest = LavalinkRestClient(this)
-    val ws = LavalinkSocket(this)
+    val ws = LavalinkSocket(this, lavalink.clientName)
 
     // Stuff for load balancing
     val penalties = Penalties(this)

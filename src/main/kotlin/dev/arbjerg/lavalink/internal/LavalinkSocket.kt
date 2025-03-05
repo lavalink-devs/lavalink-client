@@ -19,7 +19,8 @@ import java.net.ConnectException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 
-class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Closeable {
+class LavalinkSocket(private val node: LavalinkNode, private val clientName: String?) : WebSocketListener(), Closeable {
+
     private val logger = LoggerFactory.getLogger(LavalinkSocket::class.java)
 
     internal var socket: WebSocket? = null
@@ -221,7 +222,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         val request = Request.Builder()
             .url("${node.baseUri}/v4/websocket")
             .addHeader("Authorization", node.password)
-            .addHeader("Client-Name", "Lavalink-Client/${CLIENT_VERSION}")
+            .addHeader("Client-Name", clientName ?: "Lavalink-Client/${CLIENT_VERSION}")
             .addHeader("User-Id", node.lavalink.userId.toString())
             .apply {
                 if (node.sessionId != null) {
