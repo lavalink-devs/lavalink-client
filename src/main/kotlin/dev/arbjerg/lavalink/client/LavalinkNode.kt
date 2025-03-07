@@ -70,6 +70,10 @@ class LavalinkNode(
     var available: Boolean = false
         internal set
 
+    // TODO: Maybe it would make sense to add some node state enums like the links have.
+    var transferring: Boolean = false
+        internal set
+
     /**
      * A local player cache, allows us to not call the rest client every time we need a player.
      */
@@ -183,7 +187,10 @@ class LavalinkNode(
         return rest.destroyPlayer(guildId)
             .doOnSuccess {
                 removeCachedPlayer(guildId)
-                lavalink.removeDestroyedLink(guildId)
+                // When transferring to a new node preserve the link
+                if (!transferring) {
+                    lavalink.removeDestroyedLink(guildId)
+                }
             }
     }
 
@@ -471,6 +478,23 @@ class LavalinkNode(
         }.subscribe {
             sink.tryEmitNext(it)
         }
+    }
+
+    /**
+     * Puts the node into a transferring state, then starts transferring all players to other nodes.
+     * Once the node is put into this state, a reconnect or calling transferComplete() removes it from that state.
+     * Transferring state does not remove links from cache when deleting off this node, unless the transfer also fails.
+     */
+    fun transferPlayersToOtherNodes() {
+        transferring = true
+        lavalink.transferNodes(this)
+    }
+
+    /**
+     * Manually removes this node from the transfer state.
+     */
+    fun transferComplete() {
+        transferring = false
     }
 
     override fun equals(other: Any?): Boolean {
