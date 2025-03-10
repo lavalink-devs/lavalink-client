@@ -66,6 +66,7 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
                 node.sessionId = sessionId
                 node.available = true
+                node.transferring = false
                 logger.info("${node.name} is ready with session id $sessionId")
 
                 node.playerCache.values.forEach { player ->

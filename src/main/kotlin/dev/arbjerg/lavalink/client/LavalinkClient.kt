@@ -196,7 +196,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
         transferNodes(node)
     }
 
-    private fun transferNodes(node: LavalinkNode) {
+    internal fun transferNodes(node: LavalinkNode) {
         linkMap.forEach { (_, link) ->
             if (link.node == node) {
                 val voiceRegion = link.cachedPlayer?.voiceRegion
