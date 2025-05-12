@@ -40,7 +40,7 @@ object RegionGroup {
     @JvmField
     val EUROPE: IRegionFilter = object : IRegionFilter {
         val regions = listOf(VoiceRegion.ROTTERDAM, VoiceRegion.RUSSIA, VoiceRegion.AMSTERDAM, VoiceRegion.MADRID, VoiceRegion.MILAN,
-            VoiceRegion.BUCHAREST, VoiceRegion.EUROPE, VoiceRegion.LONDON, VoiceRegion.FINLAND, VoiceRegion.FRANKFURT, VoiceRegion.STOCKHOLM)
+            VoiceRegion.BUCHAREST, VoiceRegion.EUROPE, VoiceRegion.LONDON, VoiceRegion.FINLAND, VoiceRegion.FRANKFURT, VoiceRegion.STOCKHOLM, VoiceRegion.WARSAW)
 
         override fun isRegionAllowed(node: LavalinkNode, region: VoiceRegion): RegionFilterVerdict {
             return if (region in regions) RegionFilterVerdict.PASS else RegionFilterVerdict.SOFT_BLOCK
@@ -151,6 +151,7 @@ enum class VoiceRegion(val id: String, val visibleName: String) {
     US_EAST("us-east", "US East"),
     US_SOUTH("us-south", "US South"),
     US_WEST("us-west", "US West"),
+    WARSAW("warsaw", "Warsaw"),
 
     UNKNOWN("", "Unknown");
 
