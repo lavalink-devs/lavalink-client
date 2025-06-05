@@ -140,6 +140,11 @@ tasks.withType<PublishToMavenRepository> {
     dependsOn(tasks.kotlinSourcesJar)
 }
 
+tasks.withType<GenerateModuleMetadata> {
+    dependsOn(sourcesJar)
+    dependsOn(tasks.kotlinSourcesJar)
+}
+
 kotlin {
     jvmToolchain(17)
 }
@@ -164,11 +169,11 @@ val mavenUrl: String
 publishing {
     repositories {
         maven {
-            name = "arbjerg"
+            name = "lavalink"
             url = uri(mavenUrl)
             credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+                username = findProperty("MAVEN_USERNAME") as String?
+                password = findProperty("MAVEN_PASSWORD") as String?
             }
             authentication {
                 create<BasicAuthentication>("basic")
@@ -190,7 +195,7 @@ afterEvaluate {
             coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
 
             if (findProperty("mavenCentralUsername") != null && findProperty("mavenCentralPassword") != null) {
-                publishToMavenCentral(SonatypeHost.S01, false)
+                publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
                 if (release) {
                     signAllPublications()
                 }
@@ -234,7 +239,7 @@ publish.apply {
     dependsOn(tasks.build)
 
     onlyIf {
-        System.getenv("MAVEN_USERNAME") != null && System.getenv("MAVEN_PASSWORD") != null
+        findProperty("MAVEN_USERNAME") != null && findProperty("MAVEN_PASSWORD") != null
     }
 }
 
