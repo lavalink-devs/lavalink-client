@@ -140,6 +140,11 @@ tasks.withType<PublishToMavenRepository> {
     dependsOn(tasks.kotlinSourcesJar)
 }
 
+tasks.withType<GenerateModuleMetadata> {
+    dependsOn(sourcesJar)
+    dependsOn(tasks.kotlinSourcesJar)
+}
+
 kotlin {
     jvmToolchain(17)
 }
