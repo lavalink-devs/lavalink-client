@@ -116,57 +116,66 @@ object RegionGroup {
 }
 
 // TODO In case no exact server match, should it look for the closest node in that same region?
-enum class VoiceRegion(val id: String, val visibleName: String) {
-    AMSTERDAM("amsterdam", "Amsterdam"),
-    ATLANTA("atlanta", "Atlanta"),
-    BRAZIL("brazil", "Brazil"),
-    BUCHAREST("bucharest", "Bucharest"),
-    BUENOS_AIRES("buenos-aires", "Brazil"),
-    DUBAI("dubai", "Dubai"),
-    EUROPE("europe", "Europe"),
-    FINLAND("finland", "Finland"),
-    FRANKFURT("frankfurt", "Frankfurt"),
-    HONGKONG("hongkong", "Hong Kong"),
-    INDIA("india", "India"),
-    JAPAN("japan","Japan"),
-    LONDON("london", "London"),
-    MADRID("madrid", "Madrid"),
-    MILAN("milan", "Milan"),
-    MONTREAL("montreal", "Montreal"),
-    NEWARK("newark", "Newark"),
-    OREGON("oregon", "Oregon"),
-    ROTTERDAM("rotterdam","Rotterdam"),
-    RUSSIA("russia", "Russia"),
-    SANTA_CLARA("santa-clara", "Santa Clara"),
-    SANTIAGO("santiago", "Santiago"),
-    SEATTLE("seattle", "Seattle"),
-    SINGAPORE("singapore", "Singapore"),
-    SOUTH_AFRICA("southafrica","South Africa"),
-    SOUTH_KOREA("south-korea", "South Korea"),
-    ST_PETE("st-pete", "St Pete"),
-    STOCKHOLM("stockholm", "Stockholm"),
-    SYDNEY("sydney", "Sydney"),
-    TEL_AVIV("tel-aviv", "Tel Aviv"),
-    US_CENTRAL("us-central", "US Central"),
-    US_EAST("us-east", "US East"),
-    US_SOUTH("us-south", "US South"),
-    US_WEST("us-west", "US West"),
-    WARSAW("warsaw", "Warsaw"),
+enum class VoiceRegion(val visibleName: String, val longId: String, vararg val shortIds: String) {
+    AMSTERDAM("Amsterdam", "amsterdam", "ams"),
+    ATLANTA("Atlanta", "atlanta"),
+    BRAZIL("Brazil", "brazil"),
+    BUCHAREST("Bucharest", "bucharest"),
+    BUENOS_AIRES("Brazil", "buenos-aires"),
+    DUBAI("Dubai", "dubai"),
+    EUROPE("Europe", "europe"),
+    FINLAND("Finland", "finland"),
+    FRANKFURT("Frankfurt", "frankfurt"),
+    HONGKONG("Hong Kong", "hongkong"),
+    INDIA("India", "india"),
+    JAPAN("Japan", "japan"),
+    LONDON("London", "london"),
+    MADRID("Madrid", "madrid"),
+    MILAN("Milan", "milan"),
+    MONTREAL("Montreal", "montreal"),
+    NEWARK("Newark", "newark"),
+    OREGON("Oregon", "oregon"),
+    ROTTERDAM("Rotterdam", "rotterdam"),
+    RUSSIA("Russia", "russia"),
+    SANTA_CLARA("Santa Clara", "santa-clara"),
+    SANTIAGO("Santiago", "santiago"),
+    SEATTLE("Seattle", "seattle"),
+    SINGAPORE("Singapore", "singapore"),
+    SOUTH_AFRICA("South Africa", "southafrica"),
+    SOUTH_KOREA("South Korea", "south-korea"),
+    ST_PETE("St Pete", "st-pete"),
+    STOCKHOLM("Stockholm", "stockholm"),
+    SYDNEY("Sydney", "sydney"),
+    TEL_AVIV("Tel Aviv", "tel-aviv"),
+    US_CENTRAL("US Central", "us-central"),
+    US_EAST("US East", "us-east"),
+    US_SOUTH("US South", "us-south", "iad"),
+    US_WEST("US West", "us-west"),
+    WARSAW("Warsaw", "warsaw"),
 
-    UNKNOWN("", "Unknown");
+    UNKNOWN("Unknown", "");
 
     companion object {
         @JvmStatic
         fun fromEndpoint(endpoint: String): VoiceRegion {
             // Endpoints come in format like "seattle1865.discord.gg", trim to subdomain with no numbers
-            val endpointRegex = "^([a-z\\-]+)[0-9]+.*:443\$".toRegex()
+            val endpointRegex = "^([a-z\\-]+)[0-9]+.*:443$".toRegex()
+            val match = endpointRegex.find(endpoint) ?: return findFromEndpointWithShortId(endpoint)
+            val idFromEndpoint = match.groupValues[1]
+            return entries.find { it.longId == idFromEndpoint } ?: UNKNOWN
+        }
+
+        @JvmStatic
+        fun findFromEndpointWithShortId(endpoint: String): VoiceRegion {
+            // Endpoints come in format like "c-ams08-44aff7ca.discord.media:8443", extract the info that we need
+            val endpointRegex = "^[a-z-A-Z0-9]-([a-z]+)[0-9]+-[a-zA-Z0-9]+\\.discord\\.media:[0-9]+$".toRegex()
             val match = endpointRegex.find(endpoint) ?: return UNKNOWN
             val idFromEndpoint = match.groupValues[1]
-            return entries.find { it.id == idFromEndpoint } ?: UNKNOWN
+            return entries.find { it.shortIds.contains(idFromEndpoint) } ?: UNKNOWN
         }
     }
 
     override fun toString(): String {
-        return "${name}($id, $visibleName)"
+        return "$name($visibleName, $longId [${shortIds.joinToString()}])"
     }
 }
