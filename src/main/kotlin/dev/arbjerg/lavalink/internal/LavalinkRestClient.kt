@@ -51,8 +51,10 @@ class LavalinkRestClient(val node: LavalinkNode) {
     }
 
     fun decodeTrack(encoded: String): Mono<Track> {
+        val enc = URLEncoder.encode(encoded, StandardCharsets.UTF_8)
+        
         return newRequest {
-            path("/v4/decodetrack?encodedTrack=$encoded")
+            path("/v4/decodetrack?encodedTrack=$enc")
         }.toMono()
     }
 
