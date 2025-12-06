@@ -43,7 +43,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
     fun loadItem(identifier: String): Mono<LoadResult> {
         return newRequest {
             url {
-                addPathSegments("/v4/loadtracks")
+                addPathSegments("v4/loadtracks")
                 addQueryParameter("identifier", identifier)
             }
         }.toMono()
@@ -52,7 +52,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
     fun decodeTrack(encoded: String): Mono<Track> {
         return newRequest {
             url {
-                addPathSegments("/v4/decodetrack")
+                addPathSegments("v4/decodetrack")
                 addQueryParameter("encodedTrack", encoded)
             }
         }.toMono()

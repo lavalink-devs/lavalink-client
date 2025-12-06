@@ -21,6 +21,7 @@ dependencies {
 
     // other libs such as a discord client and a logger
     implementation(libs.jda)
+    implementation(libs.jackson.databind)
     implementation(libs.logger.impl)
     implementation(libs.lyrics)
 }

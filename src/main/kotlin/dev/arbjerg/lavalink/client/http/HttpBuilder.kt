@@ -106,15 +106,25 @@ class HttpBuilder(private val internalBuilder: Request.Builder) : Request.Builde
         return this
     }
 
-    override fun url(url: URL) = path(url.toString().toHttpUrl().encodedPath)
+    override fun url(url: URL) = path(url.toString().toHttpUrl().getQueryPath())
 
-    override fun url(url: String) = path(url.toHttpUrl().encodedPath)
+    override fun url(url: String) = path(url.toHttpUrl().getQueryPath())
 
-    override fun url(url: HttpUrl) = path(url.encodedPath)
+    override fun url(url: HttpUrl) = path(url.getQueryPath())
 
     fun url(configure: HttpUrl.Builder.() -> HttpUrl.Builder): HttpBuilder {
         return url(
-            configure(HttpUrl.Builder()).build()
+            configure(HttpUrl.Builder()).scheme("https").host("localghost").build()
         )
+    }
+
+    private fun HttpUrl.getQueryPath(): String {
+        var result = this.encodedPath
+
+        this.encodedQuery?.let { query ->
+            result += "?$query"
+        }
+
+        return result
     }
 }

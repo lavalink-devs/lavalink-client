@@ -1,5 +1,6 @@
 package me.duncte123.testbot;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.FilterBuilder;
@@ -32,6 +33,8 @@ public class JDAListener extends ListenerAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(JDAListener.class);
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     public final Map<Long, GuildMusicManager> musicManagers = new HashMap<>();
     private final LavalinkClient client;
     private final EvalEngine evalEngine;
@@ -54,6 +57,13 @@ public class JDAListener extends ListenerAdapter {
                         OptionType.STRING,
                         "script",
                         "Script to eval",
+                        true
+                    ),
+                Commands.slash("decode", "Try to decode some base 64 track")
+                    .addOption(
+                        OptionType.STRING,
+                        "encoded",
+                        "VALID encoded track to decode",
                         true
                     ),
                 Commands.slash("join", "Join the voice channel you are in."),
@@ -124,6 +134,24 @@ public class JDAListener extends ListenerAdapter {
                         LOG.error("Failed to eval", e);
                     }
                 });
+                break;
+            }
+            case "decode": {
+
+                final var link = this.client.getOrCreateLink(guild.getIdLong());
+
+                link.getNode().decodeTrack(event.getOption("encoded").getAsString()).subscribe(
+                    (result) -> {
+                        try {
+                            event.reply("```json\n" + mapper.writeValueAsString(result) + "```").queue();
+                        } catch (Exception e) {
+                            event.reply("Jackson bork: " + e.getMessage()).queue();
+                        }
+                    },
+                    (error) -> {
+                        event.reply("Fucky qucky: " + error.getMessage()).queue();
+                    }
+                );
                 break;
             }
             case "join":
