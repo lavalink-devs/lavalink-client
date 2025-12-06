@@ -193,8 +193,9 @@ afterEvaluate {
     plugins.withId("com.vanniktech.maven.publish.base") {
         configure<MavenPublishBaseExtension> {
             coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
-
-            if (findProperty("mavenCentralUsername") != null && findProperty("mavenCentralPassword") != null) {
+            val mavenCentralUsername = findProperty("mavenCentralUsername") as String?
+            val mavenCentralPassword = findProperty("mavenCentralPassword") as String?
+            if (!mavenCentralUsername.isNullOrEmpty() && !mavenCentralPassword.isNullOrEmpty()) {
                 publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
                 if (release) {
                     signAllPublications()
