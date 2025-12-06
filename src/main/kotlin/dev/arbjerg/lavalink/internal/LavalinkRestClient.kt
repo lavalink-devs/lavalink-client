@@ -12,8 +12,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import reactor.core.publisher.Mono
 import java.io.IOException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 class LavalinkRestClient(val node: LavalinkNode) {
     fun getPlayers(): Mono<Players> {
@@ -43,18 +41,20 @@ class LavalinkRestClient(val node: LavalinkNode) {
     }
 
     fun loadItem(identifier: String): Mono<LoadResult> {
-        val encId = URLEncoder.encode(identifier, StandardCharsets.UTF_8)
-
         return newRequest {
-            path("/v4/loadtracks?identifier=$encId")
+            url {
+                addPathSegments("/v4/loadtracks")
+                addQueryParameter("identifier", identifier)
+            }
         }.toMono()
     }
 
     fun decodeTrack(encoded: String): Mono<Track> {
-        val enc = URLEncoder.encode(encoded, StandardCharsets.UTF_8)
-        
         return newRequest {
-            path("/v4/decodetrack?encodedTrack=$enc")
+            url {
+                addPathSegments("/v4/decodetrack")
+                addQueryParameter("encodedTrack", encoded)
+            }
         }.toMono()
     }
 

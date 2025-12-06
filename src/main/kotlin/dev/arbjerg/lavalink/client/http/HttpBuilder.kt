@@ -106,18 +106,15 @@ class HttpBuilder(private val internalBuilder: Request.Builder) : Request.Builde
         return this
     }
 
-    override fun url(url: URL): HttpBuilder {
-        this.path = url.toString().toHttpUrl().encodedPath
-        return this
-    }
+    override fun url(url: URL) = path(url.toString().toHttpUrl().encodedPath)
 
-    override fun url(url: String): HttpBuilder {
-        this.path = url.toHttpUrl().encodedPath
-        return this
-    }
+    override fun url(url: String) = path(url.toHttpUrl().encodedPath)
 
-    override fun url(url: HttpUrl): HttpBuilder {
-        this.path = url.encodedPath
-        return this
+    override fun url(url: HttpUrl) = path(url.encodedPath)
+
+    fun url(configure: HttpUrl.Builder.() -> HttpUrl.Builder): HttpBuilder {
+        return url(
+            configure(HttpUrl.Builder()).build()
+        )
     }
 }
