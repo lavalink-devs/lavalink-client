@@ -157,31 +157,6 @@ tasks.withType<DokkaTask>().configureEach {
     }
 }
 
-val mavenUrl: String
-    get() {
-        if (release) {
-            return "https://maven.lavalink.dev/releases"
-        }
-
-        return "https://maven.lavalink.dev/snapshots"
-    }
-
-publishing {
-    repositories {
-        maven {
-            name = "lavalink"
-            url = uri(mavenUrl)
-            credentials {
-                username = findProperty("MAVEN_USERNAME") as String?
-                password = findProperty("MAVEN_PASSWORD") as String?
-            }
-            authentication {
-                create<BasicAuthentication>("basic")
-            }
-        }
-    }
-}
-
 mavenPublishing {
     configure(KotlinJvm(
         javadocJar = JavadocJar.Dokka("dokkaJavadoc"),
@@ -191,6 +166,26 @@ mavenPublishing {
 
 afterEvaluate {
     plugins.withId("com.vanniktech.maven.publish.base") {
+        configure<PublishingExtension> {
+            val mavenUsername = findProperty("MAVEN_USERNAME") as String?
+            val mavenPassword = findProperty("MAVEN_PASSWORD") as String?
+            if (!mavenUsername.isNullOrEmpty() && !mavenPassword.isNullOrEmpty()) {
+                repositories {
+                    val snapshots = "https://maven.lavalink.dev/snapshots"
+                    val releases = "https://maven.lavalink.dev/releases"
+
+                    maven(if (release) releases else snapshots) {
+                        credentials {
+                            username = mavenUsername
+                            password = mavenPassword
+                        }
+                    }
+                }
+            } else {
+                logger.lifecycle("Not publishing to maven.lavalink.dev because credentials are not set")
+            }
+        }
+
         configure<MavenPublishBaseExtension> {
             coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
             val mavenCentralUsername = findProperty("mavenCentralUsername") as String?
@@ -231,16 +226,6 @@ afterEvaluate {
                 }
             }
         }
-    }
-}
-
-val publish: Task by tasks
-
-publish.apply {
-    dependsOn(tasks.build)
-
-    onlyIf {
-        findProperty("MAVEN_USERNAME") != null && findProperty("MAVEN_PASSWORD") != null
     }
 }
 
