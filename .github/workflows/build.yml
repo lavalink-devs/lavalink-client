@@ -1,55 +1,55 @@
 name: Publish + build
 on:
-    push:
-        branches: [ '**' ]
-        paths-ignore: [ '**.md' ]
-    workflow_call:
-        secrets:
-            MAVEN_USERNAME:
-                required: false
-            MAVEN_PASSWORD:
-                required: false
-            MAVEN_CENTRAL_PASSWORD:
-                required: false
-            MAVEN_CENTRAL_USERNAME:
-                required: false
-            SIGNING_IN_MEMORY_KEY:
-                required: false
-            SIGNING_IN_MEMORY_KEY_PASSWORD:
-                required: false
+  push:
+    branches: [ '**' ]
+    paths-ignore: [ '**.md' ]
+  workflow_call:
+    secrets:
+      MAVEN_USERNAME:
+        required: false
+      MAVEN_PASSWORD:
+        required: false
+      MAVEN_CENTRAL_PASSWORD:
+        required: false
+      MAVEN_CENTRAL_USERNAME:
+        required: false
+      SIGNING_IN_MEMORY_KEY:
+        required: false
+      SIGNING_IN_MEMORY_KEY_PASSWORD:
+        required: false
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        env:
-            ORG_GRADLE_PROJECT_MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-            ORG_GRADLE_PROJECT_MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-            ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-            ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-            ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
-            ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
-        steps:
-            -   name: Checkout
-                uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      ORG_GRADLE_PROJECT_MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-            -   name: Setup Java
-                uses: actions/setup-java@v4
-                with:
-                    distribution: zulu
-                    java-version: 21
-                    cache: gradle
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+          cache: gradle
 
-            -   name: Setup Gradle
-                uses: gradle/gradle-build-action@v2
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
 
-            -   name: Build and Publish
-                run: ./gradlew build publish --no-daemon -x test
+      - name: Build and Publish
+        run: ./gradlew build publish --no-daemon -x test
 
-            -   name: Upload Artifacts
-                uses: actions/upload-artifact@v4
-                with:
-                    name: Lavalink-Client.zip
-                    path: |
-                        build/libs/lavalink-client-*.jar
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: Lavalink-Client.zip
+          path: |
+            build/libs/lavalink-client-*.jar

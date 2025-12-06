@@ -1,39 +1,39 @@
 name: Docs Release
 
 on:
-    release:
-        types: [ published ]
-    workflow_dispatch: {}
+  release:
+    types: [ published ]
+  workflow_dispatch: { }
 
 concurrency:
-    group: pages-${{ github.ref }}
-    cancel-in-progress: true
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            deployments: write
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            - uses: actions/setup-java@v4
-              with:
-                  java-version: 21
-                  distribution: zulu
-                  cache: gradle
-            -   name: Build docs
-                run: ./gradlew --no-daemon dokkaHtml dokkaJavadoc
-            - name: Copy javadoc subfolder
-              run: mv build/dokka/javadoc build/dokka/html/ && cp dokka/includes/404.html build/dokka/html/
-            - uses: actions/upload-pages-artifact@v3
-              with:
-                  path: 'build/dokka/html'
-            - uses: cloudflare/wrangler-action@v3
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  command: pages deploy "build/dokka/html" --project-name="${{ vars.CLOUDFLARE_PROJECT_NAME }}"
-                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: zulu
+          cache: gradle
+      - name: Build docs
+        run: ./gradlew --no-daemon dokkaHtml dokkaJavadoc
+      - name: Copy javadoc subfolder
+        run: mv build/dokka/javadoc build/dokka/html/ && cp dokka/includes/404.html build/dokka/html/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: 'build/dokka/html'
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy "build/dokka/html" --project-name="${{ vars.CLOUDFLARE_PROJECT_NAME }}"
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

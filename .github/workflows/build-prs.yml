@@ -1,7 +1,7 @@
 name: Build project (in pr)
 
 on:
-  pull_request: {}
+  pull_request: { }
 
 jobs:
   build:
@@ -10,12 +10,12 @@ jobs:
       group: ${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           path: './'
           fetch-depth: 0
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: zulu
