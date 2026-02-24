@@ -16,11 +16,12 @@ dependencyResolutionManagement {
 }
 
 fun VersionCatalogBuilder.versionRefs() {
-    version("kotlin", "1.9.21")
-    version("dokka", "1.9.10")
+    version("kotlin", "2.1.10")
+    version("dokka", "2.1.0")
     version("grgit", "5.2.0")
     version("maven-publish", "0.32.0")
-    version("lavalink", "4.0.3")
+//    version("lavalink", "4.0.3")
+    version("lavalink", "74a765017f39f01dd01d3eb9bc976bcb08ffef92-SNAPSHOT")
 
     version("logger", "2.0.7")
 }
@@ -39,7 +40,7 @@ fun VersionCatalogBuilder.common() {
 }
 
 fun VersionCatalogBuilder.discordLibs() {
-    library("jda", "net.dv8tion", "JDA").version("5.1.0")
+    library("jda", "net.dv8tion", "JDA").version("6.3.1")
     library("d4j", "com.discord4j", "discord4j-core").version("3.2.3")
 }
 

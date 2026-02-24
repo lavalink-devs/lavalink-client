@@ -45,7 +45,8 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         val state = VoiceState(
             update.token,
             update.endpoint!!,
-            getGatewayClient(update.shardInfo.index).get().sessionId
+            getGatewayClient(update.shardInfo.index).get().sessionId,
+            null // TODO: find where to get the channel id from
         )
 
         val region = VoiceRegion.fromEndpoint(update.endpoint!!)
