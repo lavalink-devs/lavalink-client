@@ -126,7 +126,7 @@ tasks.test {
 }
 
 tasks.wrapper {
-    gradleVersion = "8.5"
+    gradleVersion = "9.3.1"
     distributionType = Wrapper.DistributionType.BIN
 }
 
