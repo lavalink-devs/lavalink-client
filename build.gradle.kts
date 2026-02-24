@@ -4,11 +4,9 @@ import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
-import org.apache.tools.ant.filters.ReplaceTokens
 import org.ajoberstar.grgit.Grgit
-import org.jetbrains.dokka.base.DokkaBase
-import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.dokka.base.DokkaBaseConfiguration
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.kotlin.dsl.register
 import java.time.LocalDate
 
 plugins {
@@ -18,6 +16,7 @@ plugins {
     kotlin("jvm") version libs.versions.kotlin
     kotlin("plugin.serialization") version libs.versions.kotlin
     id("org.jetbrains.dokka") version libs.versions.dokka
+    id("org.jetbrains.dokka-javadoc") version libs.versions.dokka
     id("org.ajoberstar.grgit") version libs.versions.grgit
     id("com.vanniktech.maven.publish.base") version libs.versions.maven.publish
 }
@@ -77,13 +76,17 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-val sourcesForRelease = task<Copy>("sourcesForRelease") {
+val sourcesForRelease = tasks.register<Copy>("sourcesForRelease") {
     from("src/main/kotlin") {
         include("**/LLClientInfo.kt.txt")
 
-        filter<ReplaceTokens>(mapOf("tokens" to mapOf(
-            "VERSION" to project.version
-        )))
+        filter<ReplaceTokens>(
+            mapOf(
+                "tokens" to mapOf(
+                    "VERSION" to project.version
+                )
+            )
+        )
 
         rename("LLClientInfo.kt.txt", "LLClientInfo.kt")
     }
@@ -92,16 +95,16 @@ val sourcesForRelease = task<Copy>("sourcesForRelease") {
     includeEmptyDirs = false
 }
 
-val generateKotlinSources = task<SourceTask>("generateKotlinSources") {
+val generateKotlinSources = tasks.register<SourceTask>("generateKotlinSources") {
     val javaSources = sourceSets["main"].allSource.filter {
         it.name != "LLClientInfo.kt"
     }.asFileTree
 
-    source = javaSources + fileTree(sourcesForRelease.destinationDir)
+    source = javaSources + fileTree(sourcesForRelease.get().destinationDir)
     dependsOn(sourcesForRelease)
 }
 
-val sourcesJar = task<Jar>("sourcesJar") {
+val sourcesJar = tasks.register<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
 }
@@ -113,12 +116,12 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.compileKotlin {
-    source(generateKotlinSources.source)
+    source(generateKotlinSources.get().source)
     dependsOn(generateKotlinSources)
 }
 
 tasks.build {
-    dependsOn(tasks.dokkaJavadoc)
+    dependsOn(tasks.dokkaGenerate)
 }
 
 tasks.test {
@@ -149,17 +152,17 @@ kotlin {
     jvmToolchain(17)
 }
 
-tasks.withType<DokkaTask>().configureEach {
-    pluginConfiguration<DokkaBase, DokkaBaseConfiguration> {
-        customAssets = listOf(file("dokka/assets/logo-icon.svg"))
-        footerMessage = "&copy; ${LocalDate.now().year} Lavalink devs<br />Licensed under the MIT license"
-        separateInheritedMembers = false
+dokka {
+    pluginsConfiguration.html {
+        customAssets.from(listOf(file("dokka/assets/logo-icon.svg")))
+        footerMessage.set("&copy; ${LocalDate.now().year} Lavalink devs<br />Licensed under the MIT license")
+        separateInheritedMembers.set(true)
     }
 }
 
 mavenPublishing {
     configure(KotlinJvm(
-        javadocJar = JavadocJar.Dokka("dokkaJavadoc"),
+        javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationJavadoc"),
         sourcesJar = true
     ))
 }
