@@ -16,11 +16,12 @@ dependencyResolutionManagement {
 }
 
 fun VersionCatalogBuilder.versionRefs() {
-    version("kotlin", "1.9.21")
+    version("kotlin", "2.1.0")
     version("dokka", "1.9.10")
     version("grgit", "5.2.0")
     version("maven-publish", "0.32.0")
-    version("lavalink", "4.0.3")
+    // TODO: Update with actual version number when it arrives
+    version("lavalink", "74a765017f39f01dd01d3eb9bc976bcb08ffef92-SNAPSHOT")
 
     version("logger", "2.0.7")
 }

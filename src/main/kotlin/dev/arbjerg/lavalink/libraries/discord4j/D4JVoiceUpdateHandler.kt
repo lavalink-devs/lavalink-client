@@ -12,6 +12,7 @@ import discord4j.core.event.domain.VoiceStateUpdateEvent
 import reactor.core.Disposable
 import reactor.core.Disposables
 import reactor.core.publisher.Mono
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.jvm.optionals.getOrNull
 
 /**
@@ -24,10 +25,14 @@ import kotlin.jvm.optionals.getOrNull
  */
 @JvmName("install")
 fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposable.Composite {
+
+    val channelId: AtomicReference<String> = AtomicReference()
+
     val voiceStateUpdate = on(VoiceStateUpdateEvent::class.java) { event ->
         val update = event.current
         if (update.userId != update.client.selfId) return@on Mono.empty()
         val channel = update.channelId.getOrNull()
+        channelId.set(channel?.asString())
         val link = lavalink.getLinkIfCached(update.guildId.asLong()) ?: return@on Mono.empty()
         val player = link.node.playerCache[update.guildId.asLong()] ?: return@on Mono.empty()
         val playerState = player.state
@@ -45,7 +50,8 @@ fun GatewayDiscordClient.installVoiceHandler(lavalink: LavalinkClient): Disposab
         val state = VoiceState(
             update.token,
             update.endpoint!!,
-            getGatewayClient(update.shardInfo.index).get().sessionId
+            getGatewayClient(update.shardInfo.index).get().sessionId,
+            channelId.get()
         )
 
         val region = VoiceRegion.fromEndpoint(update.endpoint!!)
