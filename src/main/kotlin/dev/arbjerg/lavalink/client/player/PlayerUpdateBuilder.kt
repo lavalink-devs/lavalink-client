@@ -120,7 +120,7 @@ class PlayerUpdateBuilder internal constructor(private val node: LavalinkNode, p
             .map { it.toLavalinkPlayer(node) }
             .doOnSuccess {
                 // Update player in cache
-                node.playerCache[guildId] = it
+                node.playerCache[guildId] = it!!
             }
             .subscribe(actual)
     }

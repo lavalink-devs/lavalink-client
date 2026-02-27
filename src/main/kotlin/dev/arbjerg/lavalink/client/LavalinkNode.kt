@@ -122,7 +122,7 @@ class LavalinkNode(
         return rest.getPlayers()
             .map { it.players.map { pl -> pl.toLavalinkPlayer(this) } }
             .doOnSuccess {
-                it.forEach { player ->
+                it!!.forEach { player ->
                     playerCache[player.guildId] = player
                 }
             }
@@ -155,7 +155,7 @@ class LavalinkNode(
             }
             .doOnSuccess {
                 // Update the player internally upon retrieving it.
-                playerCache[it.guildId] = it
+                playerCache[it!!.guildId] = it
             }
     }
 
@@ -329,7 +329,7 @@ class LavalinkNode(
      *
      * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
      */
-    inline fun <reified T> customJsonRequest(builderFn: UnaryOperator<HttpBuilder>): Mono<T> =
+    inline fun <reified T : Any> customJsonRequest(builderFn: UnaryOperator<HttpBuilder>): Mono<T> =
         customJsonRequest(json.serializersModule.serializer<T>(), builderFn)
 
     /**
@@ -355,7 +355,7 @@ class LavalinkNode(
      * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
      */
     @OptIn(ExperimentalSerializationApi::class)
-    fun <T> customJsonRequest(
+    fun <T : Any> customJsonRequest(
         deserializer: DeserializationStrategy<T>,
         builderFn: UnaryOperator<HttpBuilder>
     ): Mono<T> {
@@ -402,7 +402,7 @@ class LavalinkNode(
      *
      * @return The Json object from the response body, may error with an IllegalStateException when the node is not available or the response is not successful.
      */
-    fun <T> customJsonRequest(
+    fun <T : Any> customJsonRequest(
         decodeTo: Class<T>,
         builderFn: UnaryOperator<HttpBuilder>
     ): Mono<T> {

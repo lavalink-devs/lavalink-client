@@ -65,13 +65,13 @@ public class Main {
 
     private static void registerLavalinkNodes(LavalinkClient client) {
         List.of(
-//            client.addNode(
-//                new NodeOptions.Builder()
-//                    .setName("localhost")
-//                    .setServerUri("ws://localhost")
-//                    .setPassword("youshallnotpass")
-//                    .build()
-//            )
+            client.addNode(
+                new NodeOptions.Builder()
+                    .setName("localhost")
+                    .setServerUri("ws://localhost")
+                    .setPassword("youshallnotpass")
+                    .build()
+            )
 //            client.addNode(
 //                new NodeOptions.Builder()
 //                    .setName("optiplex")
@@ -80,14 +80,14 @@ public class Main {
 //                    .build()
 //            ),
 //
-            client.addNode(
-                new NodeOptions.Builder()
-                    .setName("pi")
-                    .setServerUri("ws://pi.local.duncte123.lgbt:2333")
-                    .setPassword("youshallnotpass")
-                    .setRegionFilter(RegionGroup.US)
-                    .build()
-            )
+//            client.addNode(
+//                new NodeOptions.Builder()
+//                    .setName("pi")
+//                    .setServerUri("ws://pi.local.duncte123.lgbt:2333")
+//                    .setPassword("youshallnotpass")
+//                    .setRegionFilter(RegionGroup.US)
+//                    .build()
+//            )
         ).forEach((node) -> {
             node.on(TrackStartEvent.class).subscribe((event) -> {
                 final LavalinkNode node1 = event.getNode();

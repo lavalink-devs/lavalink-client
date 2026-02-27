@@ -99,7 +99,7 @@ class LavalinkRestClient(val node: LavalinkNode) {
         return node.httpClient.newCall(builder.finalizeUrl(node.baseUri).build())
     }
 
-    private inline fun <reified T> Call.toMono(): Mono<T> {
+    private inline fun <reified T : Any> Call.toMono(): Mono<T> {
         return Mono.create { sink ->
             sink.onCancel {
                 // try to cancel the request
