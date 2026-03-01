@@ -156,7 +156,8 @@ public void onDiscordVoiceServerUpdate(VoiceServerUpdateEvent event) {
     VoiceState lavalinkVoiceState = new VoiceState(
         event.getToken(),
         event.getEndpoint(),
-        event.getSessionId()
+        event.getSessionId(),
+        voiceChannelIdThatYouAreConnectingTo
     );
 
     // If you want load-balancing based on the region of the voice server, use the enum.

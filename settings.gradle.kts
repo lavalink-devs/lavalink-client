@@ -16,11 +16,11 @@ dependencyResolutionManagement {
 }
 
 fun VersionCatalogBuilder.versionRefs() {
-    version("kotlin", "1.9.21")
-    version("dokka", "1.9.10")
+    version("kotlin", "2.1.10")
+    version("dokka", "2.1.0")
     version("grgit", "5.2.0")
     version("maven-publish", "0.32.0")
-    version("lavalink", "4.0.3")
+    version("lavalink", "4.2.0")
 
     version("logger", "2.0.7")
 }
@@ -30,8 +30,8 @@ fun VersionCatalogBuilder.common() {
     library("jackson", "com.fasterxml.jackson.core", "jackson-core").version("2.16.0")
     library("lavalink-protocol", "dev.arbjerg.lavalink", "protocol").versionRef("lavalink")
     library("okhttp", "com.squareup.okhttp3", "okhttp").version("4.10.0")
-    library("reactor-core", "io.projectreactor", "reactor-core").version("3.5.6")
-    library("reactor-kotlin", "io.projectreactor.kotlin", "reactor-kotlin-extensions").version("1.2.2")
+    library("reactor-core", "io.projectreactor", "reactor-core").version("3.8.3")
+    library("reactor-kotlin", "io.projectreactor.kotlin", "reactor-kotlin-extensions").version("1.3.0")
 
     bundle("reactor", listOf("reactor-core", "reactor-kotlin"))
 
@@ -39,8 +39,8 @@ fun VersionCatalogBuilder.common() {
 }
 
 fun VersionCatalogBuilder.discordLibs() {
-    library("jda", "net.dv8tion", "JDA").version("5.1.0")
-    library("d4j", "com.discord4j", "discord4j-core").version("3.2.3")
+    library("jda", "net.dv8tion", "JDA").version("6.3.1")
+    library("d4j", "com.discord4j", "discord4j-core").version("3.3.1")
 }
 
 fun VersionCatalogBuilder.testLibs() {
