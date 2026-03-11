@@ -17,7 +17,7 @@ Feature overview:
 
 Current version (remove the `v` prefix): [![Latest version][VERSION]](https://search.maven.org/artifact/dev.arbjerg/lavalink-client)
 
-Or copy/download it [here](https://maven.arbjerg.dev/#/releases/dev/arbjerg/lavalink-client)
+Or copy/download it [here](https://maven.lavalink.dev/#/releases/dev/arbjerg/lavalink-client)
 
 Documentation can be found over at [https://client.lavalink.dev/](https://client.lavalink.dev/)
 
