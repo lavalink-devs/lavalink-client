@@ -11,7 +11,8 @@ data class NodeOptions private constructor(val name: String,
                        val regionFilter: IRegionFilter?,
                        val httpTimeout: Long,
                        val sessionId: String?,
-                       val httpInterceptors: List<Interceptor>) {
+                       val httpInterceptors: List<Interceptor>,
+                       val enableDefaultInterceptor: Boolean) {
     data class Builder(
         private var name: String? = null,
         private var serverUri: URI? = null,
@@ -19,7 +20,8 @@ data class NodeOptions private constructor(val name: String,
         private var regionFilter: IRegionFilter? = null,
         private var httpTimeout: Long = TIMEOUT_MS,
         private var sessionId: String? = null,
-        private var httpInterceptors: MutableList<Interceptor> = mutableListOf()
+        private var httpInterceptors: MutableList<Interceptor> = mutableListOf(),
+        private var enableDefaultInterceptor: Boolean = true
     ) {
         fun setName(name: String) = apply { this.name = name }
 
@@ -72,6 +74,11 @@ data class NodeOptions private constructor(val name: String,
          */
         fun addHttpInterceptor(interceptor: Interceptor) = apply { this.httpInterceptors.add(interceptor) }
 
+        /**
+         * Enables or disables the default interceptor that enriches IO errors with the request URL and node name. (Default: true)
+         */
+        fun setEnableDefaultInterceptor(enable: Boolean) = apply { this.enableDefaultInterceptor = enable }
+
         fun build(): NodeOptions {
             requireNotNull(name) { "name is required" }
             requireNotNull(serverUri) { "serverUri is required" }
@@ -84,7 +91,8 @@ data class NodeOptions private constructor(val name: String,
                 regionFilter,
                 httpTimeout,
                 sessionId,
-                httpInterceptors.toList())
+                httpInterceptors.toList(),
+                enableDefaultInterceptor)
         }
     }
 }

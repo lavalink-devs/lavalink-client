@@ -56,7 +56,21 @@ class LavalinkNode(
 
     internal val httpClient = OkHttpClient.Builder()
         .callTimeout(nodeOptions.httpTimeout, TimeUnit.MILLISECONDS)
-        .apply { nodeOptions.httpInterceptors.forEach { addInterceptor(it) } }
+        .apply {
+            if (nodeOptions.enableDefaultInterceptor) {
+                addInterceptor { chain ->
+                    val request = chain.request()
+                    try {
+                        chain.proceed(request)
+                    } catch (e: IOException) {
+                        throw IOException(
+                            "${request.method} ${request.url} [node=$name] -> ${e.message}", e
+                        )
+                    }
+                }
+            }
+            nodeOptions.httpInterceptors.forEach { addInterceptor(it) }
+        }
         .build()
 
     internal val sink: Many<ClientEvent> = Sinks.many().multicast().onBackpressureBuffer()
