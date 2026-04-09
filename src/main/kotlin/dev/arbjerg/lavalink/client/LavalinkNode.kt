@@ -54,7 +54,10 @@ class LavalinkNode(
     var sessionId: String? = nodeOptions.sessionId
         internal set
 
-    internal val httpClient = OkHttpClient.Builder().callTimeout(nodeOptions.httpTimeout, TimeUnit.MILLISECONDS).build()
+    internal val httpClient = OkHttpClient.Builder()
+        .callTimeout(nodeOptions.httpTimeout, TimeUnit.MILLISECONDS)
+        .apply { nodeOptions.httpInterceptors.forEach { addInterceptor(it) } }
+        .build()
 
     internal val sink: Many<ClientEvent> = Sinks.many().multicast().onBackpressureBuffer()
     val flux: Flux<ClientEvent> = sink.asFlux()

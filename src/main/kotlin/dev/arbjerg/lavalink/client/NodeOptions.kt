@@ -2,6 +2,7 @@ package dev.arbjerg.lavalink.client
 
 import dev.arbjerg.lavalink.client.loadbalancing.IRegionFilter
 import dev.arbjerg.lavalink.internal.TIMEOUT_MS
+import okhttp3.Interceptor
 import java.net.URI
 
 data class NodeOptions private constructor(val name: String,
@@ -9,14 +10,16 @@ data class NodeOptions private constructor(val name: String,
                        val password: String,
                        val regionFilter: IRegionFilter?,
                        val httpTimeout: Long,
-                       val sessionId: String?) {
+                       val sessionId: String?,
+                       val httpInterceptors: List<Interceptor>) {
     data class Builder(
         private var name: String? = null,
         private var serverUri: URI? = null,
         private var password: String? = null,
         private var regionFilter: IRegionFilter? = null,
         private var httpTimeout: Long = TIMEOUT_MS,
-        private var sessionId: String? = null
+        private var sessionId: String? = null,
+        private var httpInterceptors: MutableList<Interceptor> = mutableListOf()
     ) {
         fun setName(name: String) = apply { this.name = name }
 
@@ -63,6 +66,12 @@ data class NodeOptions private constructor(val name: String,
          */
         fun setSessionId(sessionId: String?) = apply { this.sessionId = sessionId }
 
+        /**
+         * Adds an OkHttp interceptor to the node's HTTP client.
+         * Useful for logging, error enrichment, or custom headers.
+         */
+        fun addHttpInterceptor(interceptor: Interceptor) = apply { this.httpInterceptors.add(interceptor) }
+
         fun build(): NodeOptions {
             requireNotNull(name) { "name is required" }
             requireNotNull(serverUri) { "serverUri is required" }
@@ -74,7 +83,8 @@ data class NodeOptions private constructor(val name: String,
                 password!!,
                 regionFilter,
                 httpTimeout,
-                sessionId)
+                sessionId,
+                httpInterceptors.toList())
         }
     }
 }
