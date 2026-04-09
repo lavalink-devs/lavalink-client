@@ -212,11 +212,11 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
         node.lavalink.onNodeDisconnected(node)
 
         if (code == 1000 || code == 1001) {
-            mayReconnect = false
             logger.info(
-                "Connection to {}({}) closed normally with reason {} (closed by server = true)",
+                "Connection to {}({}) closed normally with reason {}:{} (closed by server = true)",
                 node.name,
                 webSocket.request().url,
+                code,
                 reason
             )
         } else {
