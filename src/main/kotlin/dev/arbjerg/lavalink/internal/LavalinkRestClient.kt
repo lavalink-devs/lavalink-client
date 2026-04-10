@@ -107,7 +107,10 @@ class LavalinkRestClient(val node: LavalinkNode) {
             }
             this.enqueue(object : okhttp3.Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    sink.error(e)
+                    val request = call.request()
+                    sink.error(IOException(
+                        "${request.method} ${request.url} [node=${node.name}] -> ${e.message}", e
+                    ))
                 }
 
                 override fun onResponse(call: Call, response: Response) {
