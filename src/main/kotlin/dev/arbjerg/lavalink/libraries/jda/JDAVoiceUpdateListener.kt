@@ -28,10 +28,10 @@ class JDAVoiceUpdateListener(private val lavalink: LavalinkClient) : VoiceDispat
 
         if (channel == null) {
             if (playerState.connected) {
-                link.state = LinkState.CONNECTED
-            } else {
                 link.state = LinkState.DISCONNECTED
                 link.destroy().subscribe()
+            } else {
+                link.state = LinkState.DISCONNECTED
             }
         }
 
