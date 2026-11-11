@@ -198,7 +198,7 @@ class LavalinkClient(val userId: Long) : Closeable, Disposable {
 
     internal fun transferNodes(node: LavalinkNode) {
         linkMap.forEach { (_, link) ->
-            if (link.node == node) {
+            if (link.node == node && !link.cachedPlayer?.voiceState.isEmpty()) { // TODO: do some logging to mark them as skipped?
                 val voiceRegion = link.cachedPlayer?.voiceRegion
                 // The delay is used to prevent a race condition in Discord, causing close code 4006
                 link.transferNode(loadBalancer.selectNode(region = voiceRegion, link.guildId), delay = Duration.ofMillis(1000))
