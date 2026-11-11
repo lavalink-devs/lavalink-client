@@ -6,6 +6,7 @@ import dev.arbjerg.lavalink.protocol.v4.VoiceState
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.function.Consumer
+import kotlin.jvm.Volatile
 
 /**
  * A "Link" for linking a guild id to a node.
@@ -26,6 +27,16 @@ class Link(
      */
     var state = LinkState.DISCONNECTED
         internal set
+
+    /**
+     * The timestamp in milliseconds of the last voice server update received for this link,
+     * or `0` when no voice server update was received yet.
+     *
+     * This is used to detect whether the voice session was refreshed recently when a voice
+     * WebSocket close event arrives, see [hasFreshVoiceSession].
+     */
+    @Volatile
+    internal var lastVoiceUpdateMillis = 0L
 
     /**
      * Gets the player associated with this link. Returns null if it's not cached.
@@ -77,6 +88,8 @@ class Link(
     }
 
     fun onVoiceServerUpdate(newVoiceState: VoiceState) {
+        lastVoiceUpdateMillis = System.currentTimeMillis()
+
         if (node.available) {
             state = LinkState.CONNECTING
             node.createOrUpdatePlayer(guildId)
@@ -99,5 +112,32 @@ class Link(
 
     override fun hashCode(): Int {
         return guildId.hashCode()
+    }
+
+    /**
+     * Returns whether a voice server update was received for this link within
+     * [VOICE_SESSION_REFRESH_WINDOW_MS] milliseconds before [nowMillis].
+     *
+     * Voice close code `4014` ("Disconnected") is also emitted when the bot is moved to another
+     * voice channel, and the close event of the old session usually arrives after the voice
+     * server update of the new session. A fresh voice update therefore means the close event is
+     * stale and the player must not be destroyed, the new voice server update re-attaches it.
+     */
+    internal fun hasFreshVoiceSession(nowMillis: Long = System.currentTimeMillis()): Boolean =
+        isVoiceSessionRefreshed(lastVoiceUpdateMillis, nowMillis)
+
+    companion object {
+        /**
+         * The window in milliseconds in which a voice server update is considered a refreshed
+         * voice session.
+         */
+        internal const val VOICE_SESSION_REFRESH_WINDOW_MS = 30_000L
+
+        /**
+         * Returns whether a voice session that last received a voice server update at
+         * [lastVoiceUpdateMillis] counts as refreshed at [nowMillis].
+         */
+        internal fun isVoiceSessionRefreshed(lastVoiceUpdateMillis: Long, nowMillis: Long): Boolean =
+            lastVoiceUpdateMillis > 0 && nowMillis - lastVoiceUpdateMillis < VOICE_SESSION_REFRESH_WINDOW_MS
     }
 }

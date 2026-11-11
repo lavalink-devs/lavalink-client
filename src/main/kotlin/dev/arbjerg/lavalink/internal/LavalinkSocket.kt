@@ -130,8 +130,23 @@ class LavalinkSocket(private val node: LavalinkNode) : WebSocketListener(), Clos
 
                         if (event.code == 4004 || event.code == 4006 || event.code == 4009 || event.code == 4014) {
                             logger.debug("Node '{}' received close code {} for guild {}", node.name, event.code, event.guildId)
-                            // TODO: auto-reconnect?
-                            node.destroyPlayerAndLink(event.guildId.toLong()).subscribe()
+
+                            val guildId = event.guildId.toLong()
+                            val link = node.lavalink.getLinkIfCached(guildId)
+
+                            // Close code 4014 ("Disconnected") is also emitted when the bot is moved to
+                            // another voice channel, and the close event of the old session usually arrives
+                            // after the voice server update of the new session. When the voice session was
+                            // refreshed recently we keep the player alive, the new voice server update
+                            // re-attaches it. Actual channel leaves are still handled by the JDA and D4J
+                            // voice handlers, which destroy the player when the bot leaves the channel.
+                            if (event.code == 4014 && link?.hasFreshVoiceSession() == true) {
+                                logger.debug("Voice session of guild {} was refreshed recently, not destroying its player", guildId)
+                                link.state = LinkState.DISCONNECTED
+                            } else {
+                                // TODO: auto-reconnect?
+                                node.destroyPlayerAndLink(guildId).subscribe()
+                            }
                         }
                     }
                     else -> {}
